@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Pfötchengebendeningen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>偽造切手 / LOS 49 / ERÄ 49</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    @font-face {
+<style>
+/* ======================
+   基本
+====================== */
+@font-face {
   font-family: '1880Kurrent';
   src: url('fonts/1880_Kurrentshrift_Normal.otf') format('opentype');
 }
@@ -117,144 +120,183 @@
 .font-suetter {
   font-family: 'SUETTER', cursive;
 }
+body {
+  margin: 0;
+  background: #f6f6f6;
+  color: #333;
+  line-height: 1.8;
+}
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-      background: #f6f6f6;
-      color: #333;
-      line-height: 1.8;
-      margin: 0;
-      padding: 2rem;
-    }
-    main {
-      max-width: 720px;
-      margin: auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 8px;
-    }
-    h1 {
-      margin-top: 0;
-    }
-    footer {
-      margin-top: 3rem;
-      font-size: 0.9em;
-      color: #666;
-    }
-    .lang-switch {
-      margin-bottom: 1.5rem;
-    }
-    .lang-switch button {
-      margin-right: 0.5rem;
-    }
-  </style>
+/* ======================
+   ヘッダー
+====================== */
+.site-header {
+  background: #000;
+  color: #fff;
+  padding: 3rem 2rem;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 3rem;
+  display: none;
+}
+
+/* 言語別タイトルフォント */
+.site-title[data-lang="ja"] { font-family: 'Kazesawa'; }
+.site-title[data-lang="de"] { font-family: 'BreitkopfFraktur'; }
+.site-title[data-lang="fi"] { font-family: 'ImpactCustom'; }
+
+/* ======================
+   言語切替
+====================== */
+.lang-switch {
+  padding: 1rem 2rem;
+}
+.lang-switch button {
+  margin-right: .5rem;
+}
+
+/* ======================
+   レイアウト
+====================== */
+.layout {
+  display: flex;
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.content { flex: 3; }
+.sidebar { flex: 1; }
+
+/* ======================
+   本文
+====================== */
+.lang-block { display: none; }
+
+/* 言語別本文フォント */
+.lang-ja p { font-family: 'Kazesawa'; }
+.lang-de p { font-family: 'Geosans'; }
+.lang-fi p { font-family: 'HelveticaCustom'; }
+
+/* ======================
+   アコーディオン
+====================== */
+.sidebar details {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.sidebar summary {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  margin: .5rem 0;
+}
+
+/* ======================
+   フッター
+====================== */
+.site-footer {
+  margin-top: 4rem;
+  padding: 2rem;
+  text-align: center;
+  font-size: .85rem;
+  color: #666;
+}
+
+/* ======================
+   モバイル
+====================== */
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
+}
+</style>
 </head>
 
 <body>
-  <main>
 
-    <!-- 言語切り替え -->
-    <div class="lang-switch">
-      <button onclick="setLang('ja')">日本語</button>
-      <button onclick="setLang('de')">Deutsch</button>
-      <button onclick="setLang('fi')">Suomi</button>
-    </div>
+<!-- ヘッダー -->
+<header class="site-header">
+  <h1 class="site-title center-align" data-lang="ja">偽造切手</h1>
+  <h1 class="site-title center-align" data-lang="de">LOS 49</h1>
+  <h1 class="site-title center-align" data-lang="fi">ERÄ 49</h1>
+</header>
 
-    <!-- 日本語 -->
-    <section class="lang-block" data-lang="ja">
-      <h1 class="font-kazesawa">競介の個人サイト</h1>
+<!-- 言語切替 -->
+<div class="lang-switch">
+  <button onclick="setLang('ja')">日本語</button>
+  <button onclick="setLang('de')">Deutsch</button>
+  <button onclick="setLang('fi')">Suomi</button>
+</div>
 
-      <p class="font-kazesawa-light">
-        ここは競介の個人サイトです。<br>
-        まだ特に何もする予定はないです。
-      </p>
+<!-- メイン -->
+<div class="layout">
 
-      <p class="font-kazesawa-light">
-        まだ仮の内容ですが、そのうち色々増えます。
-      </p>
+  <!-- 左：本文 -->
+  <main class="content">
 
-      <p class="font-kazesawa-light">
-        すみません嘘つきました。増えないかもしれません。
-      </p>
-
-      <p class="font-kazesawa-light">
-        でも一応頑張るつもりです。よろしくお願いします。
-      </p>
+    <section class="lang-block lang-ja" data-lang="ja">
+      <h2 class="font-kazesawa-bold">概要</h2>
+      <p>ここは競介の個人サイトです。</p>
+      <p>作品や文章、音楽などを置いていく予定です。</p>
     </section>
 
-    <!-- ドイツ語 -->
-    <section class="lang-block" data-lang="de">
-      <h1 class="font-fraktur">Kyosukes persönliche Website</h1>
-
-      <p class="font-kurrent">
-        Dies ist Kyosukes persönliche Website.<br>
-        Im Moment habe ich noch keine konkreten Pläne.
-      </p>
-
-      <p class="font-kurrent">
-        Der Inhalt ist noch provisorisch, aber vielleicht kommt später mehr dazu.
-      </p>
-
-      <p class="font-kurrent">
-        Entschuldigung, das war gelogen. Vielleicht kommt doch nichts dazu.
-      </p>
-
-      <p class="font-kurrent">
-        Aber ich werde es zumindest versuchen. Freut mich, dass du hier bist.
-      </p>
+    <section class="lang-block lang-de" data-lang="de">
+      <h2 class="font-fraktur">Überblick</h2>
+      <p>Dies ist Kyosukes persönliche Website.</p>
+      <p>Hier sammle ich Texte, Bilder und Musik.</p>
     </section>
 
-    <!-- フィンランド語 -->
-    <section class="lang-block" data-lang="fi">
-      <h1 class="font-impact">Kyosuken henkilökohtainen sivusto</h1>
-
-      <p class="font-helvetica">
-        Tämä on Kyosuken henkilökohtainen sivusto.<br>
-        Minulla ei ole vielä erityisiä suunnitelmia.
-      </p>
-
-      <p class="font-helvetica">
-        Sisältö on vielä väliaikaista, mutta ehkä lisään jotain myöhemmin.
-      </p>
-
-      <p class="font-helvetica">
-        Anteeksi, valehtelin. Ehkä tänne ei tulekaan mitään.
-      </p>
-
-      <p class="font-helvetica">
-        Mutta yritän silti parhaani. Tervetuloa.
-      </p>
+    <section class="lang-block lang-fi" data-lang="fi">
+      <h2 class="font-impact">Yleiskuva</h2>
+      <p>Tämä on Kyosuken henkilökohtainen sivusto.</p>
+      <p>Tänne kerään tekstejä, kuvia ja musiikkia.</p>
     </section>
-
-
-    <hr>
-
-    <!-- 共通コンテンツ -->
-    <h2>Contents</h2>
-    <ul>
-      <li><a href="art/">Art</a></li>
-      <li><a href="music/">Music</a></li>
-      <li><a href="text/">Text</a></li>
-      <li><a href="diary/">Diary</a></li>
-    </ul>
-
-    <footer>
-      <p>© 2025 Pfötchengebendeningen</p>
-    </footer>
 
   </main>
 
-  <!-- 言語切り替えJS -->
-  <script>
-    function setLang(lang) {
-      document.querySelectorAll('.lang-block').forEach(block => {
-        block.style.display =
-          block.dataset.lang === lang ? 'block' : 'none';
-      });
-    }
-    // 初期表示
-    setLang('ja');
-  </script>
+  <!-- 右：ナビ -->
+  <aside class="sidebar">
+    <details open>
+      <summary>Contents</summary>
+      <ul>
+        <li><a href="art/">Art</a></li>
+        <li><a href="music/">Music</a></li>
+        <li><a href="text/">Text</a></li>
+        <li><a href="diary/">Diary</a></li>
+      </ul>
+    </details>
+  </aside>
+
+</div>
+
+<!-- フッター -->
+<footer class="site-footer">
+  <p>© 2025 Pfötchengebende - 偽造切手 / LOS 49 / ERÄ 49</p>
+  <p>
+    <a href="https://x.com/ningaesst?s=21">X</a>
+  </p>
+</footer>
+
+<script>
+function setLang(lang) {
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+}
+setLang('ja');
+</script>
+
 </body>
 </html>
