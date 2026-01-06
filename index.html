@@ -2,11 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title> Pfötchengebendeningen</title>
+  <title>Pfötchengebendeningen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       background: #f6f6f6;
       color: #333;
       line-height: 1.8;
@@ -28,44 +30,118 @@
       font-size: 0.9em;
       color: #666;
     }
+    .lang-switch {
+      margin-bottom: 1.5rem;
+    }
+    .lang-switch button {
+      margin-right: 0.5rem;
+    }
   </style>
 </head>
+
 <body>
   <main>
-    <h1>競介の個人サイト</h1>
 
-    <p>
-      ここは競介の個人サイトです。<br>
-      まだ特に何もする予定はないです。
-    </p>
+    <!-- 言語切り替え -->
+    <div class="lang-switch">
+      <button onclick="setLang('ja')">日本語</button>
+      <button onclick="setLang('de')">Deutsch</button>
+      <button onclick="setLang('fi')">Suomi</button>
+    </div>
 
-    <p>
-      まだ仮の内容ですが、そのうち色々増えます。
-    </p>
+    <!-- 日本語 -->
+    <section class="lang-block" data-lang="ja">
+      <h1>競介の個人サイト</h1>
+
+      <p>
+        ここは競介の個人サイトです。<br>
+        まだ特に何もする予定はないです。
+      </p>
+
+      <p>
+        まだ仮の内容ですが、そのうち色々増えます。
+      </p>
+
+      <p>
+        すみません嘘つきました。増えないかもしれません。
+      </p>
+
+      <p>
+        でも一応頑張るつもりです。よろしくお願いします。
+      </p>
+    </section>
+
+    <!-- ドイツ語 -->
+    <section class="lang-block" data-lang="de">
+      <h1>Kyosukes persönliche Website</h1>
+
+      <p>
+        Dies ist Kyosukes persönliche Website.<br>
+        Im Moment habe ich noch keine konkreten Pläne.
+      </p>
+
+      <p>
+        Der Inhalt ist noch provisorisch, aber vielleicht kommt später mehr dazu.
+      </p>
+
+      <p>
+        Entschuldigung, das war gelogen. Vielleicht kommt doch nichts dazu.
+      </p>
+
+      <p>
+        Aber ich werde es zumindest versuchen. Freut mich, dass du hier bist.
+      </p>
+    </section>
+
+    <!-- フィンランド語 -->
+    <section class="lang-block" data-lang="fi">
+      <h1>Kyosuken henkilökohtainen sivusto</h1>
+
+      <p>
+        Tämä on Kyosuken henkilökohtainen sivusto.<br>
+        Minulla ei ole vielä erityisiä suunnitelmia.
+      </p>
+
+      <p>
+        Sisältö on vielä väliaikaista, mutta ehkä lisään jotain myöhemmin.
+      </p>
+
+      <p>
+        Anteeksi, valehtelin. Ehkä tänne ei tulekaan mitään.
+      </p>
+
+      <p>
+        Mutta yritän silti parhaani. Tervetuloa.
+      </p>
+    </section>
+
     <hr>
 
-<h2>コンテンツ</h2>
-<ul>
-  <li><a href="art/">絵置き場</a></li>
-  <li><a href="music/">曲置き場</a></li>
-  <li><a href="text/">字置き場</a></li>
-  <li><a href="diary/">独り言</a></li>
-</ul>
-    <p>
-      　　　　　　　
-    </p>
-    
-    <p>
-      すみません嘘つきました。増えないかもしれません。
-    </p>
-    
-    <p>
-      でも一応頑張るつもりです。よろしくお願いします。
-    </p>
+    <!-- 共通コンテンツ -->
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="art/">Art</a></li>
+      <li><a href="music/">Music</a></li>
+      <li><a href="text/">Text</a></li>
+      <li><a href="diary/">Diary</a></li>
+    </ul>
 
     <footer>
       <p>© 2025 Pfötchengebendeningen</p>
     </footer>
+
   </main>
+
+  <!-- 言語切り替えJS -->
+  <script>
+    function setLang(lang) {
+      document.querySelectorAll('.lang-block').forEach(block => {
+        block.style.display =
+          block.dataset.lang === lang ? 'block' : 'none';
+      });
+    }
+    // 初期表示
+    setLang('ja');
+  </script>
 </body>
 </html>
