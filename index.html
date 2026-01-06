@@ -132,25 +132,38 @@ body {
 .site-header {
   width: 100%;
   background: #000;
-  color: #fff;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  padding: 6rem 2rem;   /* 縦を大きく */
+  padding: 6rem 2rem;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
 }
 
 .site-title {
   margin: 0;
-  font-size: clamp(3rem, 8vw, 6rem);
-  letter-spacing: 0.05em;
-  line-height: 1.1;
-
+  color: #fff;
+  font-size: 10vw;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  white-space: nowrap;
   display: none;
+  text-align: center;
 }
 
 /* 言語別タイトルフォント */
-.site-title[data-lang="ja"] { font-family: 'Kazesawa'; }
-.site-title[data-lang="de"] { font-family: 'BreitkopfFraktur'; }
-.site-title[data-lang="fi"] { font-family: 'ImpactCustom'; }
+.site-title[data-lang="ja"] {
+  font-family: 'Kazesawa';
+  letter-spacing: 0.2em;
+}
+
+.site-title[data-lang="de"] {
+  font-family: 'BreitkopfFraktur';
+  letter-spacing: 0.08em;
+}
+
+.site-title[data-lang="fi"] {
+  font-family: 'ImpactCustom';
+  letter-spacing: 0.05em;
+}
+
 
 /* ======================
    言語切替
