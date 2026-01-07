@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>偽造切手 / LOS 49 / ERÄ 49</title>
+<title>偽造切手</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -232,6 +232,7 @@ body {
 .random-text {
   font-style: italic;
   opacity: .8;
+  white-space: pre-line;
 }
 
 .time-info {
@@ -372,7 +373,7 @@ body {
     <a href="https://x.com/ningaesst?s=21">X</a>
   </p>
 </footer>
-
+<script src="js/daily.js"></script>
 <script>
 const timeZones = {
   ja: 'Asia/Tokyo',
@@ -389,9 +390,24 @@ const topics = {
 
 const randomTexts = [
   'ピンチョンを読みなさい',
-  'えーりんえーりん',
+  '( ﾟ∀ﾟ)o彡°',
   'ここの文章毎回違うんやで',
-  '名前それ自体に意味は無い'
+  '啜るー！',
+  'Arcaeaの彩夢ちゃんかわいくね？',
+  '競介は純日本人です',
+  'Juhu! Wir treffen uns schon wieder!',
+  'Meine Lieblingszahl ist 29!',
+  'Was machst du eigentlich hier?',
+  'Hallo, ich bin Hatsune Miku.',
+  'Lies einen Roman von Pynchon',
+  'Trink doch ZONe.',
+  '君は右翼すぎて左翼になっている',
+  'Saatko tarpeeksi auringonvaloa?',
+  'Haluan lopettaa tupakoinnin',
+  'Pidän Fis-molliasteikosta',
+  'Japanin X on kaoottinen paikka',
+  'Haluan tehdä persiljahilloa',
+  'Anzeigechance etwa 5%.\nSie haben Glück!'
 ];
 
 function julianDate(date) {
@@ -438,7 +454,9 @@ setInterval(() => {
   const currentLang =
     document.querySelector('.site-title:not([style*="none"])')?.dataset.lang || 'ja';
   updateInfo(currentLang);
+  loadDailyItem();
 }, 1000);
+
 
 function loadDailyItem() {
   const now = new Date();
@@ -464,12 +482,11 @@ function loadDailyItem() {
 
   // ③ 何も定義されていない日
   document.getElementById('dateInfo').innerHTML = `
-    <p class="font-kazesawa-light">
-      記録なし
-    </p>
-  `;
+  <p class="font-kazesawa-light">
+    (´・ω・｀)<br>
+  </p>
+`;
 }
 </script>
-<script src="js/daily.js"></script>
 </body>
 </html>
