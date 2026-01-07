@@ -7,8 +7,8 @@ const dailyByDate = {
   `,
   '01-07': `
     <p class="font-kazesawa-light">
-      3月14日。<br>
-      余白に数字を書く日。
+      この日替わり文字列の機能が<br>
+           実装された日です。
     </p>
   `,
   // 以下延々と追加
