@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wortquiz — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://www.biwascheme.org/releases/biwascheme-0.8.0.min.js"></script>
+  <style>
+    body { font-family: 'Geosans', 'Space Grotesk', sans-serif; }
+
+    .game-area {
+      margin: 2rem 0;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+    .question-display {
+      font-family: 'Geosans', sans-serif;
+      font-size: 1rem;
+      line-height: 1.8;
+      text-align: center;
+      margin: 1.5rem 0 0.4rem;
+      min-height: 2.5rem;
+    }
+    .letter-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      margin: 1rem 0 1.8rem;
+    }
+    .letter-box {
+      width: 2.4rem;
+      height: 2.8rem;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'BreitkopfFraktur', serif;
+      font-size: 1.4rem;
+      letter-spacing: 0;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .letter-box.filled  { border-color: var(--black); }
+    .letter-box.correct { border-color: var(--black); background: var(--black); color: var(--white); }
+    .letter-box.wrong   { border-color: #ccc; color: #ccc; }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      max-width: 360px;
+      margin: 0 auto 1rem;
+    }
+    .answer-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      background: none;
+      font-family: 'Geosans', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      padding: 0.55rem 0.8rem;
+      color: var(--fg);
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.15s ease;
+    }
+    .answer-input:focus   { border-color: var(--black); }
+    .answer-input:disabled { opacity: 0.4; }
+    .submit-btn {
+      background: none;
+      border: 1px solid var(--black);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      padding: 0.55rem 1.2rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .submit-btn:hover { background: var(--black); color: var(--white); }
+
+    .feedback {
+      font-family: 'Geosans', sans-serif;
+      text-align: center;
+      min-height: 1.5rem;
+      font-size: 0.92rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .score-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .score-row span { color: var(--fg); }
+    .next-btn {
+      display: block;
+      margin: 0 auto;
+      background: none;
+      border: 1px solid var(--black);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      padding: 0.55rem 2rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .next-btn:hover    { background: var(--black); color: var(--white); }
+    .next-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .lisp-note { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+    .lisp-note summary {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .lisp-note pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      margin-top: 1rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header sub-header">
+  <div class="container sub-header-inner">
+    <a href="../../../index.html" class="site-logo font-fraktur">偽造切手</a>
+    <nav>
+      <ul>
+        <li><a href="../art/index.html">絵置き場</a></li>
+        <li><a href="../music/index.html">曲置き場</a></li>
+        <li><a href="../text/index.html">字置き場</a></li>
+        <li><a href="../diary/index.html">独り言</a></li>
+        <li><a href="../pastime/index.html">Pastime</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <div class="container">
+    <main class="sub-main">
+      <h1 class="page-title font-fraktur">Wortquiz</h1>
+
+      <p style="font-size:0.9rem; color:var(--muted); font-family:'Geosans',sans-serif; letter-spacing:0.04em;">
+        Errate das deutsche Wort mit fünf Buchstaben anhand des Hinweises.
+      </p>
+
+      <div class="game-area">
+        <div class="score-row">
+          Richtig <span id="scoreCorrect">0</span> &nbsp;／&nbsp; Insgesamt <span id="scoreTotal">0</span>
+        </div>
+
+        <div class="question-display" id="questionDisplay">…</div>
+
+        <div class="letter-boxes" id="letterBoxes">
+          <div class="letter-box" id="lb0"></div>
+          <div class="letter-box" id="lb1"></div>
+          <div class="letter-box" id="lb2"></div>
+          <div class="letter-box" id="lb3"></div>
+          <div class="letter-box" id="lb4"></div>
+        </div>
+
+        <div class="input-row">
+          <input class="answer-input" type="text" id="answerInput"
+            placeholder="Antwort…" autocomplete="off" maxlength="5"
+            oninput="syncBoxes()"
+            onkeydown="if(event.key==='Enter') checkAnswer()">
+          <button class="submit-btn" onclick="checkAnswer()">Antworten</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>Weiter →</button>
+
+        <details class="lisp-note">
+          <summary>LISP-Code anzeigen (wordquiz.scm)</summary>
+          <pre id="lispSource">Wird geladen…</pre>
+        </details>
+      </div>
+
+      <a href="index.html" class="back-link font-geosans">← Zurück</a>
+    </main>
+    <footer class="site-footer">
+      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
+    </footer>
+  </div>
+
+<script>
+const interp = new BiwaScheme.Interpreter(err => console.error(err));
+let currentAnswer = '';
+let usedIndices = [];
+let questionCount = 0;
+let scoreCorrect = 0;
+let scoreTotal = 0;
+
+function lispEval(expr, cb) {
+  interp.evaluate(expr, result => cb(result));
+}
+
+function syncBoxes() {
+  const val = document.getElementById('answerInput').value.toUpperCase();
+  for (let i = 0; i < 5; i++) {
+    const box = document.getElementById('lb' + i);
+    box.textContent = val[i] || '';
+    box.className = 'letter-box' + (val[i] ? ' filled' : '');
+  }
+}
+
+function resetBoxes(mode) {
+  for (let i = 0; i < 5; i++) {
+    const box = document.getElementById('lb' + i);
+    if (mode === 'correct') {
+      box.textContent = currentAnswer[i];
+      box.className = 'letter-box correct';
+    } else if (mode === 'wrong') {
+      box.textContent = currentAnswer[i];
+      box.className = 'letter-box wrong';
+    } else {
+      box.textContent = '';
+      box.className = 'letter-box';
+    }
+  }
+}
+
+function nextQuestion() {
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('answerInput').value = '';
+  document.getElementById('answerInput').disabled = false;
+  resetBoxes('');
+
+  if (usedIndices.length >= questionCount) usedIndices = [];
+  let idx;
+  do { idx = Math.floor(Math.random() * questionCount); }
+  while (usedIndices.includes(idx));
+  usedIndices.push(idx);
+
+  lispEval(`(question-text (pick-question ${idx}))`, text => {
+    document.getElementById('questionDisplay').textContent = String(text);
+  });
+  lispEval(`(question-answer (pick-question ${idx}))`, ans => {
+    currentAnswer = String(ans).toUpperCase();
+  });
+
+  document.getElementById('answerInput').focus();
+}
+
+function checkAnswer() {
+  const input = document.getElementById('answerInput').value.trim().toUpperCase();
+  if (!input) return;
+
+  scoreTotal++;
+  document.getElementById('scoreTotal').textContent = scoreTotal;
+  document.getElementById('answerInput').disabled = true;
+
+  lispEval(`(check-answer "${currentAnswer}" "${input}")`, result => {
+    if (result === true) {
+      scoreCorrect++;
+      document.getElementById('scoreCorrect').textContent = scoreCorrect;
+      document.getElementById('feedback').textContent = 'Richtig!';
+      resetBoxes('correct');
+    } else {
+      document.getElementById('feedback').textContent = `Falsch. Die Antwort war: ${currentAnswer}`;
+      resetBoxes('wrong');
+    }
+    document.getElementById('nextBtn').disabled = false;
+  });
+}
+
+fetch('wordquiz.scm')
+  .then(r => r.text())
+  .then(code => {
+    document.getElementById('lispSource').textContent = code;
+    interp.evaluate(code, () => {
+      lispEval('(questions-count)', count => {
+        questionCount = Number(count);
+        nextQuestion();
+      });
+    });
+  });
+</script>
+</body>
+</html>
