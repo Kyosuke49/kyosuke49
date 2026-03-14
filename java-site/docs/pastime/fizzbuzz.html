@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FizzBuzz — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://www.biwascheme.org/releases/biwascheme-0.8.0.min.js"></script>
+  <style>
+    .game-area {
+      margin: 2rem 0;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+    .number-display {
+      font-family: 'Geosans', sans-serif;
+      font-size: clamp(3rem, 10vw, 6rem);
+      letter-spacing: 0.05em;
+      text-align: center;
+      margin: 1.5rem 0;
+      line-height: 1;
+    }
+    .answer-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    .ans-btn {
+      background: none;
+      border: 1px solid var(--border);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      padding: 0.6rem 1.4rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .ans-btn:hover        { background: var(--black); color: var(--white); }
+    .ans-btn.correct      { background: var(--black); color: var(--white); border-color: var(--black); }
+    .ans-btn.wrong        { border-color: #bbb; color: #bbb; }
+    .ans-btn:disabled     { cursor: default; }
+    .feedback {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      text-align: center;
+      min-height: 1.5rem;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+    .score-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .score-row span { color: var(--fg); }
+    .next-btn {
+      display: block;
+      margin: 0 auto;
+      background: none;
+      border: 1px solid var(--black);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      padding: 0.55rem 2rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .next-btn:hover    { background: var(--black); color: var(--white); }
+    .next-btn:disabled { opacity: 0.3; cursor: default; }
+    .lisp-note { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+    .lisp-note summary {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .lisp-note pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      margin-top: 1rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header sub-header">
+  <div class="container sub-header-inner">
+    <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>
+    <nav>
+      <ul>
+        <li><a href="../art/index.html">絵置き場</a></li>
+        <li><a href="../music/index.html">曲置き場</a></li>
+        <li><a href="../text/index.html">字置き場</a></li>
+        <li><a href="../diary/index.html">独り言</a></li>
+        <li><a href="../pastime/index.html">Pastime</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <div class="container">
+    <main class="sub-main">
+      <h1 class="page-title font-kazesawa">FizzBuzz</h1>
+
+      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted);">
+        表示された数字に対して正しい答えを選べ。3の倍数→Fizz、5の倍数→Buzz、両方→FizzBuzz。
+      </p>
+
+      <div class="game-area">
+        <div class="score-row">
+          正解 <span id="scoreCorrect">0</span> &nbsp;／&nbsp; 問題数 <span id="scoreTotal">0</span>
+        </div>
+
+        <div class="number-display font-geosans" id="numberDisplay">…</div>
+        <div class="feedback font-kazesawa-light" id="feedback"></div>
+
+        <div class="answer-row">
+          <button class="ans-btn" id="btnFizz"     onclick="answer('Fizz')">Fizz</button>
+          <button class="ans-btn" id="btnBuzz"     onclick="answer('Buzz')">Buzz</button>
+          <button class="ans-btn" id="btnFizzBuzz" onclick="answer('FizzBuzz')">FizzBuzz</button>
+          <button class="ans-btn" id="btnNumber"   onclick="answerNumber()">数字</button>
+        </div>
+
+        <button class="next-btn font-geosans" id="nextBtn" onclick="nextQuestion()" disabled>次へ →</button>
+
+        <details class="lisp-note">
+          <summary>LISPコードを見る (fizzbuzz.scm)</summary>
+          <pre id="lispSource">読み込み中…</pre>
+        </details>
+      </div>
+
+      <a href="index.html" class="back-link font-geosans">← Pastimeへ</a>
+    </main>
+    <footer class="site-footer">
+      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
+    </footer>
+  </div>
+
+<script>
+const interp = new BiwaScheme.Interpreter();
+let currentN = 0;
+let correctAnswer = '';
+let answered = false;
+let scoreCorrect = 0;
+let scoreTotal = 0;
+
+fetch('fizzbuzz.scm')
+  .then(r => r.text())
+  .then(code => {
+    document.getElementById('lispSource').textContent = code;
+    interp.evaluate(code, () => nextQuestion());
+  });
+
+function evalFizzBuzz(n, cb) {
+  interp.evaluate(`(fizzbuzz ${n})`, result => {
+    cb(result instanceof BiwaScheme.Symbol ? result.name : String(result));
+  });
+}
+
+function nextQuestion() {
+  answered = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('nextBtn').disabled = true;
+  document.querySelectorAll('.ans-btn').forEach(b => {
+    b.classList.remove('correct', 'wrong');
+    b.disabled = false;
+  });
+
+  currentN = Math.floor(Math.random() * 99) + 1;
+  document.getElementById('numberDisplay').textContent = currentN;
+
+  evalFizzBuzz(currentN, result => { correctAnswer = result; });
+}
+
+function answer(choice) {
+  if (answered) return;
+  answered = true;
+  scoreTotal++;
+  document.getElementById('scoreTotal').textContent = scoreTotal;
+
+  const correct = (choice === correctAnswer);
+  if (correct) {
+    scoreCorrect++;
+    document.getElementById('scoreCorrect').textContent = scoreCorrect;
+    document.getElementById('feedback').textContent = '正解！';
+  } else {
+    document.getElementById('feedback').textContent = `不正解。正解は「${correctAnswer}」`;
+  }
+
+  document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
+  const isNum = !['Fizz','Buzz','FizzBuzz'].includes(correctAnswer);
+  document.getElementById('btnFizz').classList.toggle('correct',     correctAnswer === 'Fizz');
+  document.getElementById('btnBuzz').classList.toggle('correct',     correctAnswer === 'Buzz');
+  document.getElementById('btnFizzBuzz').classList.toggle('correct', correctAnswer === 'FizzBuzz');
+  document.getElementById('btnNumber').classList.toggle('correct',   isNum);
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function answerNumber() {
+  if (answered) return;
+  const isNum = !['Fizz','Buzz','FizzBuzz'].includes(correctAnswer);
+  answer(isNum ? correctAnswer : '__wrong__');
+}
+</script>
+</body>
+</html>
