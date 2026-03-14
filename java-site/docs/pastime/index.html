@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pastime — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .game-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 2rem 0;
+    }
+    .game-item {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+    }
+    .game-item:first-child {
+      border-top: 1px solid var(--border);
+    }
+    .game-item a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.18s ease;
+    }
+    .game-item a:hover { opacity: 0.55; }
+    .game-title {
+      font-family: 'Geosans', sans-serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+    .game-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .game-tag {
+      display: inline-block;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.5rem;
+      margin-top: 0.5rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header sub-header">
+  <div class="container sub-header-inner">
+    <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>
+    <nav>
+      <ul>
+        <li><a href="../art/index.html">絵置き場</a></li>
+        <li><a href="../music/index.html">曲置き場</a></li>
+        <li><a href="../text/index.html">字置き場</a></li>
+        <li><a href="../diary/index.html">独り言</a></li>
+        <li><a href="../pastime/index.html">Pastime</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <div class="container">
+    <main class="sub-main">
+      <h1 class="page-title font-kazesawa">Pastime</h1>
+
+      <div class="game-list">
+        <div class="game-item">
+          <a href="fizzbuzz.html">
+            <p class="game-title">FizzBuzz</p>
+            <p class="game-desc">数字を見てFizz・Buzz・FizzBuzzを答える。全問正解を目指せ。</p>
+            <span class="game-tag">LISP</span>
+          </a>
+        </div>
+        <div class="game-item">
+          <a href="wordquiz.html">
+            <p class="game-title">Word Quiz</p>
+            <p class="game-desc">ヒントから単語を当てる。</p>
+            <span class="game-tag">LISP</span>
+          </a>
+        </div>
+      </div>
+
+      <a href="../../../index.html" class="back-link font-geosans">← トップへ</a>
+    </main>
+    <footer class="site-footer">
+      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
+    </footer>
+  </div>
+</body>
+</html>
