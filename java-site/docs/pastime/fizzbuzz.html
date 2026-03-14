@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FizzBuzz — 偽造切手</title>
+  <title>変なFizzBuzz — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
-  <script src="https://www.biwascheme.org/releases/biwascheme-0.8.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.0/release/biwascheme-min.js"></script>
   <style>
     .game-area {
       margin: 2rem 0;
@@ -58,9 +58,25 @@
       font-size: 0.8rem;
       letter-spacing: 0.1em;
       color: var(--muted);
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
     }
     .score-row span { color: var(--fg); }
+    .timer-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .timer-row span { color: var(--fg); }
+    #timerDisplay {
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      color: var(--fg) !important;
+    }
     .next-btn {
       display: block;
       margin: 0 auto;
@@ -76,6 +92,21 @@
     }
     .next-btn:hover    { background: var(--black); color: var(--white); }
     .next-btn:disabled { opacity: 0.3; cursor: default; }
+    .rule-table {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto 0.5rem;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .rule-table td {
+      font-family: 'Geosans', sans-serif;
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .rule-table td:first-child { color: var(--fg); font-weight: 400; }
     .lisp-note { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
     .lisp-note summary {
       font-family: 'Geosans', sans-serif;
@@ -113,25 +144,43 @@
 
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa">FizzBuzz</h1>
+      <h1 class="page-title font-kazesawa">変なFizzBuzz</h1>
 
-      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted);">
-        表示された数字に対して正しい答えを選べ。3の倍数→Fizz、5の倍数→Buzz、両方→FizzBuzz。
+      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted); margin-bottom:1rem;">
+        FizzBuzzにボルゾイが乱入。複合すれば文字列を連結せよ。
       </p>
+
+      <table class="rule-table">
+        <tr><td>3の倍数</td><td>→ Fizz</td></tr>
+        <tr><td>5の倍数</td><td>→ Buzz</td></tr>
+        <tr><td>7の倍数</td><td>→ Woof</td></tr>
+        <tr><td>15の倍数</td><td>→ FizzBuzz</td></tr>
+        <tr><td>21の倍数</td><td>→ FizzWoof</td></tr>
+        <tr><td>35の倍数</td><td>→ BuzzWoof</td></tr>
+        <tr><td>105の倍数</td><td>→ FizzBuzzWoof</td></tr>
+        <tr><td>それ以外</td><td>→ 数字</td></tr>
+      </table>
 
       <div class="game-area">
         <div class="score-row">
           正解 <span id="scoreCorrect">0</span> &nbsp;／&nbsp; 問題数 <span id="scoreTotal">0</span>
+        </div>
+        <div class="timer-row">
+          <span id="timerDisplay">—</span> &nbsp;／&nbsp; 最速 <span id="bestTime">—</span>
         </div>
 
         <div class="number-display font-geosans" id="numberDisplay">…</div>
         <div class="feedback font-kazesawa-light" id="feedback"></div>
 
         <div class="answer-row">
-          <button class="ans-btn" id="btnFizz"     onclick="answer('Fizz')">Fizz</button>
-          <button class="ans-btn" id="btnBuzz"     onclick="answer('Buzz')">Buzz</button>
-          <button class="ans-btn" id="btnFizzBuzz" onclick="answer('FizzBuzz')">FizzBuzz</button>
-          <button class="ans-btn" id="btnNumber"   onclick="answerNumber()">数字</button>
+          <button class="ans-btn" id="btnFizz"        onclick="answer('Fizz')">Fizz</button>
+          <button class="ans-btn" id="btnBuzz"        onclick="answer('Buzz')">Buzz</button>
+          <button class="ans-btn" id="btnWoof"        onclick="answer('Woof')">Woof</button>
+          <button class="ans-btn" id="btnFizzBuzz"    onclick="answer('FizzBuzz')">FizzBuzz</button>
+          <button class="ans-btn" id="btnFizzWoof"    onclick="answer('FizzWoof')">FizzWoof</button>
+          <button class="ans-btn" id="btnBuzzWoof"    onclick="answer('BuzzWoof')">BuzzWoof</button>
+          <button class="ans-btn" id="btnFizzBuzzWoof" onclick="answer('FizzBuzzWoof')">FizzBuzzWoof</button>
+          <button class="ans-btn" id="btnNumber"      onclick="answerNumber()">数字</button>
         </div>
 
         <button class="next-btn font-geosans" id="nextBtn" onclick="nextQuestion()" disabled>次へ →</button>
@@ -150,12 +199,37 @@
   </div>
 
 <script>
+const WORD_ANSWERS = ['Fizz','Buzz','Woof','FizzBuzz','FizzWoof','BuzzWoof','FizzBuzzWoof'];
+
 const interp = new BiwaScheme.Interpreter();
 let currentN = 0;
 let correctAnswer = '';
 let answered = false;
 let scoreCorrect = 0;
 let scoreTotal = 0;
+
+let questionStartTime = 0;
+let timerInterval = null;
+let bestTime = Infinity;
+
+function startTimer() {
+  questionStartTime = Date.now();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const s = ((Date.now() - questionStartTime) / 1000).toFixed(1);
+    document.getElementById('timerDisplay').textContent = s + 's';
+  }, 100);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  const elapsed = (Date.now() - questionStartTime) / 1000;
+  document.getElementById('timerDisplay').textContent = elapsed.toFixed(1) + 's';
+  if (elapsed < bestTime) {
+    bestTime = elapsed;
+    document.getElementById('bestTime').textContent = bestTime.toFixed(1) + 's';
+  }
+}
 
 fetch('fizzbuzz.scm')
   .then(r => r.text())
@@ -179,15 +253,19 @@ function nextQuestion() {
     b.disabled = false;
   });
 
-  currentN = Math.floor(Math.random() * 99) + 1;
+  currentN = Math.floor(Math.random() * 300) + 1;
   document.getElementById('numberDisplay').textContent = currentN;
 
-  evalFizzBuzz(currentN, result => { correctAnswer = result; });
+  evalFizzBuzz(currentN, result => {
+    correctAnswer = result;
+    startTimer();
+  });
 }
 
 function answer(choice) {
   if (answered) return;
   answered = true;
+  stopTimer();
   scoreTotal++;
   document.getElementById('scoreTotal').textContent = scoreTotal;
 
@@ -201,17 +279,20 @@ function answer(choice) {
   }
 
   document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
-  const isNum = !['Fizz','Buzz','FizzBuzz'].includes(correctAnswer);
-  document.getElementById('btnFizz').classList.toggle('correct',     correctAnswer === 'Fizz');
-  document.getElementById('btnBuzz').classList.toggle('correct',     correctAnswer === 'Buzz');
-  document.getElementById('btnFizzBuzz').classList.toggle('correct', correctAnswer === 'FizzBuzz');
-  document.getElementById('btnNumber').classList.toggle('correct',   isNum);
+  document.getElementById('btnFizz').classList.toggle('correct',        correctAnswer === 'Fizz');
+  document.getElementById('btnBuzz').classList.toggle('correct',        correctAnswer === 'Buzz');
+  document.getElementById('btnWoof').classList.toggle('correct',        correctAnswer === 'Woof');
+  document.getElementById('btnFizzBuzz').classList.toggle('correct',    correctAnswer === 'FizzBuzz');
+  document.getElementById('btnFizzWoof').classList.toggle('correct',    correctAnswer === 'FizzWoof');
+  document.getElementById('btnBuzzWoof').classList.toggle('correct',    correctAnswer === 'BuzzWoof');
+  document.getElementById('btnFizzBuzzWoof').classList.toggle('correct',correctAnswer === 'FizzBuzzWoof');
+  document.getElementById('btnNumber').classList.toggle('correct',      !WORD_ANSWERS.includes(correctAnswer));
   document.getElementById('nextBtn').disabled = false;
 }
 
 function answerNumber() {
   if (answered) return;
-  const isNum = !['Fizz','Buzz','FizzBuzz'].includes(correctAnswer);
+  const isNum = !WORD_ANSWERS.includes(correctAnswer);
   answer(isNum ? correctAnswer : '__wrong__');
 }
 </script>
