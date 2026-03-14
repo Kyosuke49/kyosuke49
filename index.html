@@ -5,390 +5,543 @@
 <title>偽造切手</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Google Fonts (non-blocking) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Space+Grotesk:wght@300;400;500;700&family=IM+Fell+English:ital@0;1&family=Fira+Code:wght@400;500&display=swap">
+
 <style>
-/* ======================
-   基本
-====================== */
+/* =====================
+   カスタムフォント（ローカル）
+===================== */
 @font-face {
   font-family: '1880Kurrent';
   src: url('fonts/1880_Kurrentshrift_Normal.otf') format('opentype');
 }
-
 @font-face {
   font-family: 'BreitkopfFraktur';
   src: url('fonts/BreitkopfFraktur.ttf') format('truetype');
 }
-
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-Light.ttf') format('truetype');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+}
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-Bold.ttf') format('truetype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'ImpactCustom';
+  src: url('fonts/impact.ttf') format('truetype');
+}
 @font-face {
   font-family: 'Geosans';
   src: url('fonts/GeosansLight.ttf') format('truetype');
 }
-
 @font-face {
   font-family: 'Geosans';
   src: url('fonts/GeosansLight-Oblique.ttf') format('truetype');
   font-style: oblique;
 }
 
-@font-face {
-  font-family: 'HelveticaCustom';
-  src: url('fonts/Helvetica-Bold.ttf') format('truetype');
-  font-weight: bold;
-}
-
-@font-face {
-  font-family: 'HelveticaCustom';
-  src: url('fonts/Helvetica-BoldOblique.ttf') format('truetype');
-  font-weight: bold;
-  font-style: oblique;
-}
-
-@font-face {
-  font-family: 'HelveticaCustom';
-  src: url('fonts/helvetica-light-587ebe5a59211.ttf') format('truetype');
-  font-weight: 300;
-}
-
-@font-face {
-  font-family: 'ImpactCustom';
-  src: url('fonts/impact.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Kazesawa';
-  src: url('fonts/Kazesawa-Regular.ttf') format('truetype');
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: 'Kazesawa';
-  src: url('fonts/Kazesawa-Light.ttf') format('truetype');
-  font-weight: 300;
-}
-
-@font-face {
-  font-family: 'Kazesawa';
-  src: url('fonts/Kazesawa-ExtraLight.ttf') format('truetype');
-  font-weight: 200;
-}
-
-@font-face {
-  font-family: 'Kazesawa';
-  src: url('fonts/Kazesawa-Bold.ttf') format('truetype');
-  font-weight: 700;
-}
-
-@font-face {
-  font-family: 'SUETTER';
-  src: url('fonts/SUETTER.ttf') format('truetype');
-}
-    .font-kazesawa {
-  font-family: 'Kazesawa', system-ui, sans-serif;
-  font-weight: 400;
-}
-
-.font-kazesawa-light {
-  font-family: 'Kazesawa';
-  font-weight: 300;
-}
-
-.font-kazesawa-bold {
-  font-family: 'Kazesawa';
-  font-weight: 700;
-}
-
-.font-fraktur {
-  font-family: 'BreitkopfFraktur', sans-serif;
-}
-
-.font-kurrent {
-  font-family: '1880Kurrent', sans-serif;
-}
-
-.font-geosans {
-  font-family: 'Geosans', 'HelveticaCustom', sans-serif;
-}
-
-.font-helvetica {
-  font-family: 'HelveticaCustom', sans-serif;
-}
-
-.font-impact {
-  font-family: 'ImpactCustom', sans-serif;
-}
-
-.font-suetter {
-  font-family: 'SUETTER', cursive;
-}
-body {
+/* =====================
+   リセット・基本
+===================== */
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  background: #f6f6f6;
 }
 
-/* ======================
-   ヘッダー
-====================== */
-.site-header {
-  width: 100%;
+:root {
+  --font-ja: 'Noto Serif JP', 'Kazesawa', serif;
+  --font-de: 'Space Grotesk', 'Geosans', sans-serif;
+  --font-fi: 'IM Fell English', serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
+  --color-bg: #f8f8f8;
+  --color-text: #111;
+  --color-header-bg: #000;
+  --color-header-text: #fff;
+  --color-muted: #777;
+  --color-border: #e0e0e0;
+  --color-accent: #4ade80;
+  --transition-lang: 300ms ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ja);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.lang-de { font-family: var(--font-de); }
+body.lang-fi { font-family: var(--font-fi); }
+
+::selection {
   background: #000;
-  padding: 6rem 2rem;
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+  color: #fff;
+}
+
+/* =====================
+   アニメーション
+===================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUpDelayed {
+  0%   { opacity: 0; transform: translateY(12px); }
+  40%  { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.anim-title {
+  animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.anim-subtitle {
+  animation: fadeInUpDelayed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* =====================
+   リンクアンダーライン
+===================== */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: currentColor;
+  transform-origin: bottom right;
+  transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* =====================
+   ヘッダー
+===================== */
+.site-header {
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  padding: 5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.header-inner {
+  position: relative;
+  z-index: 1;
 }
 
 .site-title {
-  margin: 0;
-  color: #fff;
-  font-size: 10vw;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  white-space: nowrap;
   display: none;
-  text-align: center;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.15em;
+  line-height: 1;
+  font-weight: 700;
 }
 
-/* 言語別タイトルフォント */
-.site-title[data-lang="ja"] {
-  font-family: 'Kazesawa';
-  letter-spacing: 0.2em;
+.site-title[data-lang="ja"] { font-family: 'Kazesawa', 'Noto Serif JP', sans-serif; }
+.site-title[data-lang="de"] { font-family: 'BreitkopfFraktur', 'Space Grotesk', sans-serif; letter-spacing: 0.08em; }
+.site-title[data-lang="fi"] { font-family: 'ImpactCustom', 'IM Fell English', sans-serif; letter-spacing: 0.04em; }
+
+.site-subtitle {
+  display: none;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.6;
 }
 
-.site-title[data-lang="de"] {
-  font-family: 'BreitkopfFraktur';
-  letter-spacing: 0.08em;
-}
-
-.site-title[data-lang="fi"] {
-  font-family: 'ImpactCustom';
-  letter-spacing: 0.05em;
-}
-
-
-/* ======================
-   言語切替
-====================== */
-.lang-switch {
-  padding: 1rem 2rem;
-}
-.lang-switch button {
-  margin-right: .5rem;
-}
-
-/* ======================
-   レイアウト
-====================== */
+/* =====================
+   メインレイアウト
+===================== */
 .layout {
-  display: flex;
-  gap: 2rem;
-  max-width: 1100px;
-  margin: 2rem auto;
-  padding: 0 2rem;
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 4rem;
 }
 
-.content { flex: 3; }
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+/* =====================
+   言語切替
+===================== */
+.lang-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.lang-btn {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid #000;
+  background: transparent;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-family: inherit;
+}
+.lang-btn:hover { background: #f0f0f0; }
+.lang-btn.active { background: #000; color: #fff; }
+
+/* =====================
+   本文
+===================== */
+.lang-block { display: none; }
+.lang-block.visible { display: block; }
+
+.content-text {
+  opacity: 1;
+  transition: opacity var(--transition-lang);
+}
+.content-text.fading { opacity: 0; }
+
+.lang-block p {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  line-height: 1.9;
+  color: #222;
+}
+
+/* =====================
+   サイドバー
+===================== */
 .sidebar {
   display: flex;
   flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* =====================
+   情報ウィンドウ（ターミナル風）
+===================== */
+.info-window {
+  background: #0a0a0a;
+  color: #e0e0e0;
+  padding: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.info-window::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #222, #888, #222);
+  opacity: 0.6;
+}
+
+.info-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid #1a1a1a;
+}
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+  font-size: 0.65rem;
+  color: #555;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.status-label { font-size: 0.65rem; color: #555; letter-spacing: 0.15em; text-transform: uppercase; }
+.status-online { color: #4ade80; font-size: 0.75rem; }
+
+.info-datetime {
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  color: #fff;
+}
+
+.info-jd {
+  color: #aaa;
+  letter-spacing: 0.1em;
+}
+
+.system-message {
+  color: #bbb;
+  font-style: italic;
+  white-space: pre-line;
+  border-left: 2px solid #333;
+  padding-left: 0.75rem;
+  line-height: 1.6;
+}
+
+.fragments-area {
+  cursor: pointer;
+}
+.fragments-area:hover .fragment-text { color: #fff; }
+.fragment-click-hint {
+  color: #444;
+  transition: color 0.2s;
+}
+.fragments-area:hover .fragment-click-hint { color: #aaa; }
+
+.fragment-text {
+  color: #888;
+  font-style: italic;
+  transition: color 0.3s;
+  line-height: 1.5;
+}
+
+/* =====================
+   コンテンツナビゲーション
+===================== */
+.contents-nav {
+  padding-top: 0.5rem;
+}
+
+.contents-heading {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 1.5rem;
+}
+
+.contents-list {
+  list-style: none;
+}
+
+.contents-list li {
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 0;
+}
+
+.contents-list a {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 300;
+  color: var(--color-text);
+  letter-spacing: 0.05em;
+}
+
+/* =====================
+   フッター
+===================== */
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--color-border);
+  padding: 2.5rem 2rem;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  letter-spacing: 0.05em;
+}
+
+.footer-links {
+  display: flex;
   gap: 1.5rem;
 }
 
-/* アコーディオン */
-.accordion {
-  background: #fff;
-  border-radius: 8px;
-  padding: 1rem;
-  transition: all .3s ease;
+.footer-links a {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transition: color 0.2s;
 }
-
-/* 情報ウィンドウ */
-.info-window {
-  background: #111;
-  color: #eee;
-  border-radius: 8px;
-  padding: 1rem;
-  font-size: .85rem;
-
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* 上段 */
-.info-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-/* 下段 */
-.info-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 1rem;
-}
-
-.random-text {
-  font-style: italic;
-  opacity: .8;
-  white-space: pre-line;
-}
-
-.time-info {
-  text-align: right;
-  font-family: 'Geosans';
-}
-
-/* ======================
-   本文
-====================== */
-.lang-block { display: none; }
-
-/* 言語別本文フォント */
-.lang-ja p { font-family: 'Kazesawa'; }
-.lang-de p { font-family: 'Geosans'; }
-.lang-fi p { font-family: 'HelveticaCustom'; }
-
-/* ======================
-   アコーディオン
-====================== */
-.sidebar details {
-  background: #fff;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.sidebar summary {
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.sidebar li {
-  margin: .5rem 0;
-}
-
-/* ======================
-   フッター
-====================== */
-.site-footer {
-  margin-top: 4rem;
-  padding: 2rem;
-  text-align: center;
-  font-size: .85rem;
-  color: #666;
-}
-
-/* ======================
-   モバイル
-====================== */
-@media (max-width: 768px) {
-  .layout { flex-direction: column; }
-}
+.footer-links a:hover { color: var(--color-text); }
 </style>
 </head>
 
-<body>
+<body class="lang-ja">
 
 <!-- ヘッダー -->
 <header class="site-header">
-  <h1 class="site-title center-align" data-lang="ja">偽造切手</h1>
-  <h1 class="site-title center-align" data-lang="de">LOS 49</h1>
-  <h1 class="site-title center-align" data-lang="fi">ERÄ 49</h1>
+  <div class="header-inner">
+    <h1 class="site-title anim-title" data-lang="ja">偽造切手</h1>
+    <h1 class="site-title anim-title" data-lang="de">LOS 49</h1>
+    <h1 class="site-title anim-title" data-lang="fi">ERÄ 49</h1>
+    <p class="site-subtitle anim-subtitle" data-lang="ja">作品・文章・音楽</p>
+    <p class="site-subtitle anim-subtitle" data-lang="de">Werke · Texte · Musik</p>
+    <p class="site-subtitle anim-subtitle" data-lang="fi">Teoksia · Tekstejä · Musiikkia</p>
+  </div>
 </header>
-
-<!-- 言語切替 -->
-<div class="lang-switch">
-  <button onclick="setLang('ja')">日本語</button>
-  <button onclick="setLang('de')">Deutsch</button>
-  <button onclick="setLang('fi')">Suomi</button>
-</div>
 
 <!-- メイン -->
 <div class="layout">
 
   <!-- 左：本文 -->
   <main class="content">
+    <!-- 言語切替 -->
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('de')">Deutsch</button>
+      <button class="lang-btn" onclick="setLang('fi')">Suomi</button>
+    </div>
 
-    <section class="lang-block lang-ja" data-lang="ja">
-      <h2 class="font-kazesawa-bold">概要</h2>
-      <p>ここは競介の個人サイトです。</p>
-      <p>作品や文章、音楽などを置いていく予定です。</p>
-    </section>
-
-    <section class="lang-block lang-de" data-lang="de">
-      <h2 class="font-fraktur">Überblick</h2>
-      <p>Dies ist Kyosukes persönliche Website.</p>
-      <p>Hier sammle ich Texte, Bilder und Musik.</p>
-    </section>
-
-    <section class="lang-block lang-fi" data-lang="fi">
-      <h2 class="font-impact">Yleiskuva</h2>
-      <p>Tämä on Kyosuken henkilökohtainen sivusto.</p>
-      <p>Tänne kerään tekstejä, kuvia ja musiikkia.</p>
-    </section>
-
+    <div class="content-text" id="contentText">
+      <div class="lang-block visible" data-lang="ja">
+        <p>この場所は、個人によって運営されているウェブサイトです。<br>日常の記録、散発的に作られた作品、あるいは単なる文字列の集積が置かれています。<br>明確な目的を持たず、ただ存在することのみを意図しています。</p>
+      </div>
+      <div class="lang-block" data-lang="de">
+        <p>Dies ist eine von einer Einzelperson betriebene Website.<br>Sie enthält alltägliche Aufzeichnungen, sporadisch erstellte Werke oder einfach nur Ansammlungen von Zeichenketten.<br>Sie hat keinen klaren Zweck und ist nur dazu gedacht, zu existieren.</p>
+      </div>
+      <div class="lang-block" data-lang="fi">
+        <p>Tämä on yksityishenkilön ylläpitämä verkkosivusto.<br>Se sisältää päivittäisiä muistiinpanoja, satunnaisesti luotuja teoksia tai vain merkkijonojen kokoelmia.<br>Sillä ei ole selkeää tarkoitusta, se on tarkoitettu vain olemassaoloon.</p>
+      </div>
+    </div>
   </main>
 
-  <!-- 右：ナビ -->
+  <!-- 右：サイドバー -->
   <aside class="sidebar">
 
-  <!-- 上半分：アコーディオン -->
-  <details class="accordion" open>
-    <summary>Contents</summary>
-    <ul>
-      <li><a href="art/">Art</a></li>
-      <li><a href="music/">Music</a></li>
-      <li><a href="text/">Text</a></li>
-      <li><a href="diary/">Diary</a></li>
-    </ul>
-  </details>
+    <!-- 情報ウィンドウ -->
+    <div class="info-window">
+      <div class="info-row">
+        <div class="info-status">
+          <span class="status-label">STATUS</span>
+          <span class="status-online">ONLINE</span>
+        </div>
+      </div>
 
-  <!-- 下半分：情報ウィンドウ -->
-  <section class="info-window">
-    <div class="info-top">
-      <div class="date-info" id="dateInfo"></div>
-      <div class="topic-info" id="topicInfo"></div>
+      <div class="info-row">
+        <div class="info-label">DATE_TIME [LOCAL]</div>
+        <div class="info-datetime" id="infoDatetime">----</div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">JULIAN_DATE</div>
+        <div class="info-jd" id="infoJulian">----</div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">SYSTEM_MESSAGE</div>
+        <div class="system-message" id="infoDaily"></div>
+      </div>
+
+      <div class="info-row fragments-area" id="fragmentsArea" title="クリックで次の文へ">
+        <div class="info-label">
+          <span>FRAGMENTS</span>
+          <span class="fragment-click-hint">[CLICK]</span>
+        </div>
+        <div class="fragment-text" id="infoFragment"></div>
+      </div>
     </div>
 
-    <div class="info-bottom">
-      <div class="random-text" id="randomText"></div>
-      <div class="time-info" id="timeInfo"></div>
-    </div>
-  </section>
+    <!-- コンテンツナビ -->
+    <nav class="contents-nav">
+      <p class="contents-heading">Contents</p>
+      <ul class="contents-list">
+        <li><a href="art/" class="link-underline">Art</a></li>
+        <li><a href="music/" class="link-underline">Music</a></li>
+        <li><a href="text/" class="link-underline">Text</a></li>
+        <li><a href="diary/" class="link-underline">Diary</a></li>
+      </ul>
+    </nav>
 
-</aside>
-
+  </aside>
 </div>
 
 <!-- フッター -->
 <footer class="site-footer">
-  <p>© 2025 Pfötchengebendeningen - 偽造切手 / LOS 49 / ERÄ 49</p>
-  <p>
-    <a href="https://x.com/ningaesst?s=21">X</a>
-  </p>
+  <div class="footer-inner">
+    <p class="footer-copy">© 2025 Pfötchengebendeningen – 偽造切手 / LOS 49 / ERÄ 49</p>
+    <div class="footer-links">
+      <a href="https://x.com/ningaesst?s=21" class="link-underline" target="_blank" rel="noopener">X / Twitter</a>
+    </div>
+  </div>
 </footer>
+
+<!-- daily.js: dailyByDate と specialConditions をグローバルに定義 -->
 <script src="js/daily.js"></script>
+
 <script>
-const timeZones = {
-  ja: 'Asia/Tokyo',
-  de: 'Europe/Berlin',
-  fi: 'Europe/Helsinki'
+/* =====================
+   データ定義
+===================== */
+const HEADERS = {
+  ja: { title: '偽造切手', subtitle: '作品・文章・音楽' },
+  de: { title: 'LOS 49',   subtitle: 'Werke · Texte · Musik' },
+  fi: { title: 'ERÄ 49',  subtitle: 'Teoksia · Tekstejä · Musiikkia' }
 };
 
-const topics = {
-  ja: '特になし',
-  de: 'Gedanken über Papier und Tinte',
-  fi: 'Ajatuksia paperista ja musteesta'
-};
-
-
-const randomTexts = [
+const RANDOM_TEXTS = [
   'ピンチョンを読みなさい',
   '( ﾟ∀ﾟ)o彡°',
   'ここの文章毎回違うんやで',
@@ -407,86 +560,165 @@ const randomTexts = [
   'Pidän Fis-molliasteikosta',
   'Japanin X on kaoottinen paikka',
   'Haluan tehdä persiljahilloa',
-  'Anzeigechance etwa 5%.\nSie haben Glück!'
+  'Anzeigechance etwa 5%.\nSie haben Glück!',
+  '静寂は音の不在ではない。',
+  'Die Zeit vergeht, aber die Erinnerung bleibt.',
+  'Hiljaisuus puhuu enemmän kuin tuhat sanaa.'
 ];
+
+/* =====================
+   状態
+===================== */
+let currentLang = 'ja';
+let fragmentIndex = Math.floor(Math.random() * RANDOM_TEXTS.length);
+
+/* =====================
+   言語切替
+===================== */
+function setLang(lang) {
+  if (lang === currentLang) return;
+
+  const contentText = document.getElementById('contentText');
+  contentText.classList.add('fading');
+
+  setTimeout(() => {
+    currentLang = lang;
+
+    // ボディのクラス切替（フォント）
+    document.body.className = 'lang-' + lang;
+
+    // ヘッダータイトル / サブタイトル
+    document.querySelectorAll('.site-title').forEach(el => {
+      el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+    });
+    document.querySelectorAll('.site-subtitle').forEach(el => {
+      el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+    });
+
+    // 本文
+    document.querySelectorAll('.lang-block').forEach(el => {
+      el.classList.toggle('visible', el.dataset.lang === lang);
+    });
+
+    // ボタン
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
+    });
+
+    contentText.classList.remove('fading');
+    updateInfo();
+    updateDailyText();
+  }, 300);
+}
+
+function langLabel(lang) {
+  return { ja: '日本語', de: 'Deutsch', fi: 'Suomi' }[lang];
+}
+
+/* =====================
+   時刻・Julian Date
+===================== */
+const TIME_ZONES = {
+  ja: 'Asia/Tokyo',
+  de: 'Europe/Berlin',
+  fi: 'Europe/Helsinki'
+};
 
 function julianDate(date) {
   return date / 86400000 + 2440587.5;
 }
 
-function updateInfo(lang) {
-  const now = new Date();
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
 
-  const tz = timeZones[lang];
-  const formatter = new Intl.DateTimeFormat(lang, {
+function updateInfo() {
+  const now = new Date();
+  const tz = TIME_ZONES[currentLang];
+
+  const fmt = new Intl.DateTimeFormat('sv', {
     timeZone: tz,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
   });
 
-  const timeStr = formatter.format(now);
-  const jd = julianDate(now).toFixed(5);
+  const parts = {};
+  fmt.formatToParts(now).forEach(p => { parts[p.type] = p.value; });
+  const datetimeStr = `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
 
-  document.getElementById('timeInfo').innerHTML =
-    `JD ${jd}<br>${timeStr}`;
-
-  document.getElementById('topicInfo').textContent = topics[lang];
+  document.getElementById('infoDatetime').textContent = datetimeStr;
+  document.getElementById('infoJulian').textContent = julianDate(now).toFixed(5);
 }
 
-function setRandomText() {
-  const t = randomTexts[Math.floor(Math.random() * randomTexts.length)];
-  document.getElementById('randomText').textContent = t;
-}
-
-function setLang(lang) {
-  document.querySelectorAll('[data-lang]').forEach(el => {
-    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
-  });
-  updateInfo(lang);
-  loadDailyItem();
-}
-
-setRandomText();
-setLang('ja');
-
-setInterval(() => {
-  const currentLang =
-    document.querySelector('.site-title:not([style*="none"])')?.dataset.lang || 'ja';
-  updateInfo(currentLang);
-  loadDailyItem();
-}, 1000);
-
-
-function loadDailyItem() {
+/* =====================
+   日替わり・特殊条件テキスト
+===================== */
+function updateDailyText() {
   const now = new Date();
 
-  // ① 特殊条件を最優先
-  for (const cond of specialConditions) {
-    if (cond.check(now)) {
-      document.getElementById('dateInfo').innerHTML = cond.html;
-      return;
+  // 特殊条件チェック（daily.jsのグローバル変数を使用）
+  if (typeof specialConditions !== 'undefined') {
+    for (const cond of specialConditions) {
+      if (cond.check && cond.check(now)) {
+        const text = cond.html
+          ? cond.html.replace(/<[^>]+>/g, '').trim()
+          : (cond.text || '');
+        document.getElementById('infoDaily').textContent = text;
+        return;
+      }
     }
   }
 
-  // ② 通常の日付
-  const key =
-    String(now.getMonth() + 1).padStart(2, '0') +
-    '-' +
-    String(now.getDate()).padStart(2, '0');
+  // 通常の日付
+  const key = pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
 
-  if (dailyByDate[key]) {
-    document.getElementById('dateInfo').innerHTML = dailyByDate[key];
+  if (typeof dailyByDate !== 'undefined' && dailyByDate[key]) {
+    // HTMLタグがある場合は除去してテキストのみ表示
+    const raw = dailyByDate[key];
+    document.getElementById('infoDaily').textContent =
+      raw.replace ? raw.replace(/<[^>]+>/g, '').trim() : raw;
     return;
   }
 
-  // ③ 何も定義されていない日
-  document.getElementById('dateInfo').innerHTML = `
-  <p class="font-kazesawa-light">
-    (´・ω・｀)<br>
-  </p>
-`;
+  document.getElementById('infoDaily').textContent = '(´・ω・｀)';
 }
+
+/* =====================
+   フラグメント（ランダムテキスト）
+===================== */
+function updateFragment() {
+  document.getElementById('infoFragment').textContent =
+    '"' + RANDOM_TEXTS[fragmentIndex] + '"';
+}
+
+document.getElementById('fragmentsArea').addEventListener('click', () => {
+  fragmentIndex = (fragmentIndex + 1) % RANDOM_TEXTS.length;
+  updateFragment();
+});
+
+/* =====================
+   初期化 & インターバル
+===================== */
+function init() {
+  // ヘッダー初期表示
+  document.querySelectorAll('.site-title').forEach(el => {
+    el.style.display = el.dataset.lang === 'ja' ? 'block' : 'none';
+  });
+  document.querySelectorAll('.site-subtitle').forEach(el => {
+    el.style.display = el.dataset.lang === 'ja' ? 'block' : 'none';
+  });
+
+  updateInfo();
+  updateDailyText();
+  updateFragment();
+}
+
+init();
+setInterval(() => {
+  updateInfo();
+  updateDailyText();
+}, 1000);
 </script>
 </body>
 </html>
