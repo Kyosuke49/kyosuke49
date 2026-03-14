@@ -1,54 +1,90 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>変なFizzBuzz — 偽造切手</title>
+  <title>Wortquiz — LOS49</title>
   <link rel="stylesheet" href="../style.css">
   <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.0/release/biwascheme-min.js"></script>
   <style>
+    body { font-family: 'Geosans', 'Space Grotesk', sans-serif; }
+
     .game-area {
       margin: 2rem 0;
       border-top: 1px solid var(--border);
       padding-top: 2rem;
     }
-    .number-display {
+    .question-display {
       font-family: 'Geosans', sans-serif;
-      font-size: clamp(3rem, 10vw, 6rem);
-      letter-spacing: 0.05em;
+      font-size: 1rem;
+      line-height: 1.8;
       text-align: center;
-      margin: 1.5rem 0;
-      line-height: 1;
+      margin: 1.5rem 0 0.4rem;
+      min-height: 2.5rem;
     }
-    .answer-row {
+    .letter-boxes {
       display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
       justify-content: center;
-      margin: 1.5rem 0;
+      gap: 0.4rem;
+      margin: 1rem 0 1.8rem;
     }
-    .ans-btn {
-      background: none;
+    .letter-box {
+      width: 2.4rem;
+      height: 2.8rem;
       border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'BreitkopfFraktur', serif;
+      font-size: 1.4rem;
+      letter-spacing: 0;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .letter-box.filled  { border-color: var(--black); }
+    .letter-box.correct { border-color: var(--black); background: var(--black); color: var(--white); }
+    .letter-box.wrong   { border-color: #ccc; color: #ccc; }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      max-width: 360px;
+      margin: 0 auto 1rem;
+    }
+    .answer-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      background: none;
       font-family: 'Geosans', sans-serif;
-      font-size: 0.9rem;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      padding: 0.55rem 0.8rem;
+      color: var(--fg);
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.15s ease;
+    }
+    .answer-input:focus   { border-color: var(--black); }
+    .answer-input:disabled { opacity: 0.4; }
+    .submit-btn {
+      background: none;
+      border: 1px solid var(--black);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.82rem;
       letter-spacing: 0.08em;
-      padding: 0.6rem 1.4rem;
+      padding: 0.55rem 1.2rem;
       cursor: pointer;
       color: var(--fg);
       transition: background 0.15s ease, color 0.15s ease;
     }
-    .ans-btn:hover        { background: var(--black); color: var(--white); }
-    .ans-btn.correct      { background: var(--black); color: var(--white); border-color: var(--black); }
-    .ans-btn.wrong        { border-color: #bbb; color: #bbb; }
-    .ans-btn:disabled     { cursor: default; }
+    .submit-btn:hover { background: var(--black); color: var(--white); }
+
     .feedback {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
+      font-family: 'Geosans', sans-serif;
       text-align: center;
       min-height: 1.5rem;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       margin-bottom: 1rem;
+      letter-spacing: 0.05em;
     }
     .score-row {
       display: flex;
@@ -58,25 +94,9 @@
       font-size: 0.8rem;
       letter-spacing: 0.1em;
       color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .score-row span { color: var(--fg); }
-    .timer-row {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
       margin-bottom: 1.5rem;
     }
-    .timer-row span { color: var(--fg); }
-    #timerDisplay {
-      font-size: 1rem;
-      letter-spacing: 0.06em;
-      color: var(--fg) !important;
-    }
+    .score-row span { color: var(--fg); }
     .next-btn {
       display: block;
       margin: 0 auto;
@@ -92,21 +112,7 @@
     }
     .next-btn:hover    { background: var(--black); color: var(--white); }
     .next-btn:disabled { opacity: 0.3; cursor: default; }
-    .rule-table {
-      width: 100%;
-      max-width: 360px;
-      margin: 0 auto 0.5rem;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-    }
-    .rule-table td {
-      font-family: 'Geosans', sans-serif;
-      letter-spacing: 0.06em;
-      padding: 0.25rem 0.5rem;
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
-    }
-    .rule-table td:first-child { color: var(--fg); font-weight: 400; }
+
     .lisp-note { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
     .lisp-note summary {
       font-family: 'Geosans', sans-serif;
@@ -129,14 +135,14 @@
 <body>
   <header class="site-header sub-header">
   <div class="container sub-header-inner">
-    <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>
+    <a href="../../../index.html" class="site-logo font-fraktur">LOS 49</a>
     <nav>
       <ul>
-        <li><a href="../art/index.html">絵置き場</a></li>
-        <li><a href="../music/index.html">曲置き場</a></li>
-        <li><a href="../text/index.html">字置き場</a></li>
-        <li><a href="../diary/index.html">独り言</a></li>
-        <li><a href="../pastime/index.html">暇つぶし</a></li>
+        <li><a href="../art/index.html">Bilder</a></li>
+        <li><a href="../music/index.html">Musik</a></li>
+        <li><a href="../text/index.html">Romane</a></li>
+        <li><a href="../diary/index.html">Aufzeichnung</a></li>
+        <li><a href="../pastime/index.html">Zeitvertreib</a></li>
       </ul>
     </nav>
   </div>
@@ -144,54 +150,45 @@
 
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa">変なFizzBuzz</h1>
+      <h1 class="page-title font-fraktur">Wortquiz</h1>
 
-      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted); margin-bottom:1rem;">
-        FizzBuzzにボルゾイが乱入。君はこのカオスに耐えられるか？
+      <p style="font-size:0.9rem; color:var(--muted); font-family:'Geosans',sans-serif; letter-spacing:0.04em;">
+        Errate das deutsche Wort mit fünf Buchstaben anhand des Hinweises.
       </p>
-
-      <table class="rule-table">
-        <tr><td>3の倍数</td><td>→ Fizz</td></tr>
-        <tr><td>5の倍数</td><td>→ Buzz</td></tr>
-        <tr><td>7の倍数</td><td>→ Woof</td></tr>
-        <tr><td>15の倍数</td><td>→ FizzBuzz</td></tr>
-        <tr><td>21の倍数</td><td>→ FizzWoof</td></tr>
-        <tr><td>35の倍数</td><td>→ BuzzWoof</td></tr>
-        <tr><td>105の倍数</td><td>→ FizzBuzzWoof</td></tr>
-        <tr><td>それ以外</td><td>→ 数字</td></tr>
-      </table>
 
       <div class="game-area">
         <div class="score-row">
-          正解 <span id="scoreCorrect">0</span> &nbsp;／&nbsp; 問題数 <span id="scoreTotal">0</span>
-        </div>
-        <div class="timer-row">
-          <span id="timerDisplay">—</span> &nbsp;／&nbsp; 最速 <span id="bestTime">—</span>
+          Richtig <span id="scoreCorrect">0</span> &nbsp;／&nbsp; Insgesamt <span id="scoreTotal">0</span>
         </div>
 
-        <div class="number-display font-geosans" id="numberDisplay">…</div>
-        <div class="feedback font-kazesawa-light" id="feedback"></div>
+        <div class="question-display" id="questionDisplay">…</div>
 
-        <div class="answer-row">
-          <button class="ans-btn" id="btnFizz"        onclick="answer('Fizz')">Fizz</button>
-          <button class="ans-btn" id="btnBuzz"        onclick="answer('Buzz')">Buzz</button>
-          <button class="ans-btn" id="btnWoof"        onclick="answer('Woof')">Woof</button>
-          <button class="ans-btn" id="btnFizzBuzz"    onclick="answer('FizzBuzz')">FizzBuzz</button>
-          <button class="ans-btn" id="btnFizzWoof"    onclick="answer('FizzWoof')">FizzWoof</button>
-          <button class="ans-btn" id="btnBuzzWoof"    onclick="answer('BuzzWoof')">BuzzWoof</button>
-          <button class="ans-btn" id="btnFizzBuzzWoof" onclick="answer('FizzBuzzWoof')">FizzBuzzWoof</button>
-          <button class="ans-btn" id="btnNumber"      onclick="answerNumber()">数字</button>
+        <div class="letter-boxes" id="letterBoxes">
+          <div class="letter-box" id="lb0"></div>
+          <div class="letter-box" id="lb1"></div>
+          <div class="letter-box" id="lb2"></div>
+          <div class="letter-box" id="lb3"></div>
+          <div class="letter-box" id="lb4"></div>
         </div>
 
-        <button class="next-btn font-geosans" id="nextBtn" onclick="nextQuestion()" disabled>次へ →</button>
+        <div class="input-row">
+          <input class="answer-input" type="text" id="answerInput"
+            placeholder="Antwort…" autocomplete="off" maxlength="5"
+            oninput="syncBoxes()"
+            onkeydown="if(event.key==='Enter') checkAnswer()">
+          <button class="submit-btn" onclick="checkAnswer()">Antworten</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>Weiter →</button>
 
         <details class="lisp-note">
-          <summary>LISPコードを見る (fizzbuzz.scm)</summary>
-          <pre id="lispSource">読み込み中…</pre>
+          <summary>LISP-Code anzeigen (wordquiz.scm)</summary>
+          <pre id="lispSource">Wird geladen…</pre>
         </details>
       </div>
 
-      <a href="index.html" class="back-link font-geosans">← Pastimeへ</a>
+      <a href="index.html" class="back-link font-geosans">← Zurück</a>
     </main>
     <footer class="site-footer">
       <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
@@ -199,102 +196,98 @@
   </div>
 
 <script>
-const WORD_ANSWERS = ['Fizz','Buzz','Woof','FizzBuzz','FizzWoof','BuzzWoof','FizzBuzzWoof'];
-
-const interp = new BiwaScheme.Interpreter();
-let currentN = 0;
-let correctAnswer = '';
-let answered = false;
+const interp = new BiwaScheme.Interpreter(err => console.error(err));
+let currentAnswer = '';
+let usedIndices = [];
+let questionCount = 0;
 let scoreCorrect = 0;
 let scoreTotal = 0;
 
-let questionStartTime = 0;
-let timerInterval = null;
-let bestTime = Infinity;
-
-function startTimer() {
-  questionStartTime = Date.now();
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    const s = ((Date.now() - questionStartTime) / 1000).toFixed(1);
-    document.getElementById('timerDisplay').textContent = s + 's';
-  }, 100);
+function lispEval(expr, cb) {
+  interp.evaluate(expr, result => cb(result));
 }
 
-function stopTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  const elapsed = (Date.now() - questionStartTime) / 1000;
-  document.getElementById('timerDisplay').textContent = elapsed.toFixed(1) + 's';
-  if (elapsed < bestTime) {
-    bestTime = elapsed;
-    document.getElementById('bestTime').textContent = bestTime.toFixed(1) + 's';
+function syncBoxes() {
+  const val = document.getElementById('answerInput').value.toUpperCase();
+  for (let i = 0; i < 5; i++) {
+    const box = document.getElementById('lb' + i);
+    box.textContent = val[i] || '';
+    box.className = 'letter-box' + (val[i] ? ' filled' : '');
   }
 }
 
-fetch('fizzbuzz.scm')
-  .then(r => r.text())
-  .then(code => {
-    document.getElementById('lispSource').textContent = code;
-    interp.evaluate(code, () => nextQuestion());
-  });
-
-function evalFizzBuzz(n, cb) {
-  interp.evaluate(`(fizzbuzz ${n})`, result => {
-    cb(result instanceof BiwaScheme.Symbol ? result.name : String(result));
-  });
+function resetBoxes(mode) {
+  for (let i = 0; i < 5; i++) {
+    const box = document.getElementById('lb' + i);
+    if (mode === 'correct') {
+      box.textContent = currentAnswer[i];
+      box.className = 'letter-box correct';
+    } else if (mode === 'wrong') {
+      box.textContent = currentAnswer[i];
+      box.className = 'letter-box wrong';
+    } else {
+      box.textContent = '';
+      box.className = 'letter-box';
+    }
+  }
 }
 
 function nextQuestion() {
-  answered = false;
   document.getElementById('feedback').textContent = '';
   document.getElementById('nextBtn').disabled = true;
-  document.querySelectorAll('.ans-btn').forEach(b => {
-    b.classList.remove('correct', 'wrong');
-    b.disabled = false;
+  document.getElementById('answerInput').value = '';
+  document.getElementById('answerInput').disabled = false;
+  resetBoxes('');
+
+  if (usedIndices.length >= questionCount) usedIndices = [];
+  let idx;
+  do { idx = Math.floor(Math.random() * questionCount); }
+  while (usedIndices.includes(idx));
+  usedIndices.push(idx);
+
+  lispEval(`(question-text (pick-question ${idx}))`, text => {
+    document.getElementById('questionDisplay').textContent = String(text);
+  });
+  lispEval(`(question-answer (pick-question ${idx}))`, ans => {
+    currentAnswer = String(ans).toUpperCase();
   });
 
-  currentN = Math.floor(Math.random() * 300) + 1;
-  document.getElementById('numberDisplay').textContent = currentN;
-
-  evalFizzBuzz(currentN, result => {
-    correctAnswer = result;
-    startTimer();
-  });
+  document.getElementById('answerInput').focus();
 }
 
-function answer(choice) {
-  if (answered) return;
-  answered = true;
-  stopTimer();
+function checkAnswer() {
+  const input = document.getElementById('answerInput').value.trim().toUpperCase();
+  if (!input) return;
+
   scoreTotal++;
   document.getElementById('scoreTotal').textContent = scoreTotal;
+  document.getElementById('answerInput').disabled = true;
 
-  const correct = (choice === correctAnswer);
-  if (correct) {
-    scoreCorrect++;
-    document.getElementById('scoreCorrect').textContent = scoreCorrect;
-    document.getElementById('feedback').textContent = '正解！';
-  } else {
-    document.getElementById('feedback').textContent = `不正解。正解は「${correctAnswer}」`;
-  }
-
-  document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
-  document.getElementById('btnFizz').classList.toggle('correct',        correctAnswer === 'Fizz');
-  document.getElementById('btnBuzz').classList.toggle('correct',        correctAnswer === 'Buzz');
-  document.getElementById('btnWoof').classList.toggle('correct',        correctAnswer === 'Woof');
-  document.getElementById('btnFizzBuzz').classList.toggle('correct',    correctAnswer === 'FizzBuzz');
-  document.getElementById('btnFizzWoof').classList.toggle('correct',    correctAnswer === 'FizzWoof');
-  document.getElementById('btnBuzzWoof').classList.toggle('correct',    correctAnswer === 'BuzzWoof');
-  document.getElementById('btnFizzBuzzWoof').classList.toggle('correct',correctAnswer === 'FizzBuzzWoof');
-  document.getElementById('btnNumber').classList.toggle('correct',      !WORD_ANSWERS.includes(correctAnswer));
-  document.getElementById('nextBtn').disabled = false;
+  lispEval(`(check-answer "${currentAnswer}" "${input}")`, result => {
+    if (result === true) {
+      scoreCorrect++;
+      document.getElementById('scoreCorrect').textContent = scoreCorrect;
+      document.getElementById('feedback').textContent = 'Richtig!';
+      resetBoxes('correct');
+    } else {
+      document.getElementById('feedback').textContent = `Falsch. Die Antwort war: ${currentAnswer}`;
+      resetBoxes('wrong');
+    }
+    document.getElementById('nextBtn').disabled = false;
+  });
 }
 
-function answerNumber() {
-  if (answered) return;
-  const isNum = !WORD_ANSWERS.includes(correctAnswer);
-  answer(isNum ? correctAnswer : '__wrong__');
-}
+fetch('wordquiz.scm')
+  .then(r => r.text())
+  .then(code => {
+    document.getElementById('lispSource').textContent = code;
+    interp.evaluate(code, () => {
+      lispEval('(questions-count)', count => {
+        questionCount = Number(count);
+        nextQuestion();
+      });
+    });
+  });
 </script>
 </body>
 </html>
