@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>おみくじ — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="omikuji.js"></script>
+  <style>
+    .game-area {
+      margin: 2rem 0;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+
+    /* ── ボタン列 ── */
+    .btn-row {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .draw-btn {
+      background: none;
+      border: 1px solid var(--black);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      padding: 0.65rem 2.2rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .draw-btn:hover  { background: var(--black); color: var(--white); }
+    .draw-btn.active { background: var(--black); color: var(--white); }
+
+    /* ── 単発 結果 ── */
+    .single-result {
+      display: none;
+      border: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      margin: 0 auto 2rem;
+      max-width: 400px;
+      animation: fadeIn 0.3s ease;
+    }
+    .single-result.visible { display: block; }
+
+    .rank-display {
+      font-family: 'Geosans', sans-serif;
+      font-size: clamp(2.8rem, 10vw, 5rem);
+      letter-spacing: 0.1em;
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 0.7rem;
+    }
+    .rank-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+    }
+    .fortune-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .fortune-table tr { border-top: 1px solid var(--border); }
+    .fortune-table tr:last-child { border-bottom: 1px solid var(--border); }
+    .fortune-table th {
+      font-family: 'Geosans', sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-align: left;
+      padding: 0.55rem 0.5rem 0.55rem 0;
+      width: 5rem;
+    }
+    .fortune-table td {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      padding: 0.55rem 0;
+    }
+
+    /* ── 10連 結果グリッド ── */
+    .multi-result {
+      display: none;
+      margin: 0 auto 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+    .multi-result.visible { display: block; }
+
+    .gacha-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+    }
+    @media (max-width: 560px) {
+      .gacha-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .gacha-card {
+      border: 1px solid var(--border);
+      padding: 1rem 0.6rem 1.1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+      animation: popIn 0.25s ease both;
+    }
+    .gacha-card:hover { border-color: var(--black); }
+    .gacha-card.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+    .gacha-card.selected .gacha-rank { color: var(--white); }
+    .gacha-card.selected .gacha-subdesc { color: rgba(255,255,255,0.55); }
+
+    .gacha-rank {
+      font-family: 'Geosans', sans-serif;
+      font-size: 1.35rem;
+      letter-spacing: 0.06em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+      color: var(--fg);
+    }
+    .gacha-subdesc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* カード番号 */
+    .gacha-num {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+    .gacha-card.selected .gacha-num { color: rgba(255,255,255,0.45); }
+
+    /* 選択カードの詳細パネル */
+    .detail-panel {
+      display: none;
+      border: 1px solid var(--border);
+      border-top: none;
+      padding: 1.4rem 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .detail-panel.visible { display: block; animation: fadeIn 0.2s ease; }
+    .detail-rank {
+      font-family: 'Geosans', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+    .detail-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── アニメーション ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.88); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Nimコード表示 ── */
+    .nim-note { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+    .nim-note summary {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .nim-note pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      margin-top: 1rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header sub-header">
+  <div class="container sub-header-inner">
+    <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>
+    <nav>
+      <ul>
+        <li><a href="../art/index.html">絵置き場</a></li>
+        <li><a href="../music/index.html">曲置き場</a></li>
+        <li><a href="../text/index.html">字置き場</a></li>
+        <li><a href="../diary/index.html">独り言</a></li>
+        <li><a href="../pastime/index.html">暇つぶし</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <div class="container">
+    <main class="sub-main">
+      <h1 class="page-title font-kazesawa">おみくじ</h1>
+
+      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted);">
+        レッツスタート！
+      </p>
+
+      <div class="game-area">
+
+        <div class="btn-row">
+          <button class="draw-btn font-geosans" onclick="drawSingle()">単発</button>
+          <button class="draw-btn font-geosans" onclick="drawMulti()">10連</button>
+        </div>
+
+        <!-- 単発 結果 -->
+        <div class="single-result" id="singleResult">
+          <div class="rank-display font-geosans" id="rankDisplay"></div>
+          <div class="rank-desc font-kazesawa-light" id="descDisplay"></div>
+          <table class="fortune-table">
+            <tr><th>恋愛</th><td id="loveTd"></td></tr>
+            <tr><th>仕事</th><td id="workTd"></td></tr>
+            <tr><th>健康</th><td id="healthTd"></td></tr>
+            <tr><th>ラッキーカラー</th><td id="luckyTd"></td></tr>
+          </table>
+        </div>
+
+        <!-- 10連 結果 -->
+        <div class="multi-result" id="multiResult">
+          <div class="gacha-grid" id="gachaGrid"></div>
+          <div class="detail-panel" id="detailPanel">
+            <div class="detail-rank font-geosans" id="detailRank"></div>
+            <div class="detail-desc font-kazesawa-light" id="detailDesc"></div>
+            <table class="fortune-table">
+              <tr><th>恋愛</th><td id="detailLove"></td></tr>
+              <tr><th>仕事</th><td id="detailWork"></td></tr>
+              <tr><th>健康</th><td id="detailHealth"></td></tr>
+              <tr><th>ラッキーカラー</th><td id="detailLucky"></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <details class="nim-note">
+          <summary>Nimコードを見る (omikuji.nim)</summary>
+          <pre id="nimSource">読み込み中…</pre>
+        </details>
+      </div>
+
+      <a href="index.html" class="back-link font-geosans">← Pastimeへ</a>
+    </main>
+    <footer class="site-footer">
+      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
+    </footer>
+  </div>
+
+<script>
+fetch('omikuji.nim')
+  .then(r => r.text())
+  .then(code => { document.getElementById('nimSource').textContent = code; });
+
+function getSeed(offset) {
+  return (Date.now() + offset * 137) % 100;
+}
+
+/* ── 単発 ── */
+function drawSingle() {
+  const f = jsDrawOmikuji(getSeed(0));
+
+  document.getElementById('rankDisplay').textContent = f.rank;
+  document.getElementById('descDisplay').textContent = f.desc;
+  document.getElementById('loveTd').textContent      = f.love;
+  document.getElementById('workTd').textContent      = f.work;
+  document.getElementById('healthTd').textContent    = f.health;
+  document.getElementById('luckyTd').textContent     = f.lucky;
+
+  document.getElementById('singleResult').classList.add('visible');
+  document.getElementById('multiResult').classList.remove('visible');
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+
+/* ── 10連 ── */
+let draws = [];
+let selectedIdx = -1;
+
+function drawMulti() {
+  draws = [];
+  for (let i = 0; i < 10; i++) {
+    draws.push(jsDrawOmikuji(getSeed(i)));
+  }
+
+  const grid = document.getElementById('gachaGrid');
+  grid.innerHTML = '';
+
+  draws.forEach((f, i) => {
+    const card = document.createElement('div');
+    card.className = 'gacha-card';
+    card.style.animationDelay = (i * 0.04) + 's';
+    card.innerHTML =
+      '<div class="gacha-num font-geosans">' + (i + 1) + '</div>' +
+      '<div class="gacha-rank font-geosans">' + f.rank + '</div>' +
+      '<div class="gacha-subdesc font-kazesawa-light">' + f.desc + '</div>';
+    card.addEventListener('click', () => selectCard(i));
+    grid.appendChild(card);
+  });
+
+  selectedIdx = -1;
+  document.getElementById('detailPanel').classList.remove('visible');
+  document.getElementById('multiResult').classList.add('visible');
+  document.getElementById('singleResult').classList.remove('visible');
+}
+
+function selectCard(idx) {
+  const cards = document.querySelectorAll('.gacha-card');
+
+  if (selectedIdx === idx) {
+    cards[idx].classList.remove('selected');
+    document.getElementById('detailPanel').classList.remove('visible');
+    selectedIdx = -1;
+    return;
+  }
+
+  cards.forEach(c => c.classList.remove('selected'));
+  cards[idx].classList.add('selected');
+  selectedIdx = idx;
+
+  const f = draws[idx];
+  document.getElementById('detailRank').textContent  = f.rank + '　' + f.desc;
+  document.getElementById('detailDesc').textContent  = '';
+  document.getElementById('detailLove').textContent   = f.love;
+  document.getElementById('detailWork').textContent   = f.work;
+  document.getElementById('detailHealth').textContent = f.health;
+  document.getElementById('detailLucky').textContent  = f.lucky;
+
+  document.getElementById('detailPanel').classList.add('visible');
+}
+</script>
+</body>
+</html>
