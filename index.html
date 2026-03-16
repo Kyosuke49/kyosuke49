@@ -218,14 +218,18 @@ body.lang-fi { font-family: var(--font-fi); }
 }
 
 /* =====================
-   言語切替
+   言語切替（横スクロールタブ）
 ===================== */
 .lang-switch {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 0.75rem;
   margin-bottom: 3rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.lang-switch::-webkit-scrollbar { display: none; }
 
 .lang-btn {
   padding: 0.5rem 1.5rem;
@@ -238,6 +242,8 @@ body.lang-fi { font-family: var(--font-fi); }
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
   font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .lang-btn:hover { background: #f0f0f0; }
 .lang-btn.active { background: #000; color: #fff; }
@@ -509,9 +515,9 @@ body.lang-fi { font-family: var(--font-fi); }
       <p class="contents-heading">Contents</p>
       <ul class="contents-list">
         <li><a href="java-site/docs/art/index.html" class="link-underline">Art</a></li>
-<li><a href="java-site/docs/music/index.html" class="link-underline">Music</a></li>
-<li><a href="java-site/docs/text/index.html" class="link-underline">Text</a></li>
-<li><a href="java-site/docs/diary/index.html" class="link-underline">Diary</a></li>
+        <li><a href="java-site/docs/music/index.html" class="link-underline">Music</a></li>
+        <li><a href="java-site/docs/text/index.html" class="link-underline">Text</a></li>
+        <li><a href="java-site/docs/diary/index.html" class="link-underline">Diary</a></li>
         <li><a href="java-site/docs/pastime/index.html" class="link-underline">Pastime</a></li>
       </ul>
     </nav>
@@ -568,13 +574,41 @@ const RANDOM_TEXTS = [
 ];
 
 /* =====================
-   状態
+   状態（localStorageから復元）
 ===================== */
-let currentLang = 'ja';
+let currentLang = localStorage.getItem('lang') || 'ja';
 let fragmentIndex = Math.floor(Math.random() * RANDOM_TEXTS.length);
 
 /* =====================
-   言語切替
+   言語切替コア（アニメーションなし）
+===================== */
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+
+  document.body.className = 'lang-' + lang;
+
+  document.querySelectorAll('.site-title').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+  document.querySelectorAll('.site-subtitle').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+
+  document.querySelectorAll('.lang-block').forEach(el => {
+    el.classList.toggle('visible', el.dataset.lang === lang);
+  });
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
+  });
+
+  updateInfo();
+  updateDailyText();
+}
+
+/* =====================
+   言語切替（フェードアニメーションあり）
 ===================== */
 function setLang(lang) {
   if (lang === currentLang) return;
@@ -583,32 +617,8 @@ function setLang(lang) {
   contentText.classList.add('fading');
 
   setTimeout(() => {
-    currentLang = lang;
-
-    // ボディのクラス切替（フォント）
-    document.body.className = 'lang-' + lang;
-
-    // ヘッダータイトル / サブタイトル
-    document.querySelectorAll('.site-title').forEach(el => {
-      el.style.display = el.dataset.lang === lang ? 'block' : 'none';
-    });
-    document.querySelectorAll('.site-subtitle').forEach(el => {
-      el.style.display = el.dataset.lang === lang ? 'block' : 'none';
-    });
-
-    // 本文
-    document.querySelectorAll('.lang-block').forEach(el => {
-      el.classList.toggle('visible', el.dataset.lang === lang);
-    });
-
-    // ボタン
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
-    });
-
+    applyLang(lang);
     contentText.classList.remove('fading');
-    updateInfo();
-    updateDailyText();
   }, 300);
 }
 
@@ -658,7 +668,6 @@ function updateInfo() {
 function updateDailyText() {
   const now = new Date();
 
-  // 特殊条件チェック（daily.jsのグローバル変数を使用）
   if (typeof specialConditions !== 'undefined') {
     for (const cond of specialConditions) {
       if (cond.check && cond.check(now)) {
@@ -671,11 +680,9 @@ function updateDailyText() {
     }
   }
 
-  // 通常の日付
   const key = pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
 
   if (typeof dailyByDate !== 'undefined' && dailyByDate[key]) {
-    // HTMLタグがある場合は除去してテキストのみ表示
     const raw = dailyByDate[key];
     document.getElementById('infoDaily').textContent =
       raw.replace ? raw.replace(/<[^>]+>/g, '').trim() : raw;
@@ -702,16 +709,7 @@ document.getElementById('fragmentsArea').addEventListener('click', () => {
    初期化 & インターバル
 ===================== */
 function init() {
-  // ヘッダー初期表示
-  document.querySelectorAll('.site-title').forEach(el => {
-    el.style.display = el.dataset.lang === 'ja' ? 'block' : 'none';
-  });
-  document.querySelectorAll('.site-subtitle').forEach(el => {
-    el.style.display = el.dataset.lang === 'ja' ? 'block' : 'none';
-  });
-
-  updateInfo();
-  updateDailyText();
+  applyLang(currentLang);
   updateFragment();
 }
 
