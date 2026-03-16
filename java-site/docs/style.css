@@ -40,6 +40,10 @@
   font-family: 'SUETTER';
   src: url('fonts/SUETTER.ttf') format('truetype');
 }
+@font-face {
+  font-family: 'Impact';
+  src: url('fonts/impact.ttf') format('truetype');
+}
 
 
 /* ---------- フォントユーティリティクラス ---------- */
@@ -50,6 +54,7 @@
 .font-kurrent         { font-family: '1880Kurrent', serif; }
 .font-geosans         { font-family: 'Geosans', sans-serif; }
 .font-suetter         { font-family: 'SUETTER', cursive; }
+.font-impact         { font-family: 'Impact', serif; }
 
 /* ---------- リセット・基本 ---------- */
 *, *::before, *::after {
