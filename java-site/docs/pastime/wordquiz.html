@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -133,20 +133,7 @@
   </style>
 </head>
 <body>
-  <header class="site-header sub-header">
-  <div class="container sub-header-inner">
-    <a href="../../../index.html" class="site-logo font-fraktur">LOS 49</a>
-    <nav>
-      <ul>
-        <li><a href="../art/index.html">Bilder</a></li>
-        <li><a href="../music/index.html">Musik</a></li>
-        <li><a href="../text/index.html">Romane</a></li>
-        <li><a href="../diary/index.html">Aufzeichnung</a></li>
-        <li><a href="../pastime/index.html">Zeitvertreib</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
+  <div id="shared-header"></div>
 
   <div class="container">
     <main class="sub-main">
@@ -190,9 +177,7 @@
 
       <a href="index.html" class="back-link font-geosans">← Zurück</a>
     </main>
-    <footer class="site-footer">
-      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
-    </footer>
+    <div id="shared-footer"></div>
   </div>
 
 <script>
@@ -289,5 +274,6 @@ fetch('wordquiz.scm')
     });
   });
 </script>
+<script src="../shared-nav.js"></script>
 </body>
 </html>
