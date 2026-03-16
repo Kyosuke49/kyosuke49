@@ -15,7 +15,7 @@
       diary: 'Aufzeichnung', pastime: 'Zeitvertreib'
     },
     fi: {
-      logo: 'ERÄ 49', logoClass: 'site-logo font-kazesawa',
+      logo: 'ERÄ 49', logoClass: 'site-logo font-impact',
       art: 'Kuvat', music: 'Musiikki', text: 'Tekstit',
       diary: 'Päiväkirja', pastime: 'Ajanviete'
     }
