@@ -127,20 +127,7 @@
   </style>
 </head>
 <body>
-  <header class="site-header sub-header">
-  <div class="container sub-header-inner">
-    <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>
-    <nav>
-      <ul>
-        <li><a href="../art/index.html">絵置き場</a></li>
-        <li><a href="../music/index.html">曲置き場</a></li>
-        <li><a href="../text/index.html">字置き場</a></li>
-        <li><a href="../diary/index.html">独り言</a></li>
-        <li><a href="../pastime/index.html">暇つぶし</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
+  <div id="shared-header"></div>
 
   <div class="container">
     <main class="sub-main">
@@ -173,14 +160,14 @@
         <div class="feedback font-kazesawa-light" id="feedback"></div>
 
         <div class="answer-row">
-          <button class="ans-btn" id="btnFizz"        onclick="answer('Fizz')">Fizz</button>
-          <button class="ans-btn" id="btnBuzz"        onclick="answer('Buzz')">Buzz</button>
-          <button class="ans-btn" id="btnWoof"        onclick="answer('Woof')">Woof</button>
-          <button class="ans-btn" id="btnFizzBuzz"    onclick="answer('FizzBuzz')">FizzBuzz</button>
-          <button class="ans-btn" id="btnFizzWoof"    onclick="answer('FizzWoof')">FizzWoof</button>
-          <button class="ans-btn" id="btnBuzzWoof"    onclick="answer('BuzzWoof')">BuzzWoof</button>
+          <button class="ans-btn" id="btnFizz"         onclick="answer('Fizz')">Fizz</button>
+          <button class="ans-btn" id="btnBuzz"         onclick="answer('Buzz')">Buzz</button>
+          <button class="ans-btn" id="btnWoof"         onclick="answer('Woof')">Woof</button>
+          <button class="ans-btn" id="btnFizzBuzz"     onclick="answer('FizzBuzz')">FizzBuzz</button>
+          <button class="ans-btn" id="btnFizzWoof"     onclick="answer('FizzWoof')">FizzWoof</button>
+          <button class="ans-btn" id="btnBuzzWoof"     onclick="answer('BuzzWoof')">BuzzWoof</button>
           <button class="ans-btn" id="btnFizzBuzzWoof" onclick="answer('FizzBuzzWoof')">FizzBuzzWoof</button>
-          <button class="ans-btn" id="btnNumber"      onclick="answerNumber()">数字</button>
+          <button class="ans-btn" id="btnNumber"       onclick="answerNumber()">数字</button>
         </div>
 
         <button class="next-btn font-geosans" id="nextBtn" onclick="nextQuestion()" disabled>次へ →</button>
@@ -193,9 +180,7 @@
 
       <a href="index.html" class="back-link font-geosans">← Pastimeへ</a>
     </main>
-    <footer class="site-footer">
-      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
-    </footer>
+    <div id="shared-footer"></div>
   </div>
 
 <script>
@@ -279,14 +264,14 @@ function answer(choice) {
   }
 
   document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
-  document.getElementById('btnFizz').classList.toggle('correct',        correctAnswer === 'Fizz');
-  document.getElementById('btnBuzz').classList.toggle('correct',        correctAnswer === 'Buzz');
-  document.getElementById('btnWoof').classList.toggle('correct',        correctAnswer === 'Woof');
-  document.getElementById('btnFizzBuzz').classList.toggle('correct',    correctAnswer === 'FizzBuzz');
-  document.getElementById('btnFizzWoof').classList.toggle('correct',    correctAnswer === 'FizzWoof');
-  document.getElementById('btnBuzzWoof').classList.toggle('correct',    correctAnswer === 'BuzzWoof');
-  document.getElementById('btnFizzBuzzWoof').classList.toggle('correct',correctAnswer === 'FizzBuzzWoof');
-  document.getElementById('btnNumber').classList.toggle('correct',      !WORD_ANSWERS.includes(correctAnswer));
+  document.getElementById('btnFizz').classList.toggle('correct',         correctAnswer === 'Fizz');
+  document.getElementById('btnBuzz').classList.toggle('correct',         correctAnswer === 'Buzz');
+  document.getElementById('btnWoof').classList.toggle('correct',         correctAnswer === 'Woof');
+  document.getElementById('btnFizzBuzz').classList.toggle('correct',     correctAnswer === 'FizzBuzz');
+  document.getElementById('btnFizzWoof').classList.toggle('correct',     correctAnswer === 'FizzWoof');
+  document.getElementById('btnBuzzWoof').classList.toggle('correct',     correctAnswer === 'BuzzWoof');
+  document.getElementById('btnFizzBuzzWoof').classList.toggle('correct', correctAnswer === 'FizzBuzzWoof');
+  document.getElementById('btnNumber').classList.toggle('correct',       !WORD_ANSWERS.includes(correctAnswer));
   document.getElementById('nextBtn').disabled = false;
 }
 
@@ -296,5 +281,6 @@ function answerNumber() {
   answer(isNum ? correctAnswer : '__wrong__');
 }
 </script>
+<script src="../shared-nav.js"></script>
 </body>
 </html>
