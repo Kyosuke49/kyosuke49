@@ -1,16 +1,41 @@
 (function () {
+
+  /* =====================
+     翻訳定義
+  ===================== */
+  var i18n = {
+    ja: {
+      logo: '偽造切手', logoClass: 'site-logo font-kazesawa',
+      art: '絵置き場', music: '曲置き場', text: '字置き場',
+      diary: '独り言', pastime: '暇つぶし'
+    },
+    de: {
+      logo: 'LOS 49', logoClass: 'site-logo font-fraktur',
+      art: 'Bilder', music: 'Musik', text: 'Romane',
+      diary: 'Aufzeichnung', pastime: 'Zeitvertreib'
+    },
+    fi: {
+      logo: 'ERÄ 49', logoClass: 'site-logo font-kazesawa',
+      art: 'Kuvat', music: 'Musiikki', text: 'Tekstit',
+      diary: 'Päiväkirja', pastime: 'Ajanviete'
+    }
+  };
+
+  /* =====================
+     ヘッダー・フッターHTML注入
+  ===================== */
   var headerHTML =
     '<header class="site-header sub-header">' +
     '  <div class="container">' +
     '    <div class="sub-header-inner">' +
-    '      <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>' +
+    '      <a href="../../../index.html" id="nav-logo" class="site-logo font-kazesawa">偽造切手</a>' +
     '      <nav>' +
     '        <ul>' +
-    '          <li><a href="../art/index.html">絵置き場</a></li>' +
-    '          <li><a href="../music/index.html">曲置き場</a></li>' +
-    '          <li><a href="../text/index.html">字置き場</a></li>' +
-    '          <li><a href="../diary/index.html">独り言</a></li>' +
-    '          <li><a href="../pastime/index.html">暇つぶし</a></li>' +
+    '          <li><a href="../art/index.html"     id="nav-art">絵置き場</a></li>' +
+    '          <li><a href="../music/index.html"   id="nav-music">曲置き場</a></li>' +
+    '          <li><a href="../text/index.html"    id="nav-text">字置き場</a></li>' +
+    '          <li><a href="../diary/index.html"   id="nav-diary">独り言</a></li>' +
+    '          <li><a href="../pastime/index.html" id="nav-pastime">暇つぶし</a></li>' +
     '        </ul>' +
     '      </nav>' +
     '    </div>' +
@@ -37,26 +62,49 @@
   ===================== */
   var currentLang = localStorage.getItem('lang') || 'ja';
 
-  function setLang(lang) {
-    currentLang = lang;
-    localStorage.setItem('lang', lang);
+  function applyLang(lang) {
+    var t = i18n[lang] || i18n['ja'];
 
+    /* --- ロゴ --- */
+    var logo = document.getElementById('nav-logo');
+    if (logo) { logo.textContent = t.logo; logo.className = t.logoClass; }
+
+    /* --- ナビリンク --- */
+    var navIds = { 'nav-art': t.art, 'nav-music': t.music, 'nav-text': t.text,
+                   'nav-diary': t.diary, 'nav-pastime': t.pastime };
+    Object.keys(navIds).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = navIds[id];
+    });
+
+    /* --- 言語ボタンのアクティブ状態 --- */
     document.querySelectorAll('.sub-lang-btn').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
     });
 
+    /* --- .lang-block の表示切替 --- */
     document.querySelectorAll('.lang-block[data-lang]').forEach(function (block) {
       block.style.display = block.getAttribute('data-lang') === lang ? 'block' : 'none';
     });
   }
 
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    applyLang(lang);
+  }
+
   window.setLang = setLang;
 
-  document.addEventListener('DOMContentLoaded', function () {
-    setLang(currentLang);
-  });
+  /* =====================
+     初期化（DOM構築後に実行）
+  ===================== */
+  function init() { applyLang(currentLang); }
 
-  if (document.readyState !== 'loading') {
-    setLang(currentLang);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
+
 })();
