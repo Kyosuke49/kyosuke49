@@ -51,20 +51,7 @@
   </style>
 </head>
 <body>
-  <header class="site-header sub-header">
-  <div class="container sub-header-inner">
-    <a href="../../../index.html" class="site-logo font-kazesawa">偽造切手</a>
-    <nav>
-      <ul>
-        <li><a href="../art/index.html">絵置き場</a></li>
-        <li><a href="../music/index.html">曲置き場</a></li>
-        <li><a href="../text/index.html">字置き場</a></li>
-        <li><a href="../diary/index.html">独り言</a></li>
-        <li><a href="../pastime/index.html">暇つぶし</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
+  <div id="shared-header"></div>
 
   <div class="container">
     <main class="sub-main">
@@ -85,22 +72,20 @@
             <span class="game-tag">LISP</span>
           </a>
         </div>
-
-<div class="game-item">
-  <a href="omikuji.html">
-    <p class="game-title">Omikuji</p>
-    <p class="game-desc">あなたの運値はどれくらい？</p>
-    <span class="game-tag">Nim</span>
-  </a>
-</div>
-
+        <div class="game-item">
+          <a href="omikuji.html">
+            <p class="game-title">Omikuji</p>
+            <p class="game-desc">あなたの運値はどれくらい？</p>
+            <span class="game-tag">Nim</span>
+          </a>
+        </div>
       </div>
 
       <a href="../../../index.html" class="back-link font-geosans">← トップへ</a>
     </main>
-    <footer class="site-footer">
-      <p class="font-geosans">© Kyosuke49 — 偽造切手 / LOS 49 / ERÄ 49</p>
-    </footer>
+    <div id="shared-footer"></div>
   </div>
+
+  <script src="../shared-nav.js"></script>
 </body>
 </html>
