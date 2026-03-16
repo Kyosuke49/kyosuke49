@@ -127,6 +127,7 @@ body {
   padding: 0.7rem 1.4rem;
   cursor: pointer;
   transition: color var(--transition), background var(--transition);
+  white-space: nowrap;
 }
 
 .lang-switch button:last-child {
@@ -160,14 +161,19 @@ body {
   text-decoration: none;
   padding: 1rem 0;
   transition: opacity var(--transition);
+  white-space: nowrap;
 }
 
 .site-logo:hover { opacity: 0.6; }
 
+nav {
+  overflow-x: auto;
+}
+
 nav ul {
   list-style: none;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 nav li a {
@@ -179,6 +185,7 @@ nav li a {
   font-weight: 400;
   font-size: 0.82rem;
   letter-spacing: 0.1em;
+  white-space: nowrap;
   transition: color var(--transition), background var(--transition);
 }
 
