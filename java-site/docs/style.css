@@ -87,71 +87,19 @@ body {
 }
 
 /* ==========================================================
-   ヘッダー（トップページ）
+   ヘッダー（サブページ共通）
    ========================================================== */
 .site-header {
   background: var(--black);
   color: var(--white);
-  padding: 2.5rem 0 0;
-}
-
-.site-title {
-  font-family: 'Kazesawa', system-ui, sans-serif;
-  font-weight: 400;
-  font-size: clamp(2.5rem, 10vw, 6.5rem);
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-align: center;
-  padding: 0 1rem 0.1em;
-  display: none; /* JSで制御 */
-}
-
-/* 言語切替ボタン */
-.lang-switch {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  margin-top: 1.8rem;
-  border-top: 1px solid rgba(255,255,255,0.12);
-}
-
-.lang-switch button {
-  background: none;
-  border: none;
-  border-right: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.55);
-  font-family: 'Kazesawa', system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  padding: 0.7rem 1.4rem;
-  cursor: pointer;
-  transition: color var(--transition), background var(--transition);
-  white-space: nowrap;
-}
-
-.lang-switch button:last-child {
-  border-right: none;
-}
-
-.lang-switch button:hover,
-.lang-switch button.active {
-  background: var(--white);
-  color: var(--black);
-}
-
-/* ==========================================================
-   ヘッダー（サブページ）
-   ========================================================== */
-.sub-header {
   padding: 0;
 }
 
+/* ロゴ＋ナビ行 */
 .sub-header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
 }
 
 .site-logo {
@@ -162,13 +110,17 @@ body {
   padding: 1rem 0;
   transition: opacity var(--transition);
   white-space: nowrap;
+  flex-shrink: 0;
 }
-
 .site-logo:hover { opacity: 0.6; }
 
+/* ナビゲーション（横スクロールタブ） */
 nav {
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+nav::-webkit-scrollbar { display: none; }
 
 nav ul {
   list-style: none;
@@ -188,14 +140,55 @@ nav li a {
   white-space: nowrap;
   transition: color var(--transition), background var(--transition);
 }
-
 nav li a:hover {
   color: var(--black);
   background: var(--white);
 }
 
 /* ==========================================================
-   トップページ レイアウト
+   言語切替（サブページ・横スクロールタブ）
+   ========================================================== */
+.sub-lang-switch {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sub-lang-switch::-webkit-scrollbar { display: none; }
+
+.sub-lang-btn {
+  background: none;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55);
+  font-family: 'Kazesawa', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color var(--transition), background var(--transition);
+}
+.sub-lang-btn:last-child { border-right: none; }
+.sub-lang-btn:hover,
+.sub-lang-btn.active {
+  background: var(--white);
+  color: var(--black);
+}
+
+/* ==========================================================
+   言語ブロック（サブページ）
+   翻訳コンテンツを追加する際は data-lang="ja/de/fi" を使う
+   ========================================================== */
+.lang-block[data-lang] { display: none; }
+.lang-block[data-lang="ja"] { display: block; }
+
+/* ==========================================================
+   トップページ レイアウト（style.cssを流用する場合）
    ========================================================== */
 .page-layout {
   display: grid;
@@ -206,18 +199,16 @@ nav li a:hover {
   min-height: calc(100vh - 160px);
 }
 
-/* 左カラム */
 .page-left {
   padding: 2.5rem 2rem 3rem;
   border-right: 1px solid var(--border);
 }
 
-/* 言語別セクション */
 .lang-section {
   padding: 0 0 2rem;
   border-bottom: 1px solid var(--border);
   margin-bottom: 2rem;
-  display: none; /* JSで制御 */
+  display: none;
 }
 
 .section-label {
@@ -229,23 +220,18 @@ nav li a:hover {
   font-weight: 400;
 }
 
-.nav-section {
-  padding-top: 0;
-}
+.nav-section { padding-top: 0; }
 
 .contents-list {
   list-style: none;
   margin-top: 0.8rem;
 }
-
 .contents-list li {
   border-bottom: 1px dashed var(--border);
 }
-
 .contents-list li:first-child {
   border-top: 1px dashed var(--border);
 }
-
 .contents-list a {
   display: block;
   padding: 0.7rem 0;
@@ -255,7 +241,6 @@ nav li a:hover {
   letter-spacing: 0.05em;
   transition: padding-left var(--transition), color var(--transition);
 }
-
 .contents-list a:hover {
   padding-left: 0.5rem;
   color: var(--black);
@@ -270,10 +255,7 @@ nav li a:hover {
   letter-spacing: 0.1em;
   line-height: 2;
 }
-
-.site-footer-top a {
-  color: var(--muted);
-}
+.site-footer-top a { color: var(--muted); }
 
 /* ==========================================================
    情報ウィンドウ（サイドバー）
@@ -284,17 +266,12 @@ nav li a:hover {
   display: flex;
   flex-direction: column;
 }
-
 .info-block {
   padding: 1.4rem 1.4rem;
   border-bottom: 1px solid var(--border);
   flex: 1;
 }
-
-.info-block:last-child {
-  border-bottom: none;
-}
-
+.info-block:last-child { border-bottom: none; }
 .info-label {
   font-size: 0.65rem;
   letter-spacing: 0.2em;
@@ -302,13 +279,11 @@ nav li a:hover {
   color: var(--muted);
   margin-bottom: 0.6rem;
 }
-
 .info-content {
   font-size: 0.88rem;
   line-height: 1.7;
   word-break: break-word;
 }
-
 .info-time {
   font-size: 0.78rem;
   line-height: 1.6;
@@ -338,7 +313,6 @@ a {
   text-underline-offset: 3px;
   transition: opacity var(--transition);
 }
-
 a:hover { opacity: 0.55; }
 
 .back-link {
@@ -355,21 +329,17 @@ a:hover { opacity: 0.55; }
   gap: 2.5rem;
   margin-top: 0.5rem;
 }
-
 .art-item img {
   width: 100%;
   height: auto;
   display: block;
   transition: opacity var(--transition);
 }
-
 .art-item img:hover { opacity: 0.85; }
-
 .art-caption {
   margin-top: 0.7rem;
   font-size: 0.9rem;
 }
-
 .art-note {
   display: block;
   font-size: 0.78rem;
@@ -382,23 +352,19 @@ a:hover { opacity: 0.55; }
   padding: 1.5rem 0;
   border-bottom: 1px dashed var(--border);
 }
-
 .track:last-of-type { border-bottom: none; }
-
 .track h3 {
   font-weight: 400;
   font-size: 1rem;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
 }
-
 .track audio {
   display: block;
   width: 100%;
   margin: 0.7rem 0;
   accent-color: var(--black);
 }
-
 .track p {
   font-size: 0.875rem;
   color: var(--muted);
@@ -409,7 +375,6 @@ a:hover { opacity: 0.55; }
   padding: 1.5rem 0;
   border-bottom: 1px dashed var(--border);
 }
-
 .text-entry h3 {
   font-weight: 400;
   font-size: 1.1rem;
@@ -422,16 +387,13 @@ a:hover { opacity: 0.55; }
   padding: 1.8rem 0;
   border-bottom: 1px dashed var(--border);
 }
-
 .diary-entry:last-of-type { border-bottom: none; }
-
 .diary-date {
   font-size: 0.78rem;
   color: var(--muted);
   letter-spacing: 0.15em;
   margin-bottom: 0.5rem;
 }
-
 .diary-entry p {
   font-size: 0.975rem;
   line-height: 1.9;
@@ -454,46 +416,32 @@ a:hover { opacity: 0.55; }
   .page-layout {
     grid-template-columns: 1fr;
   }
-
   .page-left {
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: 2rem 1.2rem 2rem;
   }
-
   .info-window {
     flex-direction: row;
     flex-wrap: wrap;
     border-left: none;
     border-top: 1px solid var(--border);
   }
-
   .info-block {
     flex: 1 1 45%;
     min-width: 140px;
   }
-
   .site-title {
     font-size: clamp(2rem, 12vw, 4rem);
   }
-
-  .lang-switch button {
-    padding: 0.6rem 0.9rem;
-    font-size: 0.75rem;
+  .sub-lang-btn {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.72rem;
   }
-
-  .sub-header-inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  nav ul { gap: 0; }
-
   nav li a {
     padding: 0.6rem 0.8rem;
     font-size: 0.78rem;
   }
-
   .art-grid {
     grid-template-columns: 1fr;
   }
