@@ -5,33 +5,446 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>独り言 — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── エントリー一覧 ── */
+    .diary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin: 1rem 0 2rem;
+    }
+
+    /* ── カード ── */
+    .diary-card {
+      border: 1px solid var(--border);
+      background: var(--white);
+      padding: 1.6rem 1.8rem;
+    }
+
+    /* カード上部：日付+タイトル、言語ボタン */
+    .diary-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+    .diary-date-title { flex: 1; min-width: 0; }
+
+    .diary-entry-date {
+      display: block;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .diary-entry-title {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+      color: var(--fg);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── 本文 ── */
+    .diary-entry-body {
+      margin-bottom: 0.9rem;
+    }
+    .entry-body-text {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.95rem;
+      color: var(--fg);
+      line-height: 1.9;
+      margin: 0;
+    }
+
+    /* ── タグ ── */
+    .diary-tags {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .diary-tag {
+      display: inline-block;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.18rem 0.55rem;
+    }
+
+    /* ── エントリー内言語切替ボタン ── */
+    .entry-lang-btns {
+      display: flex;
+      gap: 0.22rem;
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin-top: 0.1rem;
+    }
+    .entry-lang-btn {
+      background: none;
+      border: 1px solid #ddd;
+      color: #ccc;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: lowercase;
+      padding: 0.15rem 0.42rem;
+      cursor: pointer;
+      transition: border-color 0.12s, color 0.12s;
+      line-height: 1.4;
+    }
+    .entry-lang-btn:hover {
+      border-color: #999;
+      color: #555;
+    }
+    .entry-lang-btn.active {
+      border-color: var(--black);
+      color: var(--black);
+    }
+
+    /* ── エントリーなし ── */
+    .diary-empty {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--muted);
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── ページネーション ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 1rem 0 1.8rem;
+    }
+    .pagination-btn {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.38rem 1rem;
+      cursor: pointer;
+      color: var(--fg);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .pagination-btn:hover:not(:disabled) {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .pagination-btn:disabled { opacity: 0.28; cursor: default; }
+    .pagination-nums { display: flex; gap: 0.3rem; }
+    .pagination-num {
+      background: none;
+      border: 1px solid transparent;
+      width: 2rem; height: 2rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pagination-num:hover { color: var(--fg); border-color: var(--border); }
+    .pagination-num.active { background: var(--black); color: var(--white); border-color: var(--black); }
+  </style>
 </head>
 <body>
   <div id="shared-header"></div>
 
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa">独り言</h1>
+      <h1 class="page-title font-kazesawa" id="diary-page-title">独り言</h1>
 
-<div class="diary-entry">
-  <p class="diary-date font-geosans">2026-01-06 &mdash; 他言語・フォント追加</p>
-  <p class="font-kazesawa-light">ドイツ語版をクレント体にしてみました。すごく読みづらいですね。</p>
-</div>
-<div class="diary-entry">
-  <p class="diary-date font-geosans">2026-01-05 &mdash; 更新</p>
-  <p class="font-kazesawa-light">それらしくなり始めたみたいやね</p>
-</div>
-<div class="diary-entry">
-  <p class="diary-date font-geosans">2025-12-31 &mdash; 作った</p>
-  <p class="font-kazesawa-light">2025のうちに作っといた方がいいことあるかなって</p>
-</div>
-
-<a href="../../../index.html" class="back-link font-geosans">← トップへ</a>
-
+      <div id="pagination-top" class="pagination"></div>
+      <div id="diary-list"     class="diary-list"></div>
+      <div id="pagination-bot" class="pagination"></div>
     </main>
     <div id="shared-footer"></div>
   </div>
 
-  <script src="../shared-nav.js"></script>
+<script src="../shared-nav.js"></script>
+<script>
+/* ====================================================
+   エントリーデータ
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   新しい独り言を追加するときは配列の先頭に追記してください。
+
+   【基本形（日本語のみ）】
+   {
+     date:  'YYYY-MM-DD',
+     title: { ja: 'タイトル' },
+     body:  { ja: '本文' },
+     tags:  [{ ja: 'タグ', de: 'Tag', fi: 'Tag' }]
+   }
+
+   【翻訳版も用意する場合（エントリー内に言語切替ボタンが現れる）】
+   {
+     date:  'YYYY-MM-DD',
+     title: { ja: 'タイトル', de: 'Titel' },
+     body:  { ja: '日本語本文', de: 'Deutscher Text' },
+     tags:  [...]
+   }
+
+   翻訳がない言語はキーを省略するだけでOKです。
+   body に 2 言語以上あるエントリーのみ、カード内にボタンが表示されます。
+==================================================== */
+var ENTRIES = [
+  {
+    date:  '2026-01-06',
+    title: { ja: '他言語・フォント追加' },
+    body:  { ja: 'ドイツ語版をクレント体にしてみました。すごく読みづらいですね。' },
+    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
+  },
+  {
+    date:  '2026-01-05',
+    title: { ja: '更新' },
+    body:  { ja: 'それらしくなり始めたみたいやね' },
+    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
+  },
+  {
+    date:  '2025-12-31',
+    title: { ja: '作った' },
+    body:  { ja: '2025のうちに作っといた方がいいことあるかなって' },
+    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
+  }
+];
+
+/* ====================================================
+   UI文字列（ページレベルのみ・エントリー本文には影響しない）
+==================================================== */
+var UI = {
+  ja: { pageTitle: '独り言',      prev: '← 前へ',       next: '次へ →',    empty: '独り言はまだありません' },
+  de: { pageTitle: 'Aufzeichnung', prev: '← Zurück',    next: 'Weiter →',   empty: 'Noch keine Einträge' },
+  fi: { pageTitle: 'Päiväkirja',   prev: '← Edellinen', next: 'Seuraava →', empty: 'Ei merkintöjä vielä' }
+};
+
+/* ====================================================
+   設定
+==================================================== */
+var PER_PAGE = 10;
+
+/* 日付降順ソート */
+ENTRIES.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
+/* ====================================================
+   状態
+==================================================== */
+var lang        = localStorage.getItem('lang') || 'ja';
+var currentPage = 1;
+/* エントリーごとの表示言語（絶対インデックス → 言語コード）
+   グローバル言語切替の影響を受けず、エントリー内ボタンでのみ変化する */
+var entryLangs  = {};
+
+/* ====================================================
+   ユーティリティ
+==================================================== */
+function t(obj) {
+  if (!obj) return '';
+  return obj[lang] || obj['ja'] || '';
+}
+function ui(key) {
+  return ((UI[lang] || UI['ja'])[key]) || '';
+}
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function formatDate(iso) {
+  /* 日付フォーマットはページのグローバル言語に従う */
+  var p = iso.split('-');
+  if (lang === 'de' || lang === 'fi') return parseInt(p[2]) + '.' + parseInt(p[1]) + '.' + p[0];
+  return p[0] + '.' + p[1] + '.' + p[2];
+}
+function getPageFromHash() {
+  var m = location.hash.match(/^#p(\d+)$/);
+  return m ? Math.max(1, parseInt(m[1])) : 1;
+}
+function setPageHash(n) {
+  history.pushState(null, '', n > 1 ? '#p' + n : location.pathname + location.search);
+}
+
+/* ====================================================
+   カードHTML生成
+   ─────────────────────────────────────────────────
+   ・日付・タグ:  グローバル lang に従って描画
+   ・タイトル・本文: エントリーごとの言語（entryLangs[absIdx]）
+                 複数言語があればカード内にボタンを表示
+==================================================== */
+function buildCard(entry, absIdx) {
+  var bodyLangs  = Object.keys(entry.body || {});
+  var titleLangs = Object.keys(entry.title || {});
+  var entryLang  = entryLangs[absIdx] || bodyLangs[0] || 'ja';
+
+  /* ── タイトル ── */
+  var titleHTML = titleLangs.map(function(l) {
+    var hidden = l !== entryLang ? ' style="display:none"' : '';
+    return '<span class="entry-title-text" data-lang="' + l + '"' + hidden + '>' +
+      esc(entry.title[l]) + '</span>';
+  }).join('');
+
+  /* ── 本文 ── */
+  var bodyHTML = bodyLangs.map(function(l) {
+    var hidden = l !== entryLang ? ' style="display:none"' : '';
+    return '<p class="entry-body-text" data-lang="' + l + '"' + hidden + '>' +
+      esc(entry.body[l] || '').replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+
+  /* ── エントリー内言語切替ボタン（翻訳版がある場合のみ） ── */
+  var langBtnsHTML = '';
+  if (bodyLangs.length > 1) {
+    langBtnsHTML = '<div class="entry-lang-btns">' +
+      bodyLangs.map(function(l) {
+        var active = l === entryLang ? ' active' : '';
+        return '<button class="entry-lang-btn' + active + '" data-lang="' + l + '" ' +
+          'onclick="switchEntryLang(' + absIdx + ',\'' + l + '\')">' + esc(l) + '</button>';
+      }).join('') +
+      '</div>';
+  }
+
+  /* ── タグ（グローバル言語） ── */
+  var tagsHTML = '';
+  if (entry.tags && entry.tags.length) {
+    tagsHTML = '<div class="diary-tags">' +
+      entry.tags.map(function(tag) {
+        return '<span class="diary-tag">' + esc(t(tag)) + '</span>';
+      }).join('') +
+      '</div>';
+  }
+
+  return (
+    '<div class="diary-card" data-entry-idx="' + absIdx + '">' +
+      '<div class="diary-card-top">' +
+        '<div class="diary-date-title">' +
+          '<time class="diary-entry-date" datetime="' + esc(entry.date) + '">' + esc(formatDate(entry.date)) + '</time>' +
+          '<h2 class="diary-entry-title">' + titleHTML + '</h2>' +
+        '</div>' +
+        langBtnsHTML +
+      '</div>' +
+      '<div class="diary-entry-body">' + bodyHTML + '</div>' +
+      tagsHTML +
+    '</div>'
+  );
+}
+
+/* ====================================================
+   エントリー内言語切替
+   ─────────────────────────────────────────────────
+   そのカードの title/body のみ切り替える。
+   グローバル lang・他のカードには一切影響しない。
+==================================================== */
+function switchEntryLang(absIdx, newLang) {
+  entryLangs[absIdx] = newLang;
+  var card = document.querySelector('[data-entry-idx="' + absIdx + '"]');
+  if (!card) return;
+
+  /* title/body の各言語スパンを切替 */
+  card.querySelectorAll('[data-lang]').forEach(function(el) {
+    el.style.display = el.getAttribute('data-lang') === newLang ? '' : 'none';
+  });
+
+  /* ボタンのアクティブ状態 */
+  card.querySelectorAll('.entry-lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === newLang);
+  });
+}
+
+/* ====================================================
+   ページネーション
+==================================================== */
+function renderPagination(id, totalPages) {
+  var el = document.getElementById(id);
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  var nums = '';
+  for (var i = 1; i <= totalPages; i++) {
+    nums += '<button class="pagination-num' + (i === currentPage ? ' active' : '') +
+      '" onclick="goPage(' + i + ')">' + i + '</button>';
+  }
+  el.innerHTML =
+    '<button class="pagination-btn"' + (currentPage <= 1 ? ' disabled' : '') +
+    ' onclick="goPage(' + (currentPage - 1) + ')">' + ui('prev') + '</button>' +
+    '<div class="pagination-nums">' + nums + '</div>' +
+    '<button class="pagination-btn"' + (currentPage >= totalPages ? ' disabled' : '') +
+    ' onclick="goPage(' + (currentPage + 1) + ')">' + ui('next') + '</button>';
+}
+
+/* ====================================================
+   メイン描画
+==================================================== */
+function renderAll() {
+  document.getElementById('diary-page-title').textContent = ui('pageTitle');
+  document.title = ui('pageTitle') + ' — 偽造切手';
+
+  var total      = ENTRIES.length;
+  var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  currentPage    = Math.min(currentPage, totalPages);
+
+  var start = (currentPage - 1) * PER_PAGE;
+  var items = ENTRIES.slice(start, start + PER_PAGE);
+
+  var listEl = document.getElementById('diary-list');
+  listEl.innerHTML = items.length === 0
+    ? '<p class="diary-empty">' + ui('empty') + '</p>'
+    : items.map(function(entry, i) {
+        return buildCard(entry, start + i);
+      }).join('');
+
+  renderPagination('pagination-top', totalPages);
+  renderPagination('pagination-bot', totalPages);
+}
+
+function goPage(n) {
+  currentPage = n;
+  setPageHash(n);
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ====================================================
+   言語切替フック
+   ─────────────────────────────────────────────────
+   グローバル言語が変わっても entryLangs は保持される。
+   re-render 後もエントリー内の言語状態が維持される。
+==================================================== */
+(function() {
+  var _orig = window.setLang;
+  window.setLang = function(l) {
+    lang = l;
+    if (_orig) _orig(l);
+    renderAll();
+    /* entryLangs はそのまま保持 — 再描画でも各エントリーの
+       選択言語は buildCard 内で entryLangs から復元される */
+  };
+})();
+
+/* ====================================================
+   ハッシュ変化
+==================================================== */
+window.addEventListener('hashchange', function() {
+  currentPage = getPageFromHash();
+  renderAll();
+});
+
+/* ====================================================
+   初期表示
+==================================================== */
+currentPage = getPageFromHash();
+renderAll();
+</script>
 </body>
 </html>
