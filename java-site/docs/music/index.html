@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>曲置き場 — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
-<style>
+  <style>
     /* ── トラック一覧 ── */
     .music-list {
       display: flex;
@@ -13,12 +13,14 @@
       gap: 2.2rem;
       margin: 1rem 0 2rem;
     }
+
     /* ── カード ── */
     .track-card {
       border: 1px solid var(--border);
       background: var(--white);
       overflow: hidden;
     }
+
     /* ── メディアエリア（音声: ジャケット、動画: video要素） ── */
     .player-media {
       background: #111;
@@ -58,6 +60,7 @@
       width: 100%;
       display: block;
     }
+
     /* ── コントロールバー ── */
     .player-controls {
       background: #0d0d0d;
@@ -83,6 +86,7 @@
       transition: background 0.15s;
     }
     .player-play-btn:hover { background: rgba(255, 255, 255, 0.12); }
+
     /* シークバー */
     .player-seek-wrap {
       flex: 1;
@@ -98,6 +102,7 @@
     }
     .player-seek-wrap:hover .player-seek-track,
     .player-seek-wrap.dragging .player-seek-track { height: 5px; }
+
     .player-fill {
       position: absolute;
       top: 0; left: 0; bottom: 0;
@@ -121,6 +126,7 @@
     }
     .player-seek-wrap:hover .player-thumb,
     .player-seek-wrap.dragging .player-thumb { opacity: 1; }
+
     .player-time {
       font-family: 'Geosans', sans-serif;
       font-size: 0.7rem;
@@ -131,6 +137,7 @@
       min-width: 7rem;
       text-align: right;
     }
+
     /* ── トラック情報 ── */
     .track-info {
       padding: 1rem 1.2rem 1.2rem;
@@ -181,6 +188,7 @@
       border: 1px solid var(--border);
       padding: 0.18rem 0.55rem;
     }
+
     /* ── 作品なしメッセージ ── */
     .music-empty {
       text-align: center;
@@ -191,6 +199,7 @@
       font-size: 0.9rem;
       letter-spacing: 0.08em;
     }
+
     /* ── ページネーション（art/index.html と共通デザイン） ── */
     .pagination {
       display: flex;
@@ -243,20 +252,24 @@
 </head>
 <body>
   <div id="shared-header"></div>
+
   <div class="container">
     <main class="sub-main">
       <h1 class="page-title font-kazesawa" id="music-page-title">曲置き場</h1>
+
       <div id="pagination-top" class="pagination"></div>
       <div id="music-list"     class="music-list"></div>
       <div id="pagination-bot" class="pagination"></div>
     </main>
     <div id="shared-footer"></div>
   </div>
+
 <script src="../shared-nav.js"></script>
 <script>
 /* ====================================================
    曲データ
    新しい曲を追加するには配列の先頭に追記してください。
+
    type:   'audio' または 'video'
    jacket: 音声曲のジャケット画像パス（省略可）
    tags:   { ja, de, fi } 形式のタグ（省略可）
@@ -297,12 +310,15 @@ var UI = {
   de: { pageTitle: 'Musik',    prev: '← Zurück', next: 'Weiter →', empty: 'Noch keine Stücke' },
   fi: { pageTitle: 'Musiikki', prev: '← Edellinen', next: 'Seuraava →', empty: 'Ei musiikkia vielä' }
 };
+
 /* ====================================================
    設定
 ==================================================== */
 var PER_PAGE = 4;
+
 /* 日付降順ソート */
 TRACKS.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
 /* ====================================================
    状態
 ==================================================== */
@@ -310,6 +326,7 @@ var lang        = localStorage.getItem('lang') || 'ja';
 var currentPage = 1;
 var _nowPlaying = null;   /* 現在再生中の media 要素 */
 var _seekDrag   = null;   /* { wrap, media } ドラッグ中のシークバー */
+
 /* ====================================================
    ユーティリティ
 ==================================================== */
@@ -357,12 +374,14 @@ function getPageFromHash() {
 function setPageHash(n) {
   history.pushState(null, '', n > 1 ? '#p' + n : location.pathname + location.search);
 }
+
 /* ====================================================
    カードHTML生成
 ==================================================== */
 function buildCard(track) {
   var isVideo = track.type === 'video';
   var dateStr = formatDate(track.date);
+
   /* メディアエリア */
   var mediaHTML;
   if (isVideo) {
@@ -384,9 +403,207 @@ function buildCard(track) {
         '<div class="player-media-inner">' + inner + '</div>' +
       '</div>';
   }
+
   /* タグ */
   var tagsHTML = '';
   if (track.tags && track.tags.length) {
-    tagsHTML = ...
-[truncated]
-[truncated]
+    tagsHTML = '<div class="track-tags">' +
+      track.tags.map(function(tag) {
+        return '<span class="track-tag">' + esc(t(tag)) + '</span>';
+      }).join('') +
+      '</div>';
+  }
+
+  return (
+    '<div class="track-card">' +
+      mediaHTML +
+      '<div class="player-controls">' +
+        '<button class="player-play-btn" aria-label="再生">' + playIcon() + '</button>' +
+        '<div class="player-seek-wrap">' +
+          '<div class="player-seek-track">' +
+            '<div class="player-fill"></div>' +
+            '<div class="player-thumb"></div>' +
+          '</div>' +
+        '</div>' +
+        '<span class="player-time">0:00 / --:--</span>' +
+      '</div>' +
+      '<div class="track-info">' +
+        '<div class="track-info-header">' +
+          '<h2 class="track-title">' + esc(t(track.title)) + '</h2>' +
+          '<time class="track-date" datetime="' + esc(track.date) + '">' + esc(dateStr) + '</time>' +
+        '</div>' +
+        (t(track.desc) ? '<p class="track-desc">' + esc(t(track.desc)) + '</p>' : '') +
+        tagsHTML +
+      '</div>' +
+    '</div>'
+  );
+}
+
+/* ====================================================
+   プレイヤーイベント設定（render後に呼ぶ）
+==================================================== */
+function setupPlayers() {
+  document.querySelectorAll('.track-card').forEach(function(card) {
+    var media    = card.querySelector('audio, video');
+    var playBtn  = card.querySelector('.player-play-btn');
+    var fill     = card.querySelector('.player-fill');
+    var thumb    = card.querySelector('.player-thumb');
+    var seekWrap = card.querySelector('.player-seek-wrap');
+    var timeEl   = card.querySelector('.player-time');
+    if (!media || !playBtn) return;
+
+    /* 再生位置 → UI更新 */
+    media.addEventListener('timeupdate', function() {
+      if (!media.duration) return;
+      var pct = (media.currentTime / media.duration) * 100;
+      fill.style.width  = pct + '%';
+      thumb.style.left  = pct + '%';
+      timeEl.textContent = fmtTime(media.currentTime) + ' / ' + fmtTime(media.duration);
+    });
+    media.addEventListener('loadedmetadata', function() {
+      timeEl.textContent = '0:00 / ' + fmtTime(media.duration);
+    });
+    media.addEventListener('ended', function() {
+      playBtn.innerHTML = playIcon();
+      _nowPlaying = null;
+    });
+
+    /* 再生 / 一時停止 */
+    playBtn.addEventListener('click', function() {
+      if (media.paused) {
+        /* 別のトラックを止める */
+        if (_nowPlaying && _nowPlaying !== media) {
+          _nowPlaying.pause();
+          var otherCard = _nowPlaying.closest ? _nowPlaying.closest('.track-card') : null;
+          if (otherCard) {
+            var ob = otherCard.querySelector('.player-play-btn');
+            if (ob) ob.innerHTML = playIcon();
+          }
+        }
+        media.play();
+        _nowPlaying = media;
+        playBtn.innerHTML = pauseIcon();
+      } else {
+        media.pause();
+        _nowPlaying = null;
+        playBtn.innerHTML = playIcon();
+      }
+    });
+
+    /* シークバー操作 */
+    function seekToX(clientX) {
+      var rect = seekWrap.getBoundingClientRect();
+      var pct  = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      if (media.duration) media.currentTime = pct * media.duration;
+    }
+
+    seekWrap.addEventListener('mousedown', function(e) {
+      _seekDrag = { wrap: seekWrap, fn: seekToX };
+      seekWrap.classList.add('dragging');
+      seekToX(e.clientX);
+    });
+
+    seekWrap.addEventListener('touchstart', function(e) {
+      seekToX(e.touches[0].clientX);
+    }, { passive: true });
+    seekWrap.addEventListener('touchmove', function(e) {
+      seekToX(e.touches[0].clientX);
+    }, { passive: true });
+  });
+}
+
+/* グローバルマウス処理（setupPlayers複数回呼びでも重複しない） */
+document.addEventListener('mousemove', function(e) {
+  if (_seekDrag) _seekDrag.fn(e.clientX);
+});
+document.addEventListener('mouseup', function() {
+  if (_seekDrag) {
+    var wrap = _seekDrag.wrap;
+    if (wrap) wrap.classList.remove('dragging');
+    _seekDrag = null;
+  }
+});
+
+/* ====================================================
+   ページネーション描画
+==================================================== */
+function renderPagination(id, totalPages) {
+  var el = document.getElementById(id);
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  var nums = '';
+  for (var i = 1; i <= totalPages; i++) {
+    nums += '<button class="pagination-num' + (i === currentPage ? ' active' : '') +
+      '" onclick="goPage(' + i + ')">' + i + '</button>';
+  }
+  el.innerHTML =
+    '<button class="pagination-btn"' + (currentPage <= 1 ? ' disabled' : '') +
+    ' onclick="goPage(' + (currentPage - 1) + ')">' + ui('prev') + '</button>' +
+    '<div class="pagination-nums">' + nums + '</div>' +
+    '<button class="pagination-btn"' + (currentPage >= totalPages ? ' disabled' : '') +
+    ' onclick="goPage(' + (currentPage + 1) + ')">' + ui('next') + '</button>';
+}
+
+/* ====================================================
+   メイン描画
+==================================================== */
+function renderAll() {
+  /* 再生中のメディアを停止 */
+  if (_nowPlaying) { _nowPlaying.pause(); _nowPlaying = null; }
+
+  document.getElementById('music-page-title').textContent = ui('pageTitle');
+  document.title = ui('pageTitle') + ' — 偽造切手';
+
+  var total      = TRACKS.length;
+  var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  currentPage    = Math.min(currentPage, totalPages);
+
+  var start = (currentPage - 1) * PER_PAGE;
+  var items = TRACKS.slice(start, start + PER_PAGE);
+
+  var listEl = document.getElementById('music-list');
+  if (items.length === 0) {
+    listEl.innerHTML = '<p class="music-empty">' + ui('empty') + '</p>';
+  } else {
+    listEl.innerHTML = items.map(buildCard).join('');
+    setupPlayers();
+  }
+
+  renderPagination('pagination-top', totalPages);
+  renderPagination('pagination-bot', totalPages);
+}
+
+function goPage(n) {
+  currentPage = n;
+  setPageHash(n);
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ====================================================
+   言語切替フック
+==================================================== */
+(function() {
+  var _orig = window.setLang;
+  window.setLang = function(l) {
+    lang = l;
+    if (_orig) _orig(l);
+    renderAll();
+  };
+})();
+
+/* ====================================================
+   ハッシュ変化
+==================================================== */
+window.addEventListener('hashchange', function() {
+  currentPage = getPageFromHash();
+  renderAll();
+});
+
+/* ====================================================
+   初期表示
+==================================================== */
+currentPage = getPageFromHash();
+renderAll();
+</script>
+</body>
+</html>
