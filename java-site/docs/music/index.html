@@ -5,44 +5,388 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>曲置き場 — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
+<style>
+    /* ── トラック一覧 ── */
+    .music-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2.2rem;
+      margin: 1rem 0 2rem;
+    }
+    /* ── カード ── */
+    .track-card {
+      border: 1px solid var(--border);
+      background: var(--white);
+      overflow: hidden;
+    }
+    /* ── メディアエリア（音声: ジャケット、動画: video要素） ── */
+    .player-media {
+      background: #111;
+      line-height: 0;
+      position: relative;
+    }
+    .player-media-inner {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .player-jacket {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .player-jacket-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #0e0e0e, #1c1c1c);
+    }
+    .player-note {
+      font-size: 4.5rem;
+      color: rgba(255, 255, 255, 0.07);
+      user-select: none;
+      font-family: serif;
+      line-height: 1;
+    }
+    .player-video {
+      width: 100%;
+      display: block;
+    }
+    /* ── コントロールバー ── */
+    .player-controls {
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.9rem;
+      border-top: 1px solid #1e1e1e;
+    }
+    .player-play-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .player-play-btn:hover { background: rgba(255, 255, 255, 0.12); }
+    /* シークバー */
+    .player-seek-wrap {
+      flex: 1;
+      padding: 0.6rem 0;
+      cursor: pointer;
+    }
+    .player-seek-track {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      position: relative;
+      transition: height 0.12s;
+    }
+    .player-seek-wrap:hover .player-seek-track,
+    .player-seek-wrap.dragging .player-seek-track { height: 5px; }
+    .player-fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 0%;
+      background: #ffffff;
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .player-thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 13px;
+      height: 13px;
+      background: #ffffff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s;
+    }
+    .player-seek-wrap:hover .player-thumb,
+    .player-seek-wrap.dragging .player-thumb { opacity: 1; }
+    .player-time {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.55);
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 7rem;
+      text-align: right;
+    }
+    /* ── トラック情報 ── */
+    .track-info {
+      padding: 1rem 1.2rem 1.2rem;
+    }
+    .track-info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+    .track-title {
+      font-family: 'Geosans', sans-serif;
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      color: var(--fg);
+      margin: 0;
+    }
+    .track-date {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .track-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin: 0 0 0.7rem;
+    }
+    .track-tags {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .track-tag {
+      display: inline-block;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.18rem 0.55rem;
+    }
+    /* ── 作品なしメッセージ ── */
+    .music-empty {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--muted);
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+    }
+    /* ── ページネーション（art/index.html と共通デザイン） ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 1rem 0 1.8rem;
+    }
+    .pagination-btn {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.38rem 1rem;
+      cursor: pointer;
+      color: var(--fg);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .pagination-btn:hover:not(:disabled) {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .pagination-btn:disabled { opacity: 0.28; cursor: default; }
+    .pagination-nums { display: flex; gap: 0.3rem; }
+    .pagination-num {
+      background: none;
+      border: 1px solid transparent;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pagination-num:hover { color: var(--fg); border-color: var(--border); }
+    .pagination-num.active {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+  </style>
 </head>
 <body>
   <div id="shared-header"></div>
-
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa"><div class="lang-block" data-lang="ja">曲置き場</div>
-<div class="lang-block" data-lang="de">Musik</div>
-<div class="lang-block" data-lang="fi">Musiikki</div></h1>
-
-<div class="track">
-  <h3 class="font-geosans">Das Millennium der Mondgöttin</h3>
-  <audio controls>
-    <source src="Millennium.mp3" type="audio/mpeg">
-  </audio>
-  <p class="font-kazesawa-light"><div class="lang-block" data-lang="ja">千年幻想郷のピアノアレンジです。</div>
-<div class="lang-block" data-lang="de">Dies ist eine Klavierbearbeitung des Titelsongs von Eirin Yagokoro, einer Figur aus dem Touhou-Projekt.</div>
-<div class="lang-block" data-lang="fi">Tämä on pianosovitus Touhou-projektin hahmon Yagokoro Eirin teemakappaleesta.</div></p>
-</div>
-
-<div class="track">
-  <h3 class="font-geosans">Abend</h3>
-  <audio controls>
-    <source src="Abend.wav" type="audio/wav">
-  </audio>
-  <p class="font-kazesawa-light"><div class="lang-block" data-lang="ja">訳のわからんピアノ曲もどきです。</div>
-<div class="lang-block" data-lang="de">Es handelt sich um ein sehr avantgardistisches Klavierstück.</div>
-<div class="lang-block" data-lang="fi">Kyseessä on hyvin avantgardistinen pianokappale.</div></p>
-</div>
-
-<a href="../../../index.html" class="back-link font-geosans"><div class="lang-block" data-lang="ja">← トップへ</div>
-<div class="lang-block" data-lang="de">← ZURÜCK</div>
-<div class="lang-block" data-lang="fi">← TAKAISIN</div></a>
-
+      <h1 class="page-title font-kazesawa" id="music-page-title">曲置き場</h1>
+      <div id="pagination-top" class="pagination"></div>
+      <div id="music-list"     class="music-list"></div>
+      <div id="pagination-bot" class="pagination"></div>
     </main>
     <div id="shared-footer"></div>
   </div>
-
-  <script src="../shared-nav.js"></script>
-</body>
-</html>
+<script src="../shared-nav.js"></script>
+<script>
+/* ====================================================
+   曲データ
+   新しい曲を追加するには配列の先頭に追記してください。
+   type:   'audio' または 'video'
+   jacket: 音声曲のジャケット画像パス（省略可）
+   tags:   { ja, de, fi } 形式のタグ（省略可）
+   de/fi を省略すると ja にフォールバックします。
+==================================================== */
+var TRACKS = [
+  {
+    file:   'Millennium.mp3',
+    type:   'audio',
+    jacket: 'Mond.JPG',
+    date:   '2025-01-15',
+    title:  { ja: 'Das Millennium der Mondgöttin', de: 'Das Millennium der Mondgöttin', fi: 'Das Millennium der Mondgöttin' },
+    desc:   { ja: '千年幻想郷のピアノアレンジです' , de:'Dies ist eine Klavierbearbeitung des Titelsongs von Eirin Yagokoro, einer Figur aus dem Touhou-Projekt.', fi:'Tämä on pianosovitus Touhou-projektin hahmon Yagokoro Eirin teemakappaleesta.'},
+    tags:   [
+      { ja: 'ピアノ',   de: 'Klavier',     fi: 'Piano' },
+      { ja: 'アレンジ', de: 'Arrangement', fi: 'Sovitus' }
+    ]
+  },
+  {
+    file:   'Abend.wav',
+    type:   'audio',
+    jacket: 'Abend.JPG',
+    date:   '2024-11-20',
+    title:  { ja: 'Abend', de: 'Abend', fi: 'Abend' },
+    desc:   { ja: '訳のわからんピアノ曲もどきです。', de:'Es handelt sich um ein sehr avantgardistisches Klavierstück.',
+fi:'Kyseessä on hyvin avantgardistinen pianokappale' },
+    tags:   [
+      { ja: 'ピアノ',     de: 'Klavier',    fi: 'Piano' },
+      { ja: 'オリジナル', de: 'Original',   fi: 'Alkuperäinen' }
+    ]
+  }
+];
+/* ====================================================
+   UI文字列
+==================================================== */
+var UI = {
+  ja: { pageTitle: '曲置き場', prev: '← 前へ', next: '次へ →', empty: '曲はまだありません' },
+  de: { pageTitle: 'Musik',    prev: '← Zurück', next: 'Weiter →', empty: 'Noch keine Stücke' },
+  fi: { pageTitle: 'Musiikki', prev: '← Edellinen', next: 'Seuraava →', empty: 'Ei musiikkia vielä' }
+};
+/* ====================================================
+   設定
+==================================================== */
+var PER_PAGE = 4;
+/* 日付降順ソート */
+TRACKS.sort(function(a, b) { return b.date.localeCompare(a.date); });
+/* ====================================================
+   状態
+==================================================== */
+var lang        = localStorage.getItem('lang') || 'ja';
+var currentPage = 1;
+var _nowPlaying = null;   /* 現在再生中の media 要素 */
+var _seekDrag   = null;   /* { wrap, media } ドラッグ中のシークバー */
+/* ====================================================
+   ユーティリティ
+==================================================== */
+function t(obj) {
+  if (!obj) return '';
+  return obj[lang] || obj['ja'] || '';
+}
+function ui(key) {
+  return ((UI[lang] || UI['ja'])[key]) || '';
+}
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function fmtTime(s) {
+  if (!isFinite(s) || isNaN(s)) return '--:--';
+  var m   = Math.floor(s / 60);
+  var sec = Math.floor(s % 60);
+  return m + ':' + String(sec).padStart(2, '0');
+}
+function formatDate(iso) {
+  var p = iso.split('-');
+  if (lang === 'de' || lang === 'fi') return parseInt(p[2]) + '.' + parseInt(p[1]) + '.' + p[0];
+  return p[0] + '.' + p[1] + '.' + p[2];
+}
+function getMime(file) {
+  var ext = file.split('.').pop().toLowerCase();
+  return { mp3:'audio/mpeg', wav:'audio/wav', ogg:'audio/ogg', flac:'audio/flac',
+           mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime' }[ext] || '';
+}
+function playIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16"><polygon points="6,3 20,12 6,21" fill="currentColor"/></svg>';
+}
+function pauseIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16">' +
+    '<rect x="5" y="3" width="4" height="18" rx="1" fill="currentColor"/>' +
+    '<rect x="15" y="3" width="4" height="18" rx="1" fill="currentColor"/>' +
+    '</svg>';
+}
+function getPageFromHash() {
+  var m = location.hash.match(/^#p(\d+)$/);
+  return m ? Math.max(1, parseInt(m[1])) : 1;
+}
+function setPageHash(n) {
+  history.pushState(null, '', n > 1 ? '#p' + n : location.pathname + location.search);
+}
+/* ====================================================
+   カードHTML生成
+==================================================== */
+function buildCard(track) {
+  var isVideo = track.type === 'video';
+  var dateStr = formatDate(track.date);
+  /* メディアエリア */
+  var mediaHTML;
+  if (isVideo) {
+    mediaHTML =
+      '<div class="player-media">' +
+        '<video class="player-video" preload="metadata" playsinline>' +
+          '<source src="' + esc(track.file) + '" type="' + esc(getMime(track.file)) + '">' +
+        '</video>' +
+      '</div>';
+  } else {
+    var inner = track.jacket
+      ? '<img class="player-jacket" src="' + esc(track.jacket) + '" alt="' + esc(t(track.title)) + '">'
+      : '<div class="player-jacket-placeholder"><span class="player-note">♫</span></div>';
+    mediaHTML =
+      '<div class="player-media">' +
+        '<audio preload="metadata" style="display:none">' +
+          '<source src="' + esc(track.file) + '" type="' + esc(getMime(track.file)) + '">' +
+        '</audio>' +
+        '<div class="player-media-inner">' + inner + '</div>' +
+      '</div>';
+  }
+  /* タグ */
+  var tagsHTML = '';
+  if (track.tags && track.tags.length) {
+    tagsHTML = ...
+[truncated]
+[truncated]
