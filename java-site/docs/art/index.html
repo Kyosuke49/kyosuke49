@@ -5,45 +5,331 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>絵置き場 — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── ギャラリーグリッド ── */
+    .art-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin: 1.5rem 0 2rem;
+    }
+    @media (max-width: 580px) {
+      .art-gallery { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+    /* ── 作品カード ── */
+    .art-card {
+      border: 1px solid var(--border);
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+    }
+    /* 画像エリア */
+    .art-card-img-wrap {
+      overflow: hidden;
+      background: #ebebeb;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+    }
+    .art-card-img-wrap img {
+      width: 100%;
+      height: auto;
+      max-height: 380px;
+      object-fit: contain;
+      display: block;
+      transition: opacity 0.22s ease;
+    }
+    .art-card-img-wrap img:hover { opacity: 0.88; }
+    /* 情報エリア */
+    .art-card-info {
+      padding: 1.1rem 1.3rem 1.3rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .art-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .art-card-title {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      color: var(--fg);
+      margin: 0;
+    }
+    .art-card-date {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .art-card-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.855rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin: 0;
+    }
+    .art-card-footer {
+      margin-top: auto;
+      padding-top: 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .art-tag {
+      display: inline-block;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.18rem 0.55rem;
+    }
+    /* ── 作品なしメッセージ ── */
+    .art-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--muted);
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+    }
+    /* ── ページネーション ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 1rem 0 1.8rem;
+    }
+    .pagination-btn {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.38rem 1rem;
+      cursor: pointer;
+      color: var(--fg);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .pagination-btn:hover:not(:disabled) {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .pagination-btn:disabled { opacity: 0.28; cursor: default; }
+    .pagination-nums {
+      display: flex;
+      gap: 0.3rem;
+    }
+    .pagination-num {
+      background: none;
+      border: 1px solid transparent;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pagination-num:hover { color: var(--fg); border-color: var(--border); }
+    .pagination-num.active {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+  </style>
 </head>
 <body>
   <div id="shared-header"></div>
-
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa"><div class="lang-block" data-lang="ja">絵置き場</div>
-<div class="lang-block" data-lang="de">Bilder</div>
-<div class="lang-block" data-lang="fi">Kuvat</div></h1>
-
-<div class="art-grid">
-  <div class="art-item">
-    <img src="makomo.png" alt="マコモ湯の人" loading="lazy">
-    <p class="art-caption font-kazesawa-light"><div class="lang-block" data-lang="ja">マコモ湯の人</div>
-<div class="lang-block" data-lang="de">Eine in Japan bekannte Liebhaberin von Badezimmern.</div>
-<div class="lang-block" data-lang="fi">Japanissa tunnettu naispuolinen kylpyhuoneharrastaja.</div><span class="art-note"><div class="lang-block" data-lang="ja">お風呂ガンジス川やんけ！</div>
-<div class="lang-block" data-lang="de">Sie ist dafür bekannt, dass sie das Wasser in der Badewanne, in der sie täglich badet, überhaupt nicht wechselt.</div>
-<div class="lang-block" data-lang="fi">Hän on tunnettu siitä, ettei vaihda lainkaan vettä kylpyammeessa, jossa hän kylpee päivittäin.</div></span>
-    </p>
-  </div>
-  <div class="art-item">
-    <img src="makina.jpg" alt="マキナ" loading="lazy">
-    <p class="art-caption font-kazesawa-light"><div class="lang-block" data-lang="ja">マキナ</div>
-<div class="lang-block" data-lang="de">Makina</div>
-<div class="lang-block" data-lang="fi">Makina</div><span class="art-note"><div class="lang-block" data-lang="ja">冲永蒔那です。</div>
-<div class="lang-block" data-lang="de">Sie heißt Makina.</div>
-<div class="lang-block" data-lang="fi">Hän on Makina.</div></span>
-    </p>
-  </div>
-</div>
-
-<a href="../../../index.html" class="back-link font-geosans"><div class="lang-block" data-lang="ja">← トップへ</div>
-<div class="lang-block" data-lang="de">← ZURÜCK</div>
-<div class="lang-block" data-lang="fi">← TAKAISIN</div></a>
-
+      <h1 class="page-title font-kazesawa" id="art-page-title">絵置き場</h1>
+      <div id="pagination-top" class="pagination"></div>
+      <div id="art-gallery"   class="art-gallery"></div>
+      <div id="pagination-bot" class="pagination"></div>
     </main>
     <div id="shared-footer"></div>
   </div>
-
   <script src="../shared-nav.js"></script>
+<script src="../shared-nav.js"></script>
+<script>
+/* ====================================================
+   作品データ
+   新しい作品を追加するには、配列の先頭に追記してください。
+   date: ISO形式 "YYYY-MM-DD" で記述（新しい順に自動ソート）
+   title / desc / medium は { ja, de, fi } 形式で書くと
+   言語切替に対応します。de/fi が省略されたときは ja にフォールバック。
+==================================================== */
+const ARTWORKS = [
+  {
+    file: 'makomo.png',
+    date: '2025-02-14',
+    title:  { ja: 'マコモ湯の人', de:'Eine in Japan bekannte Liebhaberin von Badezimmern.', fi:'Japanissa tunnettu naispuolinen kylpyhuoneharrastaja.'},
+    desc:   { ja: 'お風呂ガンジス川やんけ！', de:'Sie ist dafür bekannt, dass sie das Wasser in der Badewanne, in der sie täglich badet, überhaupt nicht wechselt.', fi:'Hän on tunnettu siitä, ettei vaihda lainkaan vettä kylpyammeessa, jossa hän kylpee päivittäin.'},
+    medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+  },
+  {
+    file: 'makina.jpg',
+    date: '2025-01-10',
+    title:  { ja: 'マキナ' , de:'Makina', fi:'Makina'},
+    desc:   { ja: '冲永蒔那です。' , de:'Sie heißt Makina.', fi:'Hän on Makina.'},
+    medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+  }
+];
+/* ====================================================
+   UI文字列（言語ごと）
+==================================================== */
+const UI = {
+  ja: { pageTitle: '絵置き場', prev: '← 前へ', next: '次へ →', empty: '作品はまだありません' },
+  de: { pageTitle: 'Bilder',   prev: '← Zurück', next: 'Weiter →', empty: 'Noch keine Werke' },
+  fi: { pageTitle: 'Kuvat',    prev: '← Edellinen', next: 'Seuraava →', empty: 'Ei teoksia vielä' }
+};
+/* ====================================================
+   設定
+==================================================== */
+const PER_PAGE = 6;
+// 日付降順ソート（新しい順）
+ARTWORKS.sort((a, b) => b.date.localeCompare(a.date));
+/* ====================================================
+   状態
+==================================================== */
+let lang = localStorage.getItem('lang') || 'ja';
+let currentPage = 1;
+/* ====================================================
+   ユーティリティ
+==================================================== */
+function t(obj) {
+  if (!obj) return '';
+  return obj[lang] || obj['ja'] || '';
+}
+function ui(key) {
+  return (UI[lang] || UI['ja'])[key] || '';
+}
+function formatDate(iso) {
+  // ISO "YYYY-MM-DD" → 表示用
+  const [y, m, d] = iso.split('-');
+  if (lang === 'de' || lang === 'fi') {
+    return `${parseInt(d)}.${parseInt(m)}.${y}`;
+  }
+  return `${y}.${m}.${d}`;
+}
+function getPageFromHash() {
+  const m = location.hash.match(/^#p(\d+)$/);
+  return m ? Math.max(1, parseInt(m[1])) : 1;
+}
+function setPageHash(n) {
+  history.pushState(null, '', n > 1 ? '#p' + n : location.pathname + location.search);
+}
+/* ====================================================
+   レンダリング
+==================================================== */
+function renderAll() {
+  // ページタイトル
+  document.getElementById('art-page-title').textContent = ui('pageTitle');
+  document.title = ui('pageTitle') + ' — 偽造切手';
+  const total = ARTWORKS.length;
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  currentPage = Math.min(currentPage, totalPages);
+  const start = (currentPage - 1) * PER_PAGE;
+  const items = ARTWORKS.slice(start, start + PER_PAGE);
+  // ギャラリー
+  const gallery = document.getElementById('art-gallery');
+  if (items.length === 0) {
+    gallery.innerHTML = `<p class="art-empty">${ui('empty')}</p>`;
+  } else {
+    gallery.innerHTML = items.map(art => {
+      const dateStr = formatDate(art.date);
+      const desc    = t(art.desc);
+      const medium  = t(art.medium);
+      return (
+        `<div class="art-card">` +
+          `<div class="art-card-img-wrap">` +
+            `<img src="${art.file}" alt="${t(art.title)}" loading="lazy">` +
+          `</div>` +
+          `<div class="art-card-info">` +
+            `<div class="art-card-header">` +
+              `<h2 class="art-card-title">${t(art.title)}</h2>` +
+              `<time class="art-card-date" datetime="${art.date}">${dateStr}</time>` +
+            `</div>` +
+            (desc ? `<p class="art-card-desc">${desc}</p>` : '') +
+            (medium ? `<div class="art-card-footer"><span class="art-tag">${medium}</span></div>` : '') +
+          `</div>` +
+        `</div>`
+      );
+    }).join('');
+  }
+  // ページネーション（両端）
+  renderPagination('pagination-top', totalPages);
+  renderPagination('pagination-bot', totalPages);
+}
+function renderPagination(id, totalPages) {
+  const el = document.getElementById(id);
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  const prevDisabled = currentPage <= 1;
+  const nextDisabled = currentPage >= totalPages;
+  let nums = '';
+  for (let i = 1; i <= totalPages; i++) {
+    nums += `<button class="pagination-num${i === currentPage ? ' active' : ''}"
+      onclick="goPage(${i})">${i}</button>`;
+  }
+  el.innerHTML =
+    `<button class="pagination-btn" ${prevDisabled ? 'disabled' : ''}
+      onclick="goPage(${currentPage - 1})">${ui('prev')}</button>` +
+    `<div class="pagination-nums">${nums}</div>` +
+    `<button class="pagination-btn" ${nextDisabled ? 'disabled' : ''}
+      onclick="goPage(${currentPage + 1})">${ui('next')}</button>`;
+}
+function goPage(n) {
+  currentPage = n;
+  setPageHash(n);
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+/* ====================================================
+   言語切替フック（shared-nav.js の setLang を拡張）
+==================================================== */
+(function () {
+  const _orig = window.setLang;
+  window.setLang = function (l) {
+    lang = l;
+    if (_orig) _orig(l);
+    renderAll();
+  };
+})();
+/* ====================================================
+   ハッシュ変化でページ更新
+==================================================== */
+window.addEventListener('hashchange', function () {
+  currentPage = getPageFromHash();
+  renderAll();
+});
+/* ====================================================
+   初期表示
+==================================================== */
+currentPage = getPageFromHash();
+renderAll();
+</script>
 </body>
 </html>
