@@ -6,47 +6,147 @@
   <title>暇つぶし — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
   <style>
-    .game-list {
+    /* ── カード一覧 ── */
+    .pastime-list {
       display: flex;
       flex-direction: column;
-      gap: 0;
-      margin: 2rem 0;
+      gap: 1.2rem;
+      margin: 1rem 0 2rem;
     }
-    .game-item {
-      border-bottom: 1px solid var(--border);
-      padding: 1.4rem 0;
+
+    /* ── カード ── */
+    .pastime-card {
+      border: 1px solid var(--border);
+      background: var(--white);
+      padding: 1.6rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
     }
-    .game-item:first-child {
-      border-top: 1px solid var(--border);
+
+    /* タイトル */
+    .pastime-title {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+      color: var(--fg);
+      margin: 0;
+      line-height: 1.5;
     }
-    .game-item a {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      transition: opacity 0.18s ease;
-    }
-    .game-item a:hover { opacity: 0.55; }
-    .game-title {
-      font-family: 'Geosans', sans-serif;
-      font-size: 1.05rem;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.3rem;
-    }
-    .game-desc {
+
+    /* 説明文 */
+    .pastime-desc {
       font-family: 'Kazesawa', system-ui, sans-serif;
       font-weight: 300;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       color: var(--muted);
+      line-height: 1.9;
+      margin: 0;
     }
-    .game-tag {
+
+    /* フッター：対応言語タグ + 遊ぶボタン */
+    .pastime-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.2rem;
+    }
+
+    /* 対応言語タグ群 */
+    .pastime-langs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .pastime-lang-tag {
       display: inline-block;
       font-family: 'Geosans', sans-serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      border: 1px solid var(--border);
-      padding: 0.1rem 0.5rem;
-      margin-top: 0.5rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
       color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.18rem 0.55rem;
+    }
+
+    /* 「遊ぶ」ボタン */
+    .pastime-play-btn {
+      display: inline-block;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: var(--fg);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 0.42rem 1.1rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pastime-play-btn:hover {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+      opacity: 1;
+    }
+
+    /* ── 項目なし ── */
+    .pastime-empty {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--muted);
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── ページネーション ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 1rem 0 1.8rem;
+    }
+    .pagination-btn {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.38rem 1rem;
+      cursor: pointer;
+      color: var(--fg);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .pagination-btn:hover:not(:disabled) {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .pagination-btn:disabled { opacity: 0.28; cursor: default; }
+    .pagination-nums { display: flex; gap: 0.3rem; }
+    .pagination-num {
+      background: none;
+      border: 1px solid transparent;
+      width: 2rem; height: 2rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pagination-num:hover { color: var(--fg); border-color: var(--border); }
+    .pagination-num.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    @media (max-width: 520px) {
+      .pastime-card { padding: 1.2rem 1.2rem; }
+      .pastime-card-footer { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -55,37 +155,231 @@
 
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa">暇つぶし</h1>
+      <h1 class="page-title font-kazesawa" id="pastime-page-title">暇つぶし</h1>
 
-      <div class="game-list">
-        <div class="game-item">
-          <a href="fizzbuzz.html">
-            <p class="game-title">変なFizzBuzz</p>
-            <p class="game-desc">FizzBuzzにWoofが乱入。このカオスに耐えながら、タイムの更新を目指せ。</p>
-            <span class="game-tag">LISP</span>
-          </a>
-        </div>
-        <div class="game-item">
-          <a href="wordquiz.html">
-            <p class="game-title">Word Quiz</p>
-            <p class="game-desc">ヒントから単語を当てる。</p>
-            <span class="game-tag">LISP</span>
-          </a>
-        </div>
-        <div class="game-item">
-          <a href="omikuji.html">
-            <p class="game-title">Omikuji</p>
-            <p class="game-desc">あなたの運値はどれくらい？</p>
-            <span class="game-tag">Nim</span>
-          </a>
-        </div>
-      </div>
-
-      <a href="../../../index.html" class="back-link font-geosans">← トップへ</a>
+      <div id="pagination-top" class="pagination"></div>
+      <div id="pastime-list"   class="pastime-list"></div>
+      <div id="pagination-bot" class="pagination"></div>
     </main>
     <div id="shared-footer"></div>
   </div>
 
-  <script src="../shared-nav.js"></script>
+<script src="../shared-nav.js"></script>
+<script>
+/* ====================================================
+   暇つぶしデータ
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   新しいコンテンツを追加するときは配列の先頭に追記してください。
+
+   file  : リンク先ファイル名
+   title : 表示タイトル（言語別）。省略言語は ja にフォールバック
+   desc  : 説明文（言語別）
+   langs : そのコンテンツが対応している自然言語コードの配列
+           例: ['ja'] / ['de'] / ['ja','de','fi']
+           ここに書いた言語が「対応言語タグ」として表示されます
+==================================================== */
+var ITEMS = [
+  {
+    file:  'fizzbuzz.html',
+    title: { ja: '変なFizzBuzz' },
+    desc: {
+      ja: 'FizzBuzzにWoofが乱入。このカオスに耐えながら、タイムの更新を目指せ。',
+      de: 'Woof mischt sich ins FizzBuzz. Halte dem Chaos stand und verbessere deine Zeit.',
+      fi: 'Woof hyppää FizzBuzziin. Kestä kaaos ja yritä parantaa aikaasi.'
+    },
+    langs: ['ja']
+  },
+  {
+    file:  'wordquiz.html',
+    title: { ja: 'Word Quiz', de: 'Wortquiz' },
+    desc: {
+      ja: 'ヒントから単語を当てる。',
+      de: 'Errate das Wort anhand von Hinweisen.',
+      fi: 'Arvaa sana vihjeiden perusteella.'
+    },
+    langs: ['de']
+  },
+  {
+    file:  'omikuji.html',
+    title: { ja: 'Omikuji' },
+    desc: {
+      ja: 'あなたの運値はどれくらい？',
+      de: 'Wie viel Glück hast du heute?',
+      fi: 'Kuinka onnekas olet tänään?'
+    },
+    langs: ['ja']
+  }
+];
+
+/* ====================================================
+   UI文字列
+==================================================== */
+var UI = {
+  ja: {
+    pageTitle: '暇つぶし',
+    play:      '→ 遊ぶ',
+    prev:      '← 前へ',
+    next:      '次へ →',
+    empty:     'コンテンツはまだありません',
+    langNames: { ja: '日本語', de: 'Deutsch', fi: 'Suomi' }
+  },
+  de: {
+    pageTitle: 'Zeitvertreib',
+    play:      '→ Spielen',
+    prev:      '← Zurück',
+    next:      'Weiter →',
+    empty:     'Noch keine Inhalte',
+    langNames: { ja: 'Japanisch', de: 'Deutsch', fi: 'Finnisch' }
+  },
+  fi: {
+    pageTitle: 'Ajanviete',
+    play:      '→ Pelata',
+    prev:      '← Edellinen',
+    next:      'Seuraava →',
+    empty:     'Ei sisältöä vielä',
+    langNames: { ja: 'Japani', de: 'Saksa', fi: 'Suomi' }
+  }
+};
+
+/* ====================================================
+   設定
+==================================================== */
+var PER_PAGE = 8;
+
+/* ====================================================
+   状態
+==================================================== */
+var lang        = localStorage.getItem('lang') || 'ja';
+var currentPage = 1;
+
+/* ====================================================
+   ユーティリティ
+==================================================== */
+function t(obj) {
+  if (!obj) return '';
+  return obj[lang] || obj['ja'] || '';
+}
+function ui(key) {
+  return ((UI[lang] || UI['ja'])[key]) || '';
+}
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function langName(code) {
+  var names = ((UI[lang] || UI['ja']).langNames) || {};
+  return names[code] || code;
+}
+function getPageFromHash() {
+  var m = location.hash.match(/^#p(\d+)$/);
+  return m ? Math.max(1, parseInt(m[1])) : 1;
+}
+function setPageHash(n) {
+  history.pushState(null, '', n > 1 ? '#p' + n : location.pathname + location.search);
+}
+
+/* ====================================================
+   カードHTML生成
+==================================================== */
+function buildCard(item) {
+  var langsHTML = '';
+  if (item.langs && item.langs.length) {
+    langsHTML = '<div class="pastime-langs">' +
+      item.langs.map(function(code) {
+        return '<span class="pastime-lang-tag">' + esc(langName(code)) + '</span>';
+      }).join('') +
+      '</div>';
+  } else {
+    langsHTML = '<div class="pastime-langs"></div>';
+  }
+
+  return (
+    '<div class="pastime-card">' +
+      '<h2 class="pastime-title">' + esc(t(item.title)) + '</h2>' +
+      (t(item.desc) ? '<p class="pastime-desc">' + esc(t(item.desc)) + '</p>' : '') +
+      '<div class="pastime-card-footer">' +
+        langsHTML +
+        '<a href="' + esc(item.file) + '" class="pastime-play-btn">' + ui('play') + '</a>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+/* ====================================================
+   ページネーション
+==================================================== */
+function renderPagination(id, totalPages) {
+  var el = document.getElementById(id);
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  var nums = '';
+  for (var i = 1; i <= totalPages; i++) {
+    nums += '<button class="pagination-num' + (i === currentPage ? ' active' : '') +
+      '" onclick="goPage(' + i + ')">' + i + '</button>';
+  }
+  el.innerHTML =
+    '<button class="pagination-btn"' + (currentPage <= 1 ? ' disabled' : '') +
+    ' onclick="goPage(' + (currentPage - 1) + ')">' + ui('prev') + '</button>' +
+    '<div class="pagination-nums">' + nums + '</div>' +
+    '<button class="pagination-btn"' + (currentPage >= totalPages ? ' disabled' : '') +
+    ' onclick="goPage(' + (currentPage + 1) + ')">' + ui('next') + '</button>';
+}
+
+/* ====================================================
+   メイン描画
+==================================================== */
+function renderAll() {
+  document.getElementById('pastime-page-title').textContent = ui('pageTitle');
+  document.title = ui('pageTitle') + ' — 偽造切手';
+
+  var total      = ITEMS.length;
+  var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  currentPage    = Math.min(currentPage, totalPages);
+
+  var start = (currentPage - 1) * PER_PAGE;
+  var items = ITEMS.slice(start, start + PER_PAGE);
+
+  var listEl = document.getElementById('pastime-list');
+  listEl.innerHTML = items.length === 0
+    ? '<p class="pastime-empty">' + ui('empty') + '</p>'
+    : items.map(buildCard).join('');
+
+  renderPagination('pagination-top', totalPages);
+  renderPagination('pagination-bot', totalPages);
+}
+
+function goPage(n) {
+  currentPage = n;
+  setPageHash(n);
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ====================================================
+   言語切替フック
+==================================================== */
+(function() {
+  var _orig = window.setLang;
+  window.setLang = function(l) {
+    lang = l;
+    if (_orig) _orig(l);
+    renderAll();
+  };
+})();
+
+/* ====================================================
+   ハッシュ変化
+==================================================== */
+window.addEventListener('hashchange', function() {
+  currentPage = getPageFromHash();
+  renderAll();
+});
+
+/* ====================================================
+   初期表示
+==================================================== */
+currentPage = getPageFromHash();
+renderAll();
+</script>
 </body>
 </html>
