@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LISPソリティア — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.0/release/biwascheme-min.js"></script>
+  <style>
+    /* ── カードサイズ変数 ── */
+    :root {
+      --cw:  66px;
+      --ch:  90px;
+      --cd:  16px;   /* 裏向きカスケードオフセット */
+      --cu:  22px;   /* 表向きカスケードオフセット */
+      --cgap: 5px;
+    }
+    @media (max-width: 560px) {
+      :root {
+        --cw:  42px;
+        --ch:  58px;
+        --cd:  10px;
+        --cu:  14px;
+        --cgap: 4px;
+      }
+    }
+
+    /* ── 説明文 ── */
+    .game-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 1.4rem;
+    }
+
+    /* ── コントロールパネル ── */
+    .ctrl-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .stat-val {
+      font-size: 1rem;
+      color: var(--fg);
+      letter-spacing: 0.04em;
+    }
+    .new-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      cursor: pointer;
+      color: var(--fg);
+      white-space: nowrap;
+      transition: background 0.13s, color 0.13s, border-color 0.13s;
+    }
+    .new-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* ── ボード領域 ── */
+    .board-area {
+      border: 1px solid var(--border);
+      background: var(--white);
+      padding: 0.9rem;
+      margin-bottom: 0.8rem;
+      overflow-x: auto;
+    }
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(7, var(--cw));
+      gap: var(--cgap);
+    }
+    .top-grid   { margin-bottom: calc(var(--cgap) * 2); }
+    .pile-slot  { position: relative; height: var(--ch); }
+
+    /* ── タブロー列 ── */
+    .tab-col {
+      position: relative;
+      min-height: var(--ch);
+    }
+
+    /* ── カード ── */
+    .card {
+      width:  var(--cw);
+      height: var(--ch);
+      border-radius: 3px;
+      border: 1px solid #c8c8c8;
+      box-sizing: border-box;
+      position: absolute;
+      top: 0;
+      left: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
+    }
+    /* 裏向き */
+    .card.back {
+      background: repeating-linear-gradient(
+        -45deg,
+        #d2d2d2 0px, #d2d2d2 2px,
+        #e8e8e8 2px, #e8e8e8 8px
+      );
+      cursor: default;
+    }
+    /* 表向き */
+    .card.front {
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      padding: 2px 3px;
+      cursor: pointer;
+    }
+    .card.front.red { color: #c0392b; }
+    .c-rank {
+      font-family: 'Geosans', sans-serif;
+      font-size: calc(var(--cw) * 0.29);
+      font-weight: bold;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+    .c-suit {
+      font-size: calc(var(--cw) * 0.27);
+      line-height: 1;
+    }
+    /* 中央スーツ（大きなカードのみ） */
+    .c-mid {
+      font-size: calc(var(--cw) * 0.42);
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      opacity: 0.3;
+      line-height: 1;
+    }
+    /* 選択ハイライト */
+    .card.selected {
+      outline: 2px solid var(--black);
+      outline-offset: -2px;
+      z-index: 10;
+    }
+    /* ストックのカード枚数バッジ */
+    .stock-count {
+      position: absolute;
+      bottom: 4px;
+      right: 5px;
+      font-family: 'Geosans', sans-serif;
+      font-size: calc(var(--cw) * 0.22);
+      letter-spacing: 0.06em;
+      color: #aaa;
+      line-height: 1;
+    }
+
+    /* ── 空スロットのプレースホルダー ── */
+    .pile-ph {
+      width:  var(--cw);
+      height: var(--ch);
+      border: 1px dashed #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ccc;
+      font-family: 'Geosans', sans-serif;
+      font-size: calc(var(--cw) * 0.38);
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .pile-ph.reset { cursor: pointer; }
+
+    /* ── フィードバック ── */
+    .feedback {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      color: var(--muted);
+      min-height: 1.4rem;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.04em;
+    }
+    .feedback.won  { color: var(--fg); }
+    .feedback.hint { color: var(--border); }
+
+    /* ── 操作ヒントバー ── */
+    .action-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      min-height: 2rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 0.3rem 0.9rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.13s, color 0.13s;
+    }
+    .action-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+    .action-label {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .action-bar.hidden { display: none; }
+
+    @media (max-width: 520px) {
+      .ctrl-panel { padding: 0.7rem 0.9rem; gap: 1rem; }
+      .board-area  { padding: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="shared-header"></div>
+
+  <div class="container">
+    <main class="sub-main">
+
+      <!-- タイトル -->
+      <h1 class="page-title font-kazesawa">
+        <span class="lang-block" data-lang="ja">ソリティア</span>
+        <span class="lang-block" data-lang="de">Solitär</span>
+        <span class="lang-block" data-lang="fi">Pasianssi</span>
+      </h1>
+
+      <!-- 説明 -->
+      <p class="game-desc">
+        <span class="lang-block" data-lang="ja">52枚のカードを全てファンデーションへ送ればクリア。</span>
+        <span class="lang-block" data-lang="de">Lege alle 52 Karten auf die Fundamente, um zu gewinnen.</span>
+        <span class="lang-block" data-lang="fi">Voitat siirtämällä kaikki 52 korttia perustuksiin.</span>
+      </p>
+
+      <!-- コントロールパネル -->
+      <div class="ctrl-panel">
+        <div class="stat-item">
+          <span class="lang-block" data-lang="ja">手数</span>
+          <span class="lang-block" data-lang="de">Züge</span>
+          <span class="lang-block" data-lang="fi">Siirrot</span>
+          <span class="stat-val" id="moveCount">—</span>
+        </div>
+        <div class="stat-item">
+          <span class="lang-block" data-lang="ja">タイム</span>
+          <span class="lang-block" data-lang="de">Zeit</span>
+          <span class="lang-block" data-lang="fi">Aika</span>
+          <span class="stat-val" id="timerDisplay">—</span>
+        </div>
+        <button class="new-btn font-geosans" onclick="startNewGame()">
+          <span class="lang-block" data-lang="ja">新ゲーム</span>
+          <span class="lang-block" data-lang="de">Neu</span>
+          <span class="lang-block" data-lang="fi">Uusi</span>
+        </button>
+      </div>
+
+      <!-- フィードバック -->
+      <div class="feedback" id="feedback">&nbsp;</div>
+
+      <!-- アクションバー（選択中） -->
+      <div class="action-bar hidden" id="action-bar">
+        <span class="action-label" id="sel-label"></span>
+        <button class="action-btn" id="btn-to-found" onclick="moveSelectedToFoundation()">
+          <span class="lang-block" data-lang="ja">ファンデーションへ ↑</span>
+          <span class="lang-block" data-lang="de">Auf Fundament ↑</span>
+          <span class="lang-block" data-lang="fi">Perustukseen ↑</span>
+        </button>
+        <button class="action-btn" onclick="clearSelection()">
+          <span class="lang-block" data-lang="ja">キャンセル</span>
+          <span class="lang-block" data-lang="de">Abbruch</span>
+          <span class="lang-block" data-lang="fi">Peruuta</span>
+        </button>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-area" id="board-area">
+        <!-- 上段: ストック・ウェイスト・スペーサー・ファンデーション×4 -->
+        <div class="game-grid top-grid">
+          <div class="pile-slot" id="stock-slot"  data-zone="stock"></div>
+          <div class="pile-slot" id="waste-slot"  data-zone="waste"></div>
+          <div class="pile-slot"></div><!-- spacer -->
+          <div class="pile-slot" id="f0"  data-zone="found" data-suit="0"></div>
+          <div class="pile-slot" id="f1"  data-zone="found" data-suit="1"></div>
+          <div class="pile-slot" id="f2"  data-zone="found" data-suit="2"></div>
+          <div class="pile-slot" id="f3"  data-zone="found" data-suit="3"></div>
+        </div>
+        <!-- タブロー -->
+        <div class="game-grid" id="tableau-grid">
+          <div class="tab-col" id="tc0" data-zone="tab" data-col="0"></div>
+          <div class="tab-col" id="tc1" data-zone="tab" data-col="1"></div>
+          <div class="tab-col" id="tc2" data-zone="tab" data-col="2"></div>
+          <div class="tab-col" id="tc3" data-zone="tab" data-col="3"></div>
+          <div class="tab-col" id="tc4" data-zone="tab" data-col="4"></div>
+          <div class="tab-col" id="tc5" data-zone="tab" data-col="5"></div>
+          <div class="tab-col" id="tc6" data-zone="tab" data-col="6"></div>
+        </div>
+      </div>
+
+      <a href="index.html" class="back-link font-geosans">←
+        <span class="lang-block" data-lang="ja">Pastimeへ</span>
+        <span class="lang-block" data-lang="de">Zurück</span>
+        <span class="lang-block" data-lang="fi">Takaisin</span>
+      </a>
+
+    </main>
+    <div id="shared-footer"></div>
+  </div>
+
+<script src="../shared-nav.js"></script>
+<script>
+// ================================================================
+// BiwaScheme
+// ================================================================
+var interp = new BiwaScheme.Interpreter(function(err) {
+  console.error('Scheme:', err.message || err);
+});
+
+// BiwaScheme 0.8.0 では Pair クラス本体は未エクスポートのため
+// instanceof BiwaScheme.Pair は TypeError になる。
+// isPair() / isNil() ヘルパーを使う。
+function s2j(v) {
+  if (v === true || v === false) return v;
+  if (typeof v === 'number' || typeof v === 'string') return v;
+  if (BiwaScheme.isNil(v)) return [];
+  if (BiwaScheme.isPair(v)) {
+    var a = [], cur = v;
+    while (BiwaScheme.isPair(cur)) { a.push(s2j(cur.car)); cur = cur.cdr; }
+    return a;
+  }
+  return v;
+}
+
+// Scheme 内から直接 renderState を呼ぶための libfunc
+// evaluate() のコールバックは戻り値を受け取れないため必須
+BiwaScheme.define_libfunc("js-update!", 1, 1, function(ar) {
+  renderState(ar[0]);
+  return BiwaScheme.undef;
+});
+
+// Math.random() を Scheme へ公開（組み込み random が動作しない場合の代替）
+BiwaScheme.define_libfunc("js-random-int", 1, 1, function(ar) {
+  return Math.floor(Math.random() * ar[0]);
+});
+
+// ================================================================
+// カード定数
+// ================================================================
+var SUITS  = ['♠', '♥', '♦', '♣'];
+var RANKS  = ['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+var IS_RED = [false, true, true, false];
+
+function suit(c)  { return Math.floor(c / 13); }
+function rank(c)  { return (c % 13) + 1; }
+function isRed(c) { return IS_RED[suit(c)]; }
+
+// ================================================================
+// CSS 変数を読んでピクセル値を取得
+// ================================================================
+var CW, CH, CD, CU;
+function readSizes() {
+  var cs = getComputedStyle(document.documentElement);
+  function px(n) { return parseInt(cs.getPropertyValue(n).trim()); }
+  CW = px('--cw'); CH = px('--ch'); CD = px('--cd'); CU = px('--cu');
+}
+
+// ================================================================
+// 選択状態
+// ================================================================
+var selected  = null; // null | {type:'waste'} | {type:'tab', col:N, idxFromBot:N, n:N}
+var lastRaw   = null; // 最後に受け取った Scheme state
+var gameWon   = false;
+var firstMove = true;
+var timerInt  = null;
+var startTime = null;
+var lastMoves = 0;
+
+// ================================================================
+// タイマー
+// ================================================================
+function startTimer() {
+  if (timerInt) return;
+  startTime = Date.now();
+  timerInt = setInterval(function() {
+    document.getElementById('timerDisplay').textContent =
+      ((Date.now() - startTime) / 1000).toFixed(0) + 's';
+  }, 500);
+}
+function stopTimer() {
+  if (timerInt) { clearInterval(timerInt); timerInt = null; }
+}
+
+// ================================================================
+// カード要素生成
+// ================================================================
+function makeBackCard() {
+  var el = document.createElement('div');
+  el.className = 'card back';
+  return el;
+}
+
+function makeFrontCard(c) {
+  var el = document.createElement('div');
+  el.className = 'card front' + (isRed(c) ? ' red' : '');
+  el.innerHTML =
+    '<span class="c-rank">' + RANKS[rank(c)] + '</span>' +
+    '<span class="c-suit">' + SUITS[suit(c)] + '</span>' +
+    '<span class="c-mid">'  + SUITS[suit(c)] + '</span>';
+  return el;
+}
+
+function makePilePh(label) {
+  var el = document.createElement('div');
+  el.className = 'pile-ph';
+  el.textContent = label;
+  return el;
+}
+
+// ================================================================
+// 描画
+// ================================================================
+function renderState(raw) {
+  readSizes();
+  lastRaw = raw;
+  var st  = s2j(raw);
+  var won        = st[0];
+  var moves      = st[1];
+  var stockCnt   = st[2];
+  var wasteTop   = st[3]; // false or card-int
+  var foundations = st[4];
+  var tableaux   = st[5];
+
+  gameWon = won;
+  if (won) stopTimer();
+
+  // 手数が増えたら初回フラグ解除 & タイマースタート
+  if (firstMove && moves > 0) {
+    firstMove = false;
+    startTimer();
+  }
+  // moves 変化を検出
+  if (moves !== lastMoves) {
+    lastMoves = moves;
+  }
+
+  document.getElementById('moveCount').textContent = moves;
+
+  // フィードバック
+  var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'ja';
+  var fb = document.getElementById('feedback');
+  if (won) {
+    fb.className = 'feedback won';
+    fb.textContent = {ja:'クリア！ 全カードをファンデーションへ送った。',
+                      de:'Gewonnen! Alle Karten auf dem Fundament.',
+                      fi:'Voitto! Kaikki kortit perustuksissa.'}[lang] || 'クリア！';
+  } else {
+    fb.className = 'feedback';
+    fb.innerHTML = '&nbsp;';
+  }
+
+  // ── ストック ──
+  var stockSlot = document.getElementById('stock-slot');
+  stockSlot.innerHTML = '';
+  if (stockCnt > 0) {
+    var bk = makeBackCard();
+    var cnt = document.createElement('span');
+    cnt.className = 'stock-count';
+    cnt.textContent = stockCnt;
+    bk.appendChild(cnt);
+    stockSlot.appendChild(bk);
+  } else {
+    var ph = makePilePh('↺');
+    ph.classList.add('reset');
+    stockSlot.appendChild(ph);
+  }
+
+  // ── ウェイスト ──
+  var wasteSlot = document.getElementById('waste-slot');
+  wasteSlot.innerHTML = '';
+  if (wasteTop !== false && wasteTop !== null && wasteTop !== undefined) {
+    var wc = makeFrontCard(wasteTop);
+    if (selected && selected.type === 'waste') wc.classList.add('selected');
+    wasteSlot.appendChild(wc);
+  } else {
+    wasteSlot.appendChild(makePilePh(''));
+  }
+
+  // ── ファンデーション ──
+  for (var s = 0; s < 4; s++) {
+    var fslot = document.getElementById('f' + s);
+    fslot.innerHTML = '';
+    var topRank = foundations[s];
+    if (topRank > 0) {
+      var fc = makeFrontCard(s * 13 + (topRank - 1));
+      fslot.appendChild(fc);
+    } else {
+      fslot.appendChild(makePilePh(SUITS[s]));
+    }
+  }
+
+  // ── タブロー ──
+  for (var col = 0; col < 7; col++) {
+    var colEl = document.getElementById('tc' + col);
+    colEl.innerHTML = '';
+    var colCards = tableaux[col]; // [[card,faceUp], ...] 下から上
+
+    if (!colCards || colCards.length === 0) {
+      var kph = makePilePh('K');
+      colEl.appendChild(kph);
+      colEl.style.minHeight = CH + 'px';
+      continue;
+    }
+
+    var offset = 0;
+    for (var i = 0; i < colCards.length; i++) {
+      var cardInt = colCards[i][0];
+      var faceUp  = colCards[i][1] === 1;
+
+      var ce = faceUp ? makeFrontCard(cardInt) : makeBackCard();
+      ce.style.top = offset + 'px';
+
+      // 選択ハイライト
+      if (selected && selected.type === 'tab' &&
+          selected.col === col && i >= selected.idxFromBot) {
+        ce.classList.add('selected');
+      }
+
+      // データ属性（クリック処理用）
+      ce.dataset.zone = 'tab';
+      ce.dataset.col  = col;
+      ce.dataset.idx  = i;
+      ce.dataset.n    = colCards.length;
+      ce.dataset.fu   = faceUp ? '1' : '0';
+
+      colEl.appendChild(ce);
+
+      if (i < colCards.length - 1) {
+        offset += faceUp ? CU : CD;
+      }
+    }
+    colEl.style.minHeight = (offset + CH) + 'px';
+  }
+
+  updateActionBar();
+}
+
+// アクションバー更新
+function updateActionBar() {
+  var bar = document.getElementById('action-bar');
+  var lbl = document.getElementById('sel-label');
+  if (!selected || gameWon) {
+    bar.className = 'action-bar hidden';
+    return;
+  }
+  bar.className = 'action-bar';
+  var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'ja';
+  if (selected.type === 'waste') {
+    lbl.textContent = {ja:'ウェイストのカードを選択中',de:'Ablagestapel ausgewählt',fi:'Jätepino valittu'}[lang] || '';
+  } else {
+    var n = selected.n;
+    lbl.textContent = ({ja:'%d枚選択中', de:'%d Karten gewählt', fi:'%d korttia valittu'}[lang] || '%d').replace('%d', n);
+  }
+}
+
+function rerender() {
+  if (lastRaw) renderState(lastRaw);
+}
+
+// ================================================================
+// 選択クリア
+// ================================================================
+function clearSelection() {
+  selected = null;
+  rerender();
+}
+
+// ================================================================
+// ファンデーションへ移動（アクションバーのボタンから）
+// ================================================================
+function moveSelectedToFoundation() {
+  if (!selected) return;
+  var call;
+  if (selected.type === 'waste') {
+    call = '(move-waste-to-found!)';
+  } else {
+    if (selected.n !== 1) { clearSelection(); return; } // グループはファンデーション不可
+    call = '(move-tab-to-found! ' + selected.col + ')';
+  }
+  selected = null;
+  interp.evaluate('(js-update! ' + call + ')', function() {});
+}
+
+// ================================================================
+// クリック処理（イベント委譲）
+// ================================================================
+document.addEventListener('DOMContentLoaded', function() {
+  var boardArea = document.getElementById('board-area');
+
+  boardArea.addEventListener('click', function(e) {
+    if (gameWon) return;
+
+    // クリックされた要素のゾーン情報を探す
+    var cardEl = e.target.closest('.card');
+    var phEl   = e.target.closest('.pile-ph');
+    var zoneEl = e.target.closest('[data-zone]');
+
+    // ── ストックをクリック ──
+    if (zoneEl && zoneEl.dataset.zone === 'stock') {
+      selected = null;
+      interp.evaluate('(js-update! (draw!))', function() {});
+      return;
+    }
+
+    // ── ウェイストをクリック ──
+    if (zoneEl && zoneEl.dataset.zone === 'waste') {
+      if (selected) {
+        // 何か選択中 → 今度はウェイストが移動先になることはないので無視
+        // （ウェイストはソースにしかならない）
+        clearSelection();
+        return;
+      }
+      // ウェイストのカードを選択
+      var wt = s2j(lastRaw)[3];
+      if (wt !== false && wt !== null && wt !== undefined) {
+        selected = { type: 'waste' };
+        rerender();
+      }
+      return;
+    }
+
+    // ── ファンデーションをクリック ──
+    if (zoneEl && zoneEl.dataset.zone === 'found') {
+      if (selected) {
+        // 選択中 → ファンデーションへ移動を試みる
+        var s2 = parseInt(zoneEl.dataset.suit);
+        var call;
+        if (selected.type === 'waste') {
+          call = '(move-waste-to-found!)';
+        } else {
+          if (selected.n !== 1) { clearSelection(); return; }
+          call = '(move-tab-to-found! ' + selected.col + ')';
+        }
+        selected = null;
+        interp.evaluate('(js-update! ' + call + ')', function() {});
+      }
+      return;
+    }
+
+    // ── タブローをクリック ──
+    if (zoneEl && zoneEl.dataset.zone === 'tab') {
+      var destCol = parseInt(zoneEl.dataset.col);
+
+      // カードをクリック
+      if (cardEl && cardEl.dataset.zone === 'tab') {
+        var clickedCol = parseInt(cardEl.dataset.col);
+        var clickedIdx = parseInt(cardEl.dataset.idx);
+        var clickedN   = parseInt(cardEl.dataset.n);
+        var isFaceUp   = cardEl.dataset.fu === '1';
+
+        if (!isFaceUp) {
+          // 裏向きカード → 無視
+          return;
+        }
+
+        if (selected) {
+          // 選択中 → 同じ選択範囲なら解除
+          if (selected.type === 'tab' &&
+              selected.col === clickedCol &&
+              clickedIdx >= selected.idxFromBot) {
+            clearSelection();
+            return;
+          }
+          // 別のカード/列 → 移動を試みる
+          doTabMove(clickedCol);
+          return;
+        }
+
+        // 未選択 → このカードを選択
+        selected = {
+          type: 'tab',
+          col: clickedCol,
+          idxFromBot: clickedIdx,
+          n: clickedN - clickedIdx
+        };
+        rerender();
+        return;
+      }
+
+      // 空列の placeholder または列背景をクリック
+      if (selected) {
+        doTabMove(destCol);
+      }
+      return;
+    }
+
+    // ── ボード背景クリック → 選択解除 ──
+    if (selected) clearSelection();
+  });
+});
+
+function doTabMove(toCol) {
+  if (!selected) return;
+  var call;
+  if (selected.type === 'waste') {
+    call = '(move-waste-to-tab! ' + toCol + ')';
+  } else {
+    if (selected.col === toCol) { clearSelection(); return; }
+    call = '(move-tab-to-tab! ' + selected.col + ' ' + toCol + ' ' + selected.n + ')';
+  }
+  selected = null;
+  interp.evaluate('(js-update! ' + call + ')', function() {});
+}
+
+// ================================================================
+// 新ゲーム
+// ================================================================
+function startNewGame() {
+  stopTimer();
+  firstMove = true;
+  lastMoves = 0;
+  selected  = null;
+  gameWon   = false;
+  document.getElementById('timerDisplay').textContent = '—';
+  document.getElementById('moveCount').textContent    = '—';
+  document.getElementById('feedback').innerHTML       = '&nbsp;';
+  document.getElementById('feedback').className       = 'feedback';
+  interp.evaluate('(js-update! (new-game!))', function() {});
+}
+
+// ================================================================
+// 起動
+// ================================================================
+fetch('solitaire.scm')
+  .then(function(r) { return r.text(); })
+  .then(function(code) {
+    interp.evaluate(code, function() {
+      startNewGame();
+    });
+  })
+  .catch(function(err) {
+    console.error('solitaire.scm の読み込みに失敗:', err);
+  });
+</script>
+</body>
+</html>
