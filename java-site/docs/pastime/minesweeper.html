@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LISPマインスイーパー — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.0/release/biwascheme-min.js"></script>
+  <style>
+
+    /* ── 説明文 ── */
+    .game-desc {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 1.4rem;
+    }
+
+    /* ── コントロールパネル ── */
+    .ctrl-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .ctrl-label {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 0.3rem;
+      white-space: nowrap;
+    }
+
+    /* 難易度ボタン */
+    .diff-btn {
+      background: none;
+      border: 1px solid var(--border);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.32rem 0.9rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background 0.13s, color 0.13s, border-color 0.13s;
+    }
+    .diff-btn:hover  { background: var(--fg); color: var(--white); border-color: var(--fg); }
+    .diff-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* モード切替 */
+    .mode-group {
+      display: flex;
+      margin-left: auto;
+    }
+    .mode-btn {
+      background: none;
+      border: 1px solid var(--border);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      padding: 0.32rem 0.9rem;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background 0.13s, color 0.13s;
+      line-height: 1;
+    }
+    .mode-btn:first-child { border-right: none; }
+    .mode-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+    .mode-btn:not(.active):hover { background: var(--fg); color: var(--white); border-color: var(--fg); }
+
+    /* 統計列 */
+    .stats-row {
+      display: flex;
+      align-items: center;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .stat-val {
+      font-size: 1rem;
+      color: var(--fg);
+      letter-spacing: 0.04em;
+    }
+    .new-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.32rem 1rem;
+      cursor: pointer;
+      color: var(--fg);
+      white-space: nowrap;
+      transition: background 0.13s, color 0.13s, border-color 0.13s;
+    }
+    .new-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* ── フィードバック ── */
+    .feedback {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      color: var(--muted);
+      min-height: 1.4rem;
+      margin-bottom: 0.6rem;
+      letter-spacing: 0.04em;
+    }
+    .feedback.state-clear { color: var(--fg); }
+
+    /* ── ゲームボード領域 ── */
+    .board-area {
+      border: 1px solid var(--border);
+      background: var(--white);
+      padding: 1rem;
+      margin-bottom: 1.6rem;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .board-wrap {
+      overflow-x: auto;
+      padding-bottom: 0.2rem;
+    }
+    .board {
+      display: inline-grid;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* ── セル ── */
+    .cell {
+      width:  var(--csz);
+      height: var(--csz);
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Geosans', sans-serif;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      line-height: 1;
+      font-size: calc(var(--csz) * 0.46);
+      transition: background 0.07s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cell:hover { background: #e0e0e0; }
+
+    /* 開いたセル */
+    .cell.revealed {
+      background: var(--bg);
+      cursor: default;
+    }
+    .cell.revealed:hover { background: var(--bg); }
+
+    /* フラグ */
+    .cell.flagged {
+      color: var(--fg);
+      font-size: calc(var(--csz) * 0.5);
+      background: #f0f0f0;
+    }
+
+    /* ゲームオーバー: 踏んだ地雷 */
+    .cell.mine-hit {
+      background: #1a1a1a;
+      color: #eee;
+      cursor: default;
+    }
+    .cell.mine-hit:hover { background: #1a1a1a; }
+
+    /* ゲームオーバー: 未踏の地雷 */
+    .cell.mine-show {
+      background: #3a3a3a;
+      color: #aaa;
+      cursor: default;
+    }
+    .cell.mine-show:hover { background: #3a3a3a; }
+
+    /* 間違いフラグ */
+    .cell.wrong-flag { color: #999; }
+
+    /* 数字色（クラシック配色） */
+    .n1 { color: #1565C0; }
+    .n2 { color: #2E7D32; }
+    .n3 { color: #C62828; }
+    .n4 { color: #1A237E; }
+    .n5 { color: #B71C1C; }
+    .n6 { color: #006064; }
+    .n7 { color: #212121; }
+    .n8 { color: #757575; }
+
+    /* イースターエッグ */
+    .cell.egg {
+      color: var(--muted) !important;
+      font-size: calc(var(--csz) * 0.55) !important;
+    }
+
+    /* ── フラグモードインジケーター ── */
+    .mode-indicator {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: right;
+      margin-bottom: 0.4rem;
+    }
+    .mode-indicator.flag-mode { color: var(--fg); }
+
+    @media (max-width: 520px) {
+      .ctrl-panel { padding: 0.8rem 0.9rem; }
+      .board-area  { padding: 0.6rem; }
+      .mode-group  { margin-left: 0; margin-top: 0.2rem; }
+      .stats-row   { gap: 1rem; }
+      .new-btn     { margin-left: 0; margin-top: 0.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="shared-header"></div>
+
+  <div class="container">
+    <main class="sub-main">
+
+      <!-- タイトル（言語対応） -->
+      <h1 class="page-title font-kazesawa">
+        <span class="lang-block" data-lang="ja">LISPマインスイーパー</span>
+        <span class="lang-block" data-lang="de">LISP Minesweeper</span>
+        <span class="lang-block" data-lang="fi">LISP Miinaharava</span>
+      </h1>
+
+      <!-- 説明（言語対応） -->
+      <p class="game-desc">
+        <span class="lang-block" data-lang="ja">ゲームロジックはSchemeで動いている。全ての非地雷マスを開けばクリア。</span>
+        <span class="lang-block" data-lang="de">Die Spiellogik läuft in Scheme. Öffne alle Felder ohne Minen, um zu gewinnen.</span>
+        <span class="lang-block" data-lang="fi">Pelilogiikka toimii Schemellä. Voitat avaamalla kaikki ruudut ilman miinoja.</span>
+      </p>
+
+      <!-- ── コントロールパネル ── -->
+      <div class="ctrl-panel">
+
+        <!-- 難易度 + モード切替 -->
+        <div class="ctrl-row">
+          <span class="ctrl-label">
+            <span class="lang-block" data-lang="ja">難易度</span>
+            <span class="lang-block" data-lang="de">Schwierigkeit</span>
+            <span class="lang-block" data-lang="fi">Vaikeus</span>
+          </span>
+          <button class="diff-btn active" id="diff-easy"   onclick="setDiff('easy')">Easy</button>
+          <button class="diff-btn"        id="diff-medium" onclick="setDiff('medium')">Medium</button>
+          <button class="diff-btn"        id="diff-hard"   onclick="setDiff('hard')">Hard</button>
+
+          <div class="mode-group">
+            <button class="mode-btn active" id="mode-open" onclick="setMode('open')" title="開く">🔍</button>
+            <button class="mode-btn"        id="mode-flag" onclick="setMode('flag')" title="フラグ">⚑</button>
+          </div>
+        </div>
+
+        <!-- 統計 + 新ゲーム -->
+        <div class="ctrl-row stats-row">
+          <div class="stat-item">
+            <span>⚑</span>
+            <span class="stat-val" id="mineCount">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="lang-block" data-lang="ja">タイム</span>
+            <span class="lang-block" data-lang="de">Zeit</span>
+            <span class="lang-block" data-lang="fi">Aika</span>
+            <span class="stat-val" id="timerDisplay">—</span>
+          </div>
+          <button class="new-btn font-geosans" onclick="newGame()">
+            <span class="lang-block" data-lang="ja">新ゲーム</span>
+            <span class="lang-block" data-lang="de">Neu</span>
+            <span class="lang-block" data-lang="fi">Uusi</span>
+          </button>
+        </div>
+
+      </div>
+      <!-- /コントロールパネル -->
+
+      <!-- フィードバック -->
+      <div class="feedback" id="feedback">&nbsp;</div>
+
+      <!-- ── ゲームボード領域 ── -->
+      <div class="board-area">
+        <div class="mode-indicator" id="modeIndicator"></div>
+        <div class="board-wrap">
+          <div class="board" id="board"></div>
+        </div>
+      </div>
+
+      <a href="index.html" class="back-link font-geosans">← <span class="lang-block" data-lang="ja">Pastimeへ</span><span class="lang-block" data-lang="de">Zurück</span><span class="lang-block" data-lang="fi">Takaisin</span></a>
+    </main>
+    <div id="shared-footer"></div>
+  </div>
+
+<script src="../shared-nav.js"></script>
+<script>
+// ================================================================
+// BiwaScheme
+// ================================================================
+var interp = new BiwaScheme.Interpreter(function(err) {
+  console.error('Scheme:', err.message || err);
+});
+
+// Scheme リスト → JS 配列
+function s2j(v) {
+  if (v === BiwaScheme.nil) return [];
+  if (v instanceof BiwaScheme.Pair) {
+    var arr = [];
+    var cur = v;
+    while (cur instanceof BiwaScheme.Pair) { arr.push(s2j(cur.car)); cur = cur.cdr; }
+    return arr;
+  }
+  return v;
+}
+
+// ================================================================
+// 難易度
+// ================================================================
+var DIFFS = {
+  easy:   { rows: 9,  cols: 9,  mines: 10, csz: 36 },
+  medium: { rows: 16, cols: 16, mines: 40, csz: 28 },
+  hard:   { rows: 16, cols: 30, mines: 99, csz: 24 }
+};
+var curDiff  = 'easy';
+var curMode  = 'open';   // 'open' | 'flag'
+var gameOver = false;
+var firstClick = true;
+var timerInt   = null;
+var startTime  = null;
+
+// ================================================================
+// イースターエッグ状態
+// ================================================================
+var tapCounts = {};  // "r,c" → number
+var eggActive = {}; // "r,c" → true/false
+
+// ================================================================
+// タイマー
+// ================================================================
+function startTimer() {
+  if (timerInt) return;
+  startTime = Date.now();
+  timerInt = setInterval(function() {
+    document.getElementById('timerDisplay').textContent =
+      ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+  }, 100);
+}
+function stopTimer() {
+  if (timerInt) { clearInterval(timerInt); timerInt = null; }
+}
+
+// ================================================================
+// 難易度 / モード切替
+// ================================================================
+function setDiff(d) {
+  curDiff = d;
+  document.querySelectorAll('.diff-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('diff-' + d).classList.add('active');
+  newGame();
+}
+
+function setMode(m) {
+  curMode = m;
+  document.getElementById('mode-open').classList.toggle('active', m === 'open');
+  document.getElementById('mode-flag').classList.toggle('active', m === 'flag');
+  updateModeIndicator();
+}
+
+function updateModeIndicator() {
+  var el   = document.getElementById('modeIndicator');
+  var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'ja';
+  var labels = {
+    open: { ja: '🔍 開くモード', de: '🔍 Öffnen', fi: '🔍 Avaa' },
+    flag: { ja: '⚑ フラグモード', de: '⚑ Markieren', fi: '⚑ Lippu' }
+  };
+  var map = labels[curMode] || labels.open;
+  el.textContent = map[lang] || map['ja'];
+  el.className = 'mode-indicator' + (curMode === 'flag' ? ' flag-mode' : '');
+}
+
+// ================================================================
+// 状態をボードに反映
+// ================================================================
+function applyState(raw) {
+  var st   = s2j(raw);
+  var over = st[0];
+  var won  = st[1];
+  var rows = st[2];
+
+  gameOver = over;
+  if (over) stopTimer();
+
+  var diff = DIFFS[curDiff];
+  var flagCount = 0;
+  rows.forEach(function(row) {
+    row.forEach(function(cell) { if (cell[2]) flagCount++; });
+  });
+  document.getElementById('mineCount').textContent = diff.mines - flagCount;
+
+  var fb = document.getElementById('feedback');
+  var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'ja';
+  if (won) {
+    fb.className = 'feedback state-clear';
+    fb.textContent = { ja: 'クリア！', de: 'Geschafft!', fi: 'Läpäisit!' }[lang] || 'クリア！';
+  } else if (over) {
+    fb.className = 'feedback';
+    fb.textContent = { ja: '地雷を踏んだ。', de: 'Mine erwischt.', fi: 'Osut miinaan.' }[lang] || '地雷を踏んだ。';
+  } else {
+    fb.className = 'feedback';
+    fb.innerHTML = '&nbsp;';
+  }
+
+  var cells = document.getElementById('board').querySelectorAll('.cell');
+  var i = 0;
+  rows.forEach(function(row, r) {
+    row.forEach(function(cell, c) {
+      var rev  = cell[0];
+      var mine = cell[1];
+      var flag = cell[2];
+      var adj  = cell[3];
+      var el   = cells[i++];
+
+      el.className = 'cell';
+      el.textContent = '';
+
+      if (rev) {
+        if (mine) {
+          el.classList.add('mine-hit');
+          el.textContent = '✕';
+        } else {
+          el.classList.add('revealed');
+          if (adj > 0) {
+            el.textContent = adj;
+            el.classList.add('n' + adj);
+          }
+        }
+      } else {
+        if (flag) {
+          el.classList.add('flagged');
+          el.textContent = '⚑';
+          if (over && !mine) el.classList.add('wrong-flag');
+        } else if (over && mine) {
+          el.classList.add('mine-show');
+          el.textContent = '✕';
+        }
+      }
+    });
+  });
+
+  reapplyEggs();
+}
+
+// ================================================================
+// イースターエッグ
+// ================================================================
+function reapplyEggs() {
+  var cells = document.getElementById('board').querySelectorAll('.cell');
+  var diff  = DIFFS[curDiff];
+  Object.keys(eggActive).forEach(function(key) {
+    if (!eggActive[key]) return;
+    var parts = key.split(',');
+    var r = parseInt(parts[0]);
+    var c = parseInt(parts[1]);
+    var el = cells[r * diff.cols + c];
+    if (el && el.classList.contains('revealed')) {
+      el.textContent = '⏻';
+      el.classList.add('egg');
+    }
+  });
+}
+
+function handleEgg(r, c, el) {
+  var key = r + ',' + c;
+  tapCounts[key] = (tapCounts[key] || 0) + 1;
+  if (tapCounts[key] === 10) {
+    eggActive[key] = true;
+    el.textContent = '⏻';
+    el.classList.add('egg');
+  } else if (tapCounts[key] >= 11) {
+    tapCounts[key] = 0;
+    eggActive[key] = false;
+    // Scheme に状態を再取得して再描画
+    interp.evaluate('(state)', function(st) { applyState(st); });
+  }
+}
+
+// ================================================================
+// セルクリック処理
+// ================================================================
+function onCellClick(e) {
+  var el = e.currentTarget;
+  var r  = parseInt(el.dataset.r);
+  var c  = parseInt(el.dataset.c);
+
+  // 開いたセルをタップ → イースターエッグ判定
+  if (el.classList.contains('revealed') || el.classList.contains('egg')) {
+    handleEgg(r, c, el);
+    return;
+  }
+
+  if (gameOver) return;
+
+  if (curMode === 'flag') {
+    interp.evaluate('(flag! ' + r + ' ' + c + ')', function(st) { applyState(st); });
+  } else {
+    if (firstClick) { firstClick = false; startTimer(); }
+    interp.evaluate('(reveal! ' + r + ' ' + c + ')', function(st) { applyState(st); });
+  }
+}
+
+// ================================================================
+// ボード DOM 構築
+// ================================================================
+function buildBoard() {
+  var diff  = DIFFS[curDiff];
+  var board = document.getElementById('board');
+  board.style.gridTemplateColumns = 'repeat(' + diff.cols + ', ' + diff.csz + 'px)';
+  board.style.setProperty('--csz', diff.csz + 'px');
+  board.innerHTML = '';
+
+  for (var r = 0; r < diff.rows; r++) {
+    for (var c = 0; c < diff.cols; c++) {
+      var el = document.createElement('div');
+      el.className = 'cell';
+      el.dataset.r = r;
+      el.dataset.c = c;
+      el.addEventListener('click', onCellClick);
+      board.appendChild(el);
+    }
+  }
+}
+
+// ================================================================
+// 新ゲーム
+// ================================================================
+function newGame() {
+  stopTimer();
+  firstClick = true;
+  gameOver   = false;
+  tapCounts  = {};
+  eggActive  = {};
+  var diff   = DIFFS[curDiff];
+  document.getElementById('timerDisplay').textContent = '—';
+  document.getElementById('mineCount').textContent   = diff.mines;
+  document.getElementById('feedback').innerHTML       = '&nbsp;';
+  document.getElementById('feedback').className      = 'feedback';
+  buildBoard();
+  updateModeIndicator();
+  interp.evaluate('(start! ' + diff.rows + ' ' + diff.cols + ' ' + diff.mines + ')',
+    function() {});
+}
+
+// ================================================================
+// 起動（minesweeper.scm を fetch してから開始）
+// ================================================================
+fetch('minesweeper.scm')
+  .then(function(r) { return r.text(); })
+  .then(function(code) {
+    interp.evaluate(code, function() {
+      newGame();
+    });
+  })
+  .catch(function(err) {
+    console.error('minesweeper.scm の読み込みに失敗:', err);
+  });
+</script>
+</body>
+</html>
