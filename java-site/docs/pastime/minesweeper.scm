@@ -70,7 +70,7 @@
 (define (place-mines!)
   (let loop ((placed 0))
     (when (< placed *mines*)
-      (let* ((k (inexact->exact (floor (random (* *rows* *cols*)))))
+      (let* ((k (js-random-int (* *rows* *cols*)))
              (r (quotient  k *cols*))
              (c (remainder k *cols*)))
         (if (cell-mine? (board-ref r c))
