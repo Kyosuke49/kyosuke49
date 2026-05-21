@@ -185,18 +185,53 @@
 const ARTWORKS = [
   {
     file: 'makomo.png',
-    date: '2025-02-14',
+    date: '2025-12-31',
     title:  { ja: 'マコモ湯の人', de:'Eine in Japan bekannte Liebhaberin von Badezimmern.', fi:'Japanissa tunnettu naispuolinen kylpyhuoneharrastaja.'},
     desc:   { ja: 'お風呂ガンジス川やんけ！', de:'Sie ist dafür bekannt, dass sie das Wasser in der Badewanne, in der sie täglich badet, überhaupt nicht wechselt.', fi:'Hän on tunnettu siitä, ettei vaihda lainkaan vettä kylpyammeessa, jossa hän kylpee päivittäin.'},
     medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
   },
   {
     file: 'makina.jpg',
-    date: '2025-01-10',
+    date: '2025-07-13',
     title:  { ja: 'マキナ' , de:'Makina', fi:'Makina'},
     desc:   { ja: '冲永蒔那です。' , de:'Sie heißt Makina.', fi:'Hän on Makina.'},
     medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
-  }
+  },
+{
+  file: 'edmond.png',
+  date: '2026-06-18',
+  title:  { ja: '前クソ8周年！', de: 'Edmond', fi: 'Edmond' },
+  desc:   { ja: '最近はずっとⅣのアプデを待ってます。', de:'Er heißt Edmomd.', fi:'Hän on Edmond.'},
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'Juho.png',
+  date: '2025-12-31',
+  title:  { ja: 'フィンランドのやばい議員', de: 'Juho Eerola', fi: 'Juho Eerola' },
+  desc:   { ja: 'なんだこいつ', de:'Wer ist das denn', fi:'Minä olen Sarah!'},
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'Takesima.jpg',
+  date: '2025-11-10',
+  title:  { ja: 'ありえないあいだみつを', de: 'Avantgardistische Typografie', fi: 'Avantgardistinen typografia' },
+  desc:   { ja: '絵って言っていいんかこれ', de:'Was auch immer andere sagen mögen, das hier ist Kunst.', fi:'Mitä muut sitten sanovatkin, tämä on taidetta.'},
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Lethe.jpg',
+  date: '2025-10-12',
+  title:  { ja: 'レーテー', de: 'Lethe', fi: 'Lethe' },
+  desc:   { ja: '一時期アイコンにしてたやつ', de:'Lethe.', fi:'Lethe.'},
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Chikawa.jpg',
+  date: '2025-09-21',
+  title:  { ja: 'ちいかわ', de: 'Chikawa', fi: 'Chikawa' },
+  desc:   { ja: 'ちいかわですが何か？', de:'Dieser Charakter heißt Chikawa. Merkt euch das bitte.', fi:'Tämän hahmon nimi on Chikawa. Muistakaa se.'},
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+}
 ];
 /* ====================================================
    UI文字列（言語ごと）
@@ -209,7 +244,7 @@ const UI = {
 /* ====================================================
    設定
 ==================================================== */
-const PER_PAGE = 6;
+const PER_PAGE = 4;
 // 日付降順ソート（新しい順）
 ARTWORKS.sort((a, b) => b.date.localeCompare(a.date));
 /* ====================================================
