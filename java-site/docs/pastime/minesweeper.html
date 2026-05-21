@@ -331,16 +331,40 @@ var interp = new BiwaScheme.Interpreter(function(err) {
 });
 
 // Scheme リスト → JS 配列
+// BiwaScheme 0.8.0 では Pair クラスはエクスポートされていないため
+// instanceof BiwaScheme.Pair は使えない。
+// 代わりに BiwaScheme.isPair() / BiwaScheme.isNil() を使う。
 function s2j(v) {
-  if (v === BiwaScheme.nil) return [];
-  if (v instanceof BiwaScheme.Pair) {
+  // Scheme #t/#f → JS true/false（先に処理して nil との混同を避ける）
+  if (v === true || v === false) return v;
+  // Scheme 数値・文字列はそのまま
+  if (typeof v === 'number' || typeof v === 'string') return v;
+  // Scheme '() (nil) → 空配列
+  if (BiwaScheme.isNil(v)) return [];
+  // Scheme Pair → 再帰的に JS 配列へ
+  if (BiwaScheme.isPair(v)) {
     var arr = [];
     var cur = v;
-    while (cur instanceof BiwaScheme.Pair) { arr.push(s2j(cur.car)); cur = cur.cdr; }
+    while (BiwaScheme.isPair(cur)) { arr.push(s2j(cur.car)); cur = cur.cdr; }
     return arr;
   }
   return v;
 }
+
+// Scheme から直接 applyState を呼べるように登録
+// evaluate() のコールバックは戻り値を受け取れない場合があるため、
+// Scheme 側から js-update! を呼び出して確実に DOM を更新する
+BiwaScheme.define_libfunc("js-update!", 1, 1, function(ar) {
+  applyState(ar[0]);
+  return BiwaScheme.undef;
+});
+
+// JS 側の Math.random() を Scheme に公開する
+// BiwaScheme 0.8.0 の組み込み random が動作しない場合に備えたフォールバック
+// (js-random-int n) → 0 以上 n 未満のランダム整数
+BiwaScheme.define_libfunc("js-random-int", 1, 1, function(ar) {
+  return Math.floor(Math.random() * ar[0]);
+});
 
 // ================================================================
 // 難易度
@@ -509,7 +533,7 @@ function handleEgg(r, c, el) {
     tapCounts[key] = 0;
     eggActive[key] = false;
     // Scheme に状態を再取得して再描画
-    interp.evaluate('(state)', function(st) { applyState(st); });
+    interp.evaluate('(js-update! (state))', function() {});
   }
 }
 
@@ -530,10 +554,10 @@ function onCellClick(e) {
   if (gameOver) return;
 
   if (curMode === 'flag') {
-    interp.evaluate('(flag! ' + r + ' ' + c + ')', function(st) { applyState(st); });
+    interp.evaluate('(js-update! (flag! ' + r + ' ' + c + '))', function() {});
   } else {
     if (firstClick) { firstClick = false; startTimer(); }
-    interp.evaluate('(reveal! ' + r + ' ' + c + ')', function(st) { applyState(st); });
+    interp.evaluate('(js-update! (reveal! ' + r + ' ' + c + '))', function() {});
   }
 }
 
@@ -575,7 +599,7 @@ function newGame() {
   document.getElementById('feedback').className      = 'feedback';
   buildBoard();
   updateModeIndicator();
-  interp.evaluate('(start! ' + diff.rows + ' ' + diff.cols + ' ' + diff.mines + ')',
+  interp.evaluate('(js-update! (start! ' + diff.rows + ' ' + diff.cols + ' ' + diff.mines + '))',
     function() {});
 }
 
