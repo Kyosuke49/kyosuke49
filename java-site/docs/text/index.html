@@ -14,14 +14,88 @@
       margin: 1rem 0 2rem;
     }
 
-    /* ── カード ── */
+    /* ── カード（CSS グリッド） ── */
     .novel-card {
       border: 1px solid var(--border);
       background: var(--white);
-      padding: 1.6rem 1.8rem;
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    /* ── ジャケット画像：左列・全行スパン ── */
+    .novel-jacket {
+      grid-column: 1;
+      grid-row: 1 / 4;
+      border-right: 1px solid var(--border);
+      background: #f0f0f0;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+    }
+    .novel-jacket-img {
+      flex: 1;
+      overflow: hidden;
+      min-height: 120px;
+    }
+    .novel-jacket-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .novel-jacket-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .novel-jacket-placeholder span {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-size: 0.68rem;
+      color: #bbb;
+      letter-spacing: 0.12em;
+      writing-mode: vertical-rl;
+    }
+    .novel-jacket-footer {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding: 0.42rem 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--white);
+    }
+    .novel-jacket-footer .novel-jacket-date {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    /* ── タイトルエリア：右列1行目 ── */
+    .novel-card-header {
+      grid-column: 2;
+      grid-row: 1;
+      padding: 1.6rem 1.8rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── あらすじエリア：右列2行目 ── */
+    .novel-card-synopsis {
+      grid-column: 2;
+      grid-row: 2;
+      padding: 0.9rem 1.8rem;
+    }
+
+    /* ── タグ+ボタンエリア：右列3行目 ── */
+    .novel-card-foot {
+      grid-column: 2;
+      grid-row: 3;
+      padding: 0 1.8rem 1.6rem;
     }
 
     .novel-card-top {
@@ -176,9 +250,39 @@
     .pagination-num.active { background: var(--black); color: var(--white); border-color: var(--black); }
 
     @media (max-width: 520px) {
-      .novel-card { padding: 1.2rem 1.2rem; }
+      /* 縦並び：タイトル → 画像+フッター → あらすじ → タグ+ボタン */
+      .novel-card {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+      }
+      .novel-card-header {
+        grid-column: 1;
+        grid-row: 1;
+        padding: 1.2rem 1.2rem 0.9rem;
+      }
+      .novel-jacket {
+        grid-column: 1;
+        grid-row: 2;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .novel-jacket-img {
+        min-height: 180px;
+        max-height: 240px;
+      }
+      .novel-card-synopsis {
+        grid-column: 1;
+        grid-row: 3;
+        padding: 0.9rem 1.2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .novel-card-foot {
+        grid-column: 1;
+        grid-row: 4;
+        padding: 0.9rem 1.2rem 1.2rem;
+      }
       .novel-card-top { flex-direction: column; }
-      .novel-meta { flex-direction: row; align-items: center; }
       .novel-card-bottom { flex-direction: column; align-items: flex-start; }
     }
   </style>
@@ -209,7 +313,8 @@
 var NOVELS = [
   {
     file:     'mamama.html',
-    date:     '2025-12-31',
+    image:    'mamama.jpg',
+    date:     null,
     status:   'wip',
     title:    { ja: '外余擺線上のマキナ' },
     synopsis: {
@@ -281,7 +386,7 @@ function setPageHash(n) {
 function buildCard(novel) {
   var statusClass = novel.status === 'done' ? 'novel-status-done' : 'novel-status-wip';
   var statusText  = novel.status === 'done' ? ui('done') : ui('wip');
-  var dateStr     = formatDate(novel.date);
+  var dateStr     = novel.date ? formatDate(novel.date) : '';
 
   var tagsHTML = '';
   if (novel.tags && novel.tags.length) {
@@ -292,19 +397,33 @@ function buildCard(novel) {
       '</div>';
   }
 
+  var jacketImgHTML = novel.image
+    ? '<img src="' + esc(novel.image) + '" alt="' + esc(t(novel.title)) + '">'
+    : '<div class="novel-jacket-placeholder"><span>' + esc(t(novel.title)) + '</span></div>';
+
+  var jacketHTML =
+    '<div class="novel-jacket">' +
+      '<div class="novel-jacket-img">' + jacketImgHTML + '</div>' +
+      '<div class="novel-jacket-footer">' +
+        (novel.date ? '<time class="novel-jacket-date" datetime="' + esc(novel.date) + '">' + esc(dateStr) + '</time>' : '') +
+        '<span class="novel-status ' + statusClass + '">' + esc(statusText) + '</span>' +
+      '</div>' +
+    '</div>';
+
   return (
     '<div class="novel-card">' +
-      '<div class="novel-card-top">' +
+      jacketHTML +
+      '<div class="novel-card-header">' +
         '<h2 class="novel-title">' + esc(t(novel.title)) + '</h2>' +
-        '<div class="novel-meta">' +
-          '<time class="novel-date" datetime="' + esc(novel.date) + '">' + esc(dateStr) + '</time>' +
-          '<span class="novel-status ' + statusClass + '">' + esc(statusText) + '</span>' +
-        '</div>' +
       '</div>' +
-      (t(novel.synopsis) ? '<p class="novel-synopsis">' + esc(t(novel.synopsis)) + '</p>' : '') +
-      '<div class="novel-card-bottom">' +
-        tagsHTML +
-        '<a href="' + esc(novel.file) + '" class="novel-read-btn">' + ui('read') + '</a>' +
+      '<div class="novel-card-synopsis">' +
+        (t(novel.synopsis) ? '<p class="novel-synopsis">' + esc(t(novel.synopsis)) + '</p>' : '') +
+      '</div>' +
+      '<div class="novel-card-foot">' +
+        '<div class="novel-card-bottom">' +
+          tagsHTML +
+          '<a href="' + esc(novel.file) + '" class="novel-read-btn">' + ui('read') + '</a>' +
+        '</div>' +
       '</div>' +
     '</div>'
   );
