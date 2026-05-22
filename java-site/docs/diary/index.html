@@ -110,6 +110,20 @@
       color: var(--black);
     }
 
+    /* ── スクロールアニメーション本文 ── */
+    .entry-body-scroll {
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .entry-body-scroll .entry-body-text {
+      display: inline-block;
+      animation: entryBodyScroll 7s linear infinite;
+    }
+    @keyframes entryBodyScroll {
+      0%   { transform: translateX(110%); }
+      100% { transform: translateX(-110%); }
+    }
+
     /* ── エントリーなし ── */
     .diary-empty {
       text-align: center;
@@ -221,6 +235,38 @@ var ENTRIES = [
     title: { ja: '作った' },
     body:  { ja: '2025のうちに作っといた方がいいことあるかなって' },
     tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
+  },
+{
+     date:  '2026-05-21',
+     title: { ja: '公開範囲を拡大！' },
+     body:  { ja: '一部のネッ友たちに公開してみました。みんなのアドバイスを待ってるよ！', de:'Ich habe die Seite ein paar Freunden gezeigt. Bin gespannt auf eure Vorschläge!', fi:'Julkaisin sivuston jo muutamille nettikavereille. Odotan teidän kommenttejanne!' },
+     tags:  [{ ja: 'お知らせ', de: 'Mitteilung', fi: 'Ilmoitus' }]
+   },
+{
+    date:  '2026-05-20',
+    title: { ja: '☆大改革☆' },
+    body:  { ja: '本当はこれまでもちょくちょく更新してたんですよ？独り言ページに記述し忘れてただけで…' },
+    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
+  },
+{
+    date:  '2026-05-21',
+    title: { ja: '幻リプのガチャで大爆死した' },
+    body:  { ja: '全部が全部意味のある独り言だと思うなよ。' },
+    tags:  [{ ja: '雑談', de: 'Gelaber', fi: 'Höpinää' }]
+  },
+{
+    date:  '2026-05-22',
+    title: { ja: 'なにこれ！楽しい！(2)' },
+    body:  { ja: 'ここの文字動かせるやんけ！' },
+    animate: 'scroll',
+    tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
+  },
+{
+    date:  '2026-05-22',
+    title: { ja: 'なにこれ！楽しい！' },
+    body:  { ja: 'ここの文タップしてみ？' },
+    tap:   { ja: 'へへ！びっくりした？' },
+    tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
   }
 ];
 
@@ -236,7 +282,7 @@ var UI = {
 /* ====================================================
    設定
 ==================================================== */
-var PER_PAGE = 10;
+var PER_PAGE = 4;
 
 /* 日付降順ソート */
 ENTRIES.sort(function(a, b) { return b.date.localeCompare(a.date); });
@@ -249,6 +295,8 @@ var currentPage = 1;
 /* エントリーごとの表示言語（絶対インデックス → 言語コード）
    グローバル言語切替の影響を受けず、エントリー内ボタンでのみ変化する */
 var entryLangs  = {};
+/* タップ済みエントリー（絶対インデックス → true） */
+var tapRevealed = {};
 
 /* ====================================================
    ユーティリティ
@@ -299,10 +347,21 @@ function buildCard(entry, absIdx) {
   }).join('');
 
   /* ── 本文 ── */
+  var isTapEntry    = !!entry.tap;
+  var isTapRevealed = isTapEntry && !!tapRevealed[absIdx];
   var bodyHTML = bodyLangs.map(function(l) {
-    var hidden = l !== entryLang ? ' style="display:none"' : '';
-    return '<p class="entry-body-text" data-lang="' + l + '"' + hidden + '>' +
-      esc(entry.body[l] || '').replace(/\n/g, '<br>') + '</p>';
+    var hidden  = l !== entryLang ? ' style="display:none"' : '';
+    var text    = isTapRevealed
+      ? esc(entry.tap[l] || entry.tap['ja'] || '').replace(/\n/g, '<br>')
+      : esc(entry.body[l] || '').replace(/\n/g, '<br>');
+    var tapAttr = (isTapEntry && !isTapRevealed)
+      ? ' onclick="revealTap(' + absIdx + ')" style="cursor:pointer;' +
+        (l !== entryLang ? 'display:none;' : '') + '"'
+      : hidden;
+    if (isTapEntry && !isTapRevealed) {
+      return '<p class="entry-body-text" data-lang="' + l + '"' + tapAttr + '>' + text + '</p>';
+    }
+    return '<p class="entry-body-text" data-lang="' + l + '"' + hidden + '>' + text + '</p>';
   }).join('');
 
   /* ── エントリー内言語切替ボタン（翻訳版がある場合のみ） ── */
@@ -336,10 +395,33 @@ function buildCard(entry, absIdx) {
         '</div>' +
         langBtnsHTML +
       '</div>' +
-      '<div class="diary-entry-body">' + bodyHTML + '</div>' +
+      '<div class="diary-entry-body' + (entry.animate === 'scroll' ? ' entry-body-scroll' : '') + '">' + bodyHTML + '</div>' +
       tagsHTML +
     '</div>'
   );
+}
+
+/* ====================================================
+   タップ仕掛けの発動
+   ─────────────────────────────────────────────────
+   tap フィールドを持つエントリーの本文をタップしたとき呼ばれる。
+   状態を記録してカードだけ再描画する。
+==================================================== */
+function revealTap(absIdx) {
+  tapRevealed[absIdx] = true;
+  var card = document.querySelector('[data-entry-idx="' + absIdx + '"]');
+  if (!card) return;
+  var entry = ENTRIES[absIdx];
+  if (!entry || !entry.tap) return;
+  card.querySelectorAll('.entry-body-text').forEach(function(p) {
+    var l = p.getAttribute('data-lang');
+    var tapText = esc(entry.tap[l] || entry.tap['ja'] || '').replace(/\n/g, '<br>');
+    p.innerHTML  = tapText;
+    p.style.cursor          = '';
+    p.style.textDecoration  = '';
+    p.style.textUnderlineOffset = '';
+    p.onclick = null;
+  });
 }
 
 /* ====================================================
