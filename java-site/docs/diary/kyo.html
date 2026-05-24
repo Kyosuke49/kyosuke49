@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>おかえりなさい</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Space+Grotesk:wght@300;400;500;700&family=IM+Fell+English:ital@0;1&family=Fira+Code:wght@300;400;500&display=swap">
+
+<style>
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Regular.ttf')   format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Light.ttf')      format('truetype'); font-weight: 300; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-ExtraLight.ttf') format('truetype'); font-weight: 200; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Bold.ttf')       format('truetype'); font-weight: 700; }
+@font-face { font-family: 'BreitkopfFraktur'; src: url('java-site/docs/fonts/BreitkopfFraktur.ttf') format('truetype'); }
+@font-face { font-family: 'ImpactCustom';     src: url('java-site/docs/fonts/impact.ttf')          format('truetype'); }
+@font-face { font-family: 'Geosans';          src: url('java-site/docs/fonts/GeosansLight.ttf')    format('truetype'); }
+@font-face { font-family: 'Geosans';          src: url('java-site/docs/fonts/GeosansLight-Oblique.ttf') format('truetype'); font-style: oblique; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-ja:    'Noto Serif JP', 'Kazesawa', serif;
+  --font-de:    'Space Grotesk', 'Geosans', sans-serif;
+  --font-fi:    'IM Fell English', serif;
+  --font-mono:  'Fira Code', 'Courier New', monospace;
+  --bg:         #060810;
+  --bg-surface: #090c14;
+  --bg-panel:   #070a12;
+  --text:       #b8c8e0;
+  --text-dim:   #4a5a70;
+  --text-bright:#ddeeff;
+  --accent:     #00c8f0;
+  --accent-dim: rgba(0,200,240,0.12);
+  --accent-glow:rgba(0,200,240,0.28);
+  --accent-mid: rgba(0,200,240,0.4);
+  --gold:       #c8a84a;
+  --gold-dim:   rgba(200,168,74,0.2);
+  --border:     rgba(0,200,240,0.1);
+  --border-hard:rgba(0,200,240,0.2);
+  --transition: 250ms ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+body.lang-de { font-family: var(--font-mono); }
+body.lang-fi { font-family: var(--font-mono); }
+
+::selection { background: var(--accent); color: #000; }
+
+/* =====================
+   キーフレーム
+===================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUpDelayed {
+  0%,40% { opacity: 0; transform: translateY(10px); }
+  100%   { opacity: 1; transform: translateY(0); }
+}
+@keyframes grid-drift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+@keyframes scan-pass {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+@keyframes glow-pulse {
+  0%,100% { opacity: 0.4; }
+  50%     { opacity: 0.9; }
+}
+@keyframes cursor-blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0; }
+}
+@keyframes data-flow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 0% 100%; }
+}
+@keyframes badge-glow {
+  0%,100% { box-shadow: 0 0 6px var(--gold-dim), inset 0 0 6px var(--gold-dim); }
+  50%     { box-shadow: 0 0 14px rgba(200,168,74,0.4), inset 0 0 10px rgba(200,168,74,0.15); }
+}
+@keyframes tool-open {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.anim-title    { animation: fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+.anim-subtitle { animation: fadeInUpDelayed 1.1s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+/* =====================
+   ヘッダー
+===================== */
+.site-header {
+  background: var(--bg-panel);
+  color: var(--text-bright);
+  padding: 4.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-hard);
+}
+
+/* 動くグリッド */
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: grid-drift 12s linear infinite;
+  pointer-events: none;
+}
+
+/* スキャンライン */
+.site-header::after {
+  content: '';
+  position: absolute; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(transparent, rgba(0,200,240,0.035) 50%, transparent);
+  animation: scan-pass 8s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header-accent-line {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 30%, var(--accent) 70%, transparent 100%);
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+.header-inner { position: relative; z-index: 1; }
+
+/* クリアランスバッジ */
+.clearance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(200,168,74,0.4);
+  padding: 0.2rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.8rem;
+  animation: badge-glow 4s ease-in-out infinite;
+}
+.clearance-badge::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+}
+
+.site-title {
+  display: none;
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  letter-spacing: 0.14em;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--text-bright);
+  text-shadow:
+    0 0 30px rgba(0,200,240,0.4),
+    0 0 70px rgba(0,200,240,0.15);
+}
+.site-title[data-lang="ja"] { font-family: 'Kazesawa', 'Noto Serif JP', sans-serif; }
+.site-title[data-lang="de"] { font-family: 'BreitkopfFraktur', sans-serif; letter-spacing: 0.08em; }
+.site-title[data-lang="fi"] { font-family: 'ImpactCustom', sans-serif; letter-spacing: 0.04em; }
+
+.site-subtitle {
+  display: none;
+  margin-top: 1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  opacity: 0.35;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+/* =====================
+   レイアウト
+===================== */
+.layout {
+  flex: 1;
+  max-width: 1200px; width: 100%;
+  margin: 0 auto;
+  padding: 3.5rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 3.5rem;
+}
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+/* =====================
+   言語切替
+===================== */
+.lang-switch {
+  display: flex; flex-wrap: nowrap; overflow-x: auto;
+  gap: 0.5rem; margin-bottom: 2.5rem;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.lang-switch::-webkit-scrollbar { display: none; }
+
+.lang-btn {
+  padding: 0.4rem 1.2rem;
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  border: 1px solid var(--border-hard);
+  background: transparent; color: var(--accent-mid);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              border-color var(--transition), box-shadow var(--transition);
+  font-family: var(--font-mono);
+  white-space: nowrap; flex-shrink: 0;
+}
+.lang-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  color: var(--accent);
+}
+.lang-btn.active {
+  background: var(--accent);
+  color: #000; border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* =====================
+   本文エリア
+===================== */
+.lang-block { display: none; }
+.lang-block.visible { display: block; }
+.content-text { opacity: 1; transition: opacity var(--transition); }
+.content-text.fading { opacity: 0; }
+
+/* ターミナル風ブロック */
+.terminal-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-mid);
+  padding: 1.5rem 1.8rem;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.terminal-block::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -1px; left: 1.2rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--bg-surface);
+  padding: 0 0.4rem;
+  line-height: 0;
+  top: 0; transform: translateY(-50%);
+}
+.terminal-block p {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--text);
+  font-weight: 300;
+}
+
+/* アクセスタグ */
+.access-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: rgba(0,200,240,0.25);
+  letter-spacing: 0.12em;
+  margin-top: 1.2rem;
+}
+.access-tag::before { content: '❯ '; color: var(--accent-mid); }
+
+/* メタ情報行 */
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.meta-pill {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-hard);
+  padding: 0.2rem 0.6rem;
+  color: var(--text-dim);
+}
+.meta-pill.active { border-color: rgba(200,168,74,0.35); color: var(--gold); }
+
+/* =====================
+   クイックアクセスパネル
+===================== */
+.quick-access { }
+
+.qa-heading {
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent-mid);
+  font-family: var(--font-mono);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.qa-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* トップへ戻るボタン：幅いっぱい */
+.qa-btn-top {
+  grid-column: 1 / -1;
+}
+
+.qa-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color var(--transition), color var(--transition),
+              background var(--transition), box-shadow var(--transition);
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.qa-btn::before {
+  content: '';
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.qa-btn:hover {
+  border-color: var(--border-hard);
+  color: var(--text-bright);
+  background: rgba(0,200,240,0.04);
+  box-shadow: 0 0 12px rgba(0,200,240,0.06);
+}
+.qa-btn:hover::before { opacity: 1; }
+.qa-btn:hover .qa-icon { color: var(--accent); }
+
+.qa-btn-top.qa-btn {
+  border-color: var(--border-hard);
+  color: var(--text);
+}
+.qa-btn-top.qa-btn:hover {
+  border-color: rgba(200,168,74,0.4);
+  color: var(--gold);
+  box-shadow: 0 0 12px var(--gold-dim);
+}
+.qa-btn-top.qa-btn:hover::before { background: var(--gold); opacity: 1; }
+
+.qa-icon {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: color var(--transition);
+  flex-shrink: 0;
+  font-style: normal;
+}
+.qa-label { display: flex; flex-direction: column; gap: 0.1rem; }
+.qa-label-main { font-size: 0.7rem; }
+.qa-label-sub  { font-size: 0.55rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+/* =====================
+   サイドバー
+===================== */
+.sidebar { display: flex; flex-direction: column; gap: 2rem; }
+
+/* =====================
+   情報ウィンドウ
+===================== */
+.info-window {
+  background: var(--bg-panel);
+  color: var(--text);
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-hard);
+  box-shadow:
+    0 0 0 1px rgba(0,200,240,0.06),
+    0 24px 60px rgba(0,0,0,0.6),
+    inset 0 0 60px rgba(0,200,240,0.015);
+}
+
+/* ウィンドウタイトルバー */
+.info-titlebar {
+  background: rgba(0,200,240,0.05);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-mid);
+}
+.info-titlebar-dots { display: flex; gap: 0.35rem; }
+.info-titlebar-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-dim); opacity: 0.4;
+}
+.info-titlebar-dot:first-child { background: #e83929; opacity: 0.7; }
+
+.info-body { padding: 0 1.2rem; }
+
+/* トップグロー */
+.info-window::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: glow-pulse 5s ease-in-out infinite;
+}
+
+.info-row { padding: 0.85rem 0; border-bottom: 1px solid rgba(0,200,240,0.06); }
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+  font-size: 0.58rem;
+  color: var(--accent-mid);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.info-status { display: flex; justify-content: space-between; align-items: center; }
+.status-label { font-size: 0.58rem; color: var(--accent-mid); letter-spacing: 0.2em; text-transform: uppercase; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.65rem; letter-spacing: 0.12em;
+  color: var(--gold);
+  border: 1px solid rgba(200,168,74,0.35);
+  padding: 0.1rem 0.5rem;
+}
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 5px var(--gold);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.info-datetime {
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+.info-datetime::after {
+  content: '_';
+  animation: cursor-blink 1s step-end infinite;
+  color: var(--accent);
+}
+
+.info-jd { color: var(--text-dim); letter-spacing: 0.08em; }
+
+/* システムメッセージ */
+.system-message {
+  color: var(--text-dim);
+  white-space: pre-line;
+  border-left: 1px solid var(--border-hard);
+  padding-left: 0.75rem;
+  line-height: 1.7;
+  font-size: 0.72rem;
+}
+.system-message .sm-key {
+  color: var(--accent-mid);
+}
+
+/* フラグメンツ（暗号文っぽいログ） */
+.log-area {
+  line-height: 1.75;
+  font-size: 0.72rem;
+}
+.log-line { display: block; color: var(--text-dim); }
+.log-line.current { color: var(--text); }
+.log-line .log-ts { color: rgba(0,200,240,0.3); margin-right: 0.5em; }
+.log-line .log-tag { color: var(--accent-mid); margin-right: 0.4em; }
+.log-nav {
+  margin-top: 0.6rem;
+  display: flex; gap: 0.5rem; align-items: center;
+}
+.log-nav-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-dim); font-family: var(--font-mono);
+  font-size: 0.6rem; padding: 0.2rem 0.5rem;
+  cursor: pointer; transition: border-color var(--transition), color var(--transition);
+  letter-spacing: 0.1em;
+}
+.log-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.log-counter { font-size: 0.58rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+/* =====================
+   ツールウィンドウ（フローティングパネル）
+===================== */
+#tool-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 8000;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+#tool-overlay.active {
+  display: flex;
+  background: rgba(0,0,0,0.7);
+}
+
+.tool-panel {
+  display: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hard);
+  box-shadow: 0 0 0 1px rgba(0,200,240,0.08), 0 40px 100px rgba(0,0,0,0.8);
+  width: 90%;
+  max-width: 460px;
+  position: relative;
+  animation: tool-open 0.18s ease forwards;
+}
+.tool-panel.visible { display: block; }
+.tool-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.tool-titlebar {
+  background: rgba(0,200,240,0.04);
+  border-bottom: 1px solid var(--border);
+  padding: 0.55rem 1.2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-mid);
+}
+.tool-close {
+  background: none; border: none; color: var(--text-dim);
+  font-family: var(--font-mono); font-size: 0.75rem;
+  cursor: pointer; padding: 0 0.2rem; line-height: 1;
+  transition: color var(--transition);
+}
+.tool-close:hover { color: #e83929; }
+
+.tool-body { padding: 1.5rem 1.4rem; }
+
+/* 共通インプット */
+.tool-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  transition: border-color var(--transition);
+  resize: vertical;
+}
+.tool-input:focus { border-color: var(--accent-mid); }
+
+.tool-btn {
+  background: transparent;
+  border: 1px solid var(--border-hard);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.12em;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+.tool-btn:hover {
+  background: var(--accent-dim);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.tool-output {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-mid);
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  word-break: break-all;
+  min-height: 2.5rem;
+  margin-top: 0.8rem;
+  white-space: pre-wrap;
+}
+.tool-output.muted { color: var(--text-dim); }
+
+.tool-row {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  margin-bottom: 0.6rem; flex-wrap: wrap;
+}
+.tool-label {
+  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 0.3rem; display: block;
+}
+
+/* 計算機キーパッド */
+.calc-display {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-mid);
+  padding: 0.7rem 1rem;
+  text-align: right;
+  font-size: 1.4rem;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  min-height: 3rem;
+  margin-bottom: 0.8rem;
+  word-break: break-all;
+}
+.calc-expr {
+  font-size: 0.65rem; color: var(--text-dim);
+  text-align: right; min-height: 1em; margin-bottom: 0.3rem;
+}
+.calc-pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+.calc-key {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.65rem 0;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  text-align: center;
+}
+.calc-key:hover { background: rgba(0,200,240,0.06); border-color: var(--border-hard); }
+.calc-key:active { background: rgba(0,200,240,0.12); }
+.calc-key.op   { color: var(--accent); }
+.calc-key.eq   { background: var(--accent); color: #000; border-color: var(--accent); }
+.calc-key.eq:hover { box-shadow: 0 0 12px var(--accent-glow); }
+.calc-key.clr  { color: #e8795a; }
+
+/* 時計パネル */
+.tz-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.tz-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 0.75rem 0.9rem;
+}
+.tz-name  { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.3rem; }
+.tz-time  { font-size: 1rem; color: var(--accent); letter-spacing: 0.05em; }
+.tz-date  { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.15rem; }
+
+/* =====================
+   フッター
+===================== */
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 1.8rem 2rem;
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; flex-wrap: wrap;
+}
+.footer-copy {
+  font-size: 0.65rem; color: var(--text-dim);
+  letter-spacing: 0.06em; font-family: var(--font-mono);
+}
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a {
+  font-size: 0.65rem; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.15em;
+  text-decoration: none; transition: color var(--transition);
+}
+.footer-links a:hover { color: var(--accent); }
+</style>
+</head>
+
+<body class="lang-ja">
+
+<!-- ヘッダー -->
+<header class="site-header">
+  <div class="header-accent-line"></div>
+  <div class="header-inner">
+    <div class="clearance-badge" id="clearanceBadge">CLEARANCE · LAYER_1 · AUTHORIZED</div>
+    <h1 class="site-title anim-title" data-lang="ja">偽造切手</h1>
+    <h1 class="site-title anim-title" data-lang="de">LOS 49</h1>
+    <h1 class="site-title anim-title" data-lang="fi">ERÄ 49</h1>
+    <p class="site-subtitle anim-subtitle" data-lang="ja">作品・文章・音楽</p>
+    <p class="site-subtitle anim-subtitle" data-lang="de">Werke · Texte · Musik</p>
+    <p class="site-subtitle anim-subtitle" data-lang="fi">Teoksia · Tekstejä · Musiikkia</p>
+  </div>
+</header>
+
+<!-- メイン -->
+<div class="layout">
+  <main class="content">
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('de')">Deutsch</button>
+      <button class="lang-btn" onclick="setLang('fi')">Suomi</button>
+    </div>
+
+    <div class="content-text" id="contentText">
+      <div class="lang-block visible" data-lang="ja">
+        <div class="terminal-block" data-label="TRANSMISSION">
+          <p>ここに辿り着いたということは、<br>君は競介ととっても仲良しだってこと！</p>
+        </div>
+        <p class="access-tag">access_granted :: layer_1 :: node_kyo</p>
+        <div class="meta-row">
+          <span class="meta-pill active">VIP</span>
+          <span class="meta-pill">VERIFIED</span>
+          <span class="meta-pill">ENCRYPTED</span>
+        </div>
+      </div>
+      <div class="lang-block" data-lang="de">
+        <div class="terminal-block" data-label="TRANSMISSION">
+          <p>Wenn du diese Seite gefunden hast,<br>sind wir wohl ziemlich eng befreundet!</p>
+        </div>
+        <p class="access-tag">access_granted :: layer_1 :: node_kyo</p>
+        <div class="meta-row">
+          <span class="meta-pill active">VIP</span>
+          <span class="meta-pill">VERIFIED</span>
+          <span class="meta-pill">ENCRYPTED</span>
+        </div>
+      </div>
+      <div class="lang-block" data-lang="fi">
+        <div class="terminal-block" data-label="TRANSMISSION">
+          <p>Jos löysit tämän sivun,<br>olemme varmaan todella läheisiä ystäviä!</p>
+        </div>
+        <p class="access-tag">access_granted :: layer_1 :: node_kyo</p>
+        <div class="meta-row">
+          <span class="meta-pill active">VIP</span>
+          <span class="meta-pill">VERIFIED</span>
+          <span class="meta-pill">ENCRYPTED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイックアクセス -->
+    <div class="quick-access" style="margin-top:3rem;">
+      <p class="qa-heading">Quick Access</p>
+      <div class="qa-grid">
+        <!-- トップへ -->
+        <a href="https://kyosuke49.github.io/kyosuke49/index.html" class="qa-btn qa-btn-top" target="_blank" rel="noopener">
+          <i class="qa-icon">↩</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="トップページへ戻る" data-de="Zurück zur Startseite" data-fi="Takaisin etusivulle">トップページへ戻る</span>
+            <span class="qa-label-sub">index.html</span>
+          </span>
+        </a>
+
+        <!-- 計算機 -->
+        <button class="qa-btn" onclick="openTool('calc')">
+          <i class="qa-icon">⊞</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="計算機" data-de="Taschenrechner" data-fi="Laskin">計算機</span>
+            <span class="qa-label-sub">calculator</span>
+          </span>
+        </button>
+
+        <!-- 文字数カウント -->
+        <button class="qa-btn" onclick="openTool('charcount')">
+          <i class="qa-icon">≡</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="文字数カウント" data-de="Zeichenzähler" data-fi="Merkkimäärä">文字数カウント</span>
+            <span class="qa-label-sub">char counter</span>
+          </span>
+        </button>
+
+        <!-- Base64 -->
+        <button class="qa-btn" onclick="openTool('base64')">
+          <i class="qa-icon">⇌</i>
+          <span class="qa-label">
+            <span class="qa-label-main">Base64</span>
+            <span class="qa-label-sub">encode / decode</span>
+          </span>
+        </button>
+
+        <!-- タイムゾーン -->
+        <button class="qa-btn" onclick="openTool('timezone')">
+          <i class="qa-icon">◷</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="世界時計" data-de="Weltzeituhr" data-fi="Maailmankello">世界時計</span>
+            <span class="qa-label-sub">world clock</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="info-window">
+      <div class="info-titlebar">
+        <div class="info-titlebar-dots">
+          <div class="info-titlebar-dot"></div>
+          <div class="info-titlebar-dot"></div>
+          <div class="info-titlebar-dot"></div>
+        </div>
+        <span>SYS_MONITOR · v2.1</span>
+        <span></span>
+      </div>
+      <div class="info-body">
+
+        <div class="info-row">
+          <div class="info-status">
+            <span class="status-label">STATUS</span>
+            <span class="status-badge">CLASSIFIED</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">DATE_TIME [LOCAL]</div>
+          <div class="info-datetime" id="infoDatetime">----</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">JULIAN_DATE</div>
+          <div class="info-jd" id="infoJulian">----</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">SYSTEM_MESSAGE</div>
+          <div class="system-message" id="infoDaily"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label"><span>PERSONAL_LOG</span></div>
+          <div class="log-area" id="logArea"></div>
+          <div class="log-nav">
+            <button class="log-nav-btn" onclick="prevLog()">◂ prev</button>
+            <button class="log-nav-btn" onclick="nextLog()">next ▸</button>
+            <span class="log-counter" id="logCounter"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- フッター -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-copy">© 2025 Pfötchengebendeningen — 偽造切手 / LOS 49 / ERÄ 49</p>
+    <div class="footer-links">
+      <a href="https://x.com/ningaesst?s=21" target="_blank" rel="noopener">X / Twitter</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ツールオーバーレイ -->
+<div id="tool-overlay">
+
+  <!-- 計算機 -->
+  <div class="tool-panel" id="panel-calc">
+    <div class="tool-titlebar">
+      <span>Calculator</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="calc-expr" id="calcExpr"></div>
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-pad">
+        <button class="calc-key clr" onclick="calcClear()">C</button>
+        <button class="calc-key op"  onclick="calcSign()">±</button>
+        <button class="calc-key op"  onclick="calcPercent()">%</button>
+        <button class="calc-key op"  onclick="calcOp('/')">÷</button>
+        <button class="calc-key"     onclick="calcNum('7')">7</button>
+        <button class="calc-key"     onclick="calcNum('8')">8</button>
+        <button class="calc-key"     onclick="calcNum('9')">9</button>
+        <button class="calc-key op"  onclick="calcOp('*')">×</button>
+        <button class="calc-key"     onclick="calcNum('4')">4</button>
+        <button class="calc-key"     onclick="calcNum('5')">5</button>
+        <button class="calc-key"     onclick="calcNum('6')">6</button>
+        <button class="calc-key op"  onclick="calcOp('-')">−</button>
+        <button class="calc-key"     onclick="calcNum('1')">1</button>
+        <button class="calc-key"     onclick="calcNum('2')">2</button>
+        <button class="calc-key"     onclick="calcNum('3')">3</button>
+        <button class="calc-key op"  onclick="calcOp('+')">+</button>
+        <button class="calc-key"     onclick="calcNum('0')" style="grid-column:span 2">0</button>
+        <button class="calc-key"     onclick="calcDot()">.</button>
+        <button class="calc-key eq"  onclick="calcEquals()">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文字数カウント -->
+  <div class="tool-panel" id="panel-charcount">
+    <div class="tool-titlebar">
+      <span>Char Counter</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <label class="tool-label" id="ccLabel">テキストを入力</label>
+      <textarea class="tool-input" id="ccInput" rows="5" oninput="updateCharCount()" placeholder="ここに入力..."></textarea>
+      <div class="tool-output muted" id="ccOutput">----</div>
+    </div>
+  </div>
+
+  <!-- Base64 -->
+  <div class="tool-panel" id="panel-base64">
+    <div class="tool-titlebar">
+      <span>Base64 Encode / Decode</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <label class="tool-label" id="b64Label">入力</label>
+      <textarea class="tool-input" id="b64Input" rows="3" placeholder="テキストまたはBase64文字列を入力"></textarea>
+      <div class="tool-row" style="margin-top:0.6rem;">
+        <button class="tool-btn" onclick="doBase64('encode')" id="b64EncBtn">Encode →</button>
+        <button class="tool-btn" onclick="doBase64('decode')" id="b64DecBtn">← Decode</button>
+      </div>
+      <label class="tool-label" id="b64OutLabel">出力</label>
+      <div class="tool-output" id="b64Output">----</div>
+    </div>
+  </div>
+
+  <!-- 世界時計 -->
+  <div class="tool-panel" id="panel-timezone">
+    <div class="tool-titlebar">
+      <span>World Clock</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="tz-grid" id="tzGrid"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/daily.js"></script>
+<script>
+/* ============================================================
+   定数・データ
+============================================================ */
+const LOG_ENTRIES = [
+  { ts: '2025-03-14', tag: 'NOTE', text: 'ピンチョンを読みなさい' },
+  { ts: '2025-04-01', tag: 'LOG',  text: 'ここの文章毎回違うんやで' },
+  { ts: '2025-04-19', tag: 'NOTE', text: 'Arcaeaの彩夢ちゃんかわいくね？' },
+  { ts: '2025-05-03', tag: 'LOG',  text: '競介は純日本人です' },
+  { ts: '2025-05-17', tag: 'INFO', text: 'Meine Lieblingszahl ist 29!' },
+  { ts: '2025-06-02', tag: 'LOG',  text: '君は右翼すぎて左翼になっている' },
+  { ts: '2025-06-21', tag: 'NOTE', text: 'Saatko tarpeeksi auringonvaloa?' },
+  { ts: '2025-07-08', tag: 'INFO', text: 'Nim mag dich.' },
+  { ts: '2025-08-14', tag: 'LOG',  text: 'Trink doch ZONe.' },
+  { ts: '2025-09-01', tag: 'NOTE', text: 'Tulkoon LISP' },
+  { ts: '2025-10-10', tag: 'INFO', text: 'Anzeigechance etwa 5%. Sie haben Glück!' },
+  { ts: '2025-11-03', tag: 'LOG',  text: '啜るー！' },
+];
+
+const SYS_MESSAGES = {
+  ja: '認証済み\n第一階層クリアランス\nnode_kyo :: online',
+  de: 'Authentifiziert\nFreigabe Ebene 1\nnode_kyo :: online',
+  fi: 'Todennettu\nTaso 1 käyttöoikeus\nnode_kyo :: online',
+};
+
+const WORLD_CLOCKS = [
+  { label: 'Tokyo', tz: 'Asia/Tokyo' },
+  { label: 'Berlin', tz: 'Europe/Berlin' },
+  { label: 'Helsinki', tz: 'Europe/Helsinki' },
+  { label: 'New York', tz: 'America/New_York' },
+  { label: 'London', tz: 'Europe/London' },
+  { label: 'Los Angeles', tz: 'America/Los_Angeles' },
+];
+
+const TIME_ZONES = { ja: 'Asia/Tokyo', de: 'Europe/Berlin', fi: 'Europe/Helsinki' };
+
+/* ============================================================
+   状態
+============================================================ */
+let currentLang  = localStorage.getItem('lang') || 'ja';
+let logIdx       = 0;
+let tzInterval   = null;
+let currentPanel = null;
+
+/* ============================================================
+   言語切替
+============================================================ */
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.body.className = 'lang-' + lang;
+
+  document.querySelectorAll('.site-title').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+  document.querySelectorAll('.site-subtitle').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+  document.querySelectorAll('.lang-block').forEach(el => {
+    el.classList.toggle('visible', el.dataset.lang === lang);
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
+  });
+
+  /* Quick Access ラベル多言語 */
+  document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+    el.textContent = el.dataset[lang];
+  });
+
+  /* CCラベル */
+  const ccLabelMap = { ja: 'テキストを入力', de: 'Text eingeben', fi: 'Syötä teksti' };
+  const b64LabelMap = { ja: '入力', de: 'Eingabe', fi: 'Syöte' };
+  const b64OutMap = { ja: '出力', de: 'Ausgabe', fi: 'Tulos' };
+  const b64EncMap = { ja: 'Encode →', de: 'Kodieren →', fi: 'Koodaa →' };
+  const b64DecMap = { ja: '← Decode', de: '← Dekodieren', fi: '← Dekoodaa' };
+  document.getElementById('ccLabel').textContent   = ccLabelMap[lang];
+  document.getElementById('b64Label').textContent  = b64LabelMap[lang];
+  document.getElementById('b64OutLabel').textContent = b64OutMap[lang];
+  document.getElementById('b64EncBtn').textContent = b64EncMap[lang];
+  document.getElementById('b64DecBtn').textContent = b64DecMap[lang];
+
+  updateInfo();
+  renderSysMsg();
+  renderLog();
+}
+
+function setLang(lang) {
+  if (lang === currentLang) return;
+  const ct = document.getElementById('contentText');
+  ct.classList.add('fading');
+  setTimeout(() => { applyLang(lang); ct.classList.remove('fading'); }, 250);
+}
+
+function langLabel(lang) {
+  return { ja: '日本語', de: 'Deutsch', fi: 'Suomi' }[lang];
+}
+
+/* ============================================================
+   時刻
+============================================================ */
+function julianDate(d) { return d / 86400000 + 2440587.5; }
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function getDatetimeStr(tz) {
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat('sv', {
+    timeZone: tz,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+  const p = {};
+  fmt.formatToParts(now).forEach(x => { p[x.type] = x.value; });
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+function updateInfo() {
+  document.getElementById('infoDatetime').textContent = getDatetimeStr(TIME_ZONES[currentLang]);
+  document.getElementById('infoJulian').textContent   = julianDate(Date.now()).toFixed(5);
+}
+
+/* ============================================================
+   システムメッセージ
+============================================================ */
+function renderSysMsg() {
+  document.getElementById('infoDaily').textContent = SYS_MESSAGES[currentLang];
+}
+
+/* ============================================================
+   パーソナルログ
+============================================================ */
+function renderLog() {
+  const area = document.getElementById('logArea');
+  const total = LOG_ENTRIES.length;
+  const prev  = (logIdx - 1 + total) % total;
+  const cur   = logIdx;
+
+  const make = (entry, isCurrent) => {
+    const s = document.createElement('span');
+    s.className = 'log-line' + (isCurrent ? ' current' : '');
+    s.innerHTML =
+      `<span class="log-ts">[${entry.ts}]</span>` +
+      `<span class="log-tag">${entry.tag}</span>` +
+      entry.text;
+    return s;
+  };
+
+  area.innerHTML = '';
+  area.appendChild(make(LOG_ENTRIES[prev], false));
+  area.appendChild(make(LOG_ENTRIES[cur],  true));
+
+  document.getElementById('logCounter').textContent =
+    `${String(cur + 1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+}
+
+function nextLog() { logIdx = (logIdx + 1) % LOG_ENTRIES.length; renderLog(); }
+function prevLog() { logIdx = (logIdx - 1 + LOG_ENTRIES.length) % LOG_ENTRIES.length; renderLog(); }
+
+/* ============================================================
+   ツールパネル開閉
+============================================================ */
+const overlay = document.getElementById('tool-overlay');
+
+function openTool(id) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('visible'));
+  const panel = document.getElementById('panel-' + id);
+  if (!panel) return;
+  panel.classList.add('visible');
+  currentPanel = id;
+
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('active'));
+
+  if (id === 'timezone') startTzClock();
+  else stopTzClock();
+}
+
+function closeTool() {
+  overlay.classList.remove('active');
+  stopTzClock();
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('visible'));
+    currentPanel = null;
+  }, 200);
+}
+
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) closeTool();
+});
+
+/* ============================================================
+   計算機
+============================================================ */
+let calcExpr    = '';
+let calcCurrent = '0';
+let calcOp_     = null;
+let calcPrev    = null;
+let calcNewNum  = true;
+
+function calcDisplay() {
+  document.getElementById('calcDisplay').textContent = calcCurrent;
+  document.getElementById('calcExpr').textContent    = calcExpr;
+}
+
+function calcNum(n) {
+  if (calcNewNum) { calcCurrent = n === '.' ? '0.' : n; calcNewNum = false; }
+  else {
+    if (n === '.' && calcCurrent.includes('.')) return;
+    calcCurrent = calcCurrent === '0' && n !== '.' ? n : calcCurrent + n;
+  }
+  calcDisplay();
+}
+
+function calcDot() { calcNum('.'); }
+
+function calcOp(op) {
+  calcPrev   = parseFloat(calcCurrent);
+  calcOp_    = op;
+  calcExpr   = calcCurrent + ' ' + ({'+':'+','-':'−','*':'×','/':'÷'}[op]);
+  calcNewNum = true;
+  calcDisplay();
+}
+
+function calcEquals() {
+  if (calcOp_ === null) return;
+  const a = calcPrev, b = parseFloat(calcCurrent);
+  let result;
+  if (calcOp_ === '+') result = a + b;
+  else if (calcOp_ === '-') result = a - b;
+  else if (calcOp_ === '*') result = a * b;
+  else if (calcOp_ === '/') result = b === 0 ? 'ERR' : a / b;
+  calcExpr   = `${a} ${({'+':'+','-':'−','*':'×','/':'÷'}[calcOp_])} ${b} =`;
+  calcCurrent = result === 'ERR' ? 'ERR' : String(parseFloat(result.toFixed(10)));
+  calcOp_    = null;
+  calcPrev   = null;
+  calcNewNum = true;
+  calcDisplay();
+}
+
+function calcClear() {
+  calcCurrent = '0'; calcExpr = ''; calcOp_ = null; calcPrev = null; calcNewNum = true;
+  calcDisplay();
+}
+function calcSign()    { calcCurrent = String(-parseFloat(calcCurrent)); calcDisplay(); }
+function calcPercent() { calcCurrent = String(parseFloat(calcCurrent) / 100); calcDisplay(); }
+
+/* ============================================================
+   文字数カウント
+============================================================ */
+function updateCharCount() {
+  const text = document.getElementById('ccInput').value;
+  const chars     = text.length;
+  const noSpace   = text.replace(/\s/g,'').length;
+  const words     = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  const lines     = text === '' ? 0 : text.split('\n').length;
+  const byteCount = new TextEncoder().encode(text).length;
+
+  const labelMap = {
+    ja: `文字数: ${chars}  （空白除く: ${noSpace}）\n単語数: ${words}  行数: ${lines}\nバイト数: ${byteCount}`,
+    de: `Zeichen: ${chars}  (ohne Leerzeichen: ${noSpace})\nWörter: ${words}  Zeilen: ${lines}\nBytes: ${byteCount}`,
+    fi: `Merkit: ${chars}  (ilman välilyöntejä: ${noSpace})\nSanat: ${words}  Rivit: ${lines}\nTavut: ${byteCount}`,
+  };
+  const out = document.getElementById('ccOutput');
+  out.className = 'tool-output' + (chars === 0 ? ' muted' : '');
+  out.textContent = chars === 0 ? '----' : labelMap[currentLang];
+}
+
+/* ============================================================
+   Base64
+============================================================ */
+function doBase64(mode) {
+  const input = document.getElementById('b64Input').value;
+  const out   = document.getElementById('b64Output');
+  try {
+    if (mode === 'encode') {
+      out.textContent = btoa(unescape(encodeURIComponent(input)));
+      out.className   = 'tool-output';
+    } else {
+      out.textContent = decodeURIComponent(escape(atob(input)));
+      out.className   = 'tool-output';
+    }
+  } catch {
+    const errMap = { ja: 'デコードエラー', de: 'Dekodierungsfehler', fi: 'Dekoodausvirhe' };
+    out.textContent = errMap[currentLang];
+    out.className   = 'tool-output muted';
+  }
+}
+
+/* ============================================================
+   世界時計
+============================================================ */
+function renderTzGrid() {
+  const grid = document.getElementById('tzGrid');
+  grid.innerHTML = '';
+  WORLD_CLOCKS.forEach(({ label, tz }) => {
+    const now = new Date();
+    const fmt = new Intl.DateTimeFormat('sv', {
+      timeZone: tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+    });
+    const dateFmt = new Intl.DateTimeFormat('sv', {
+      timeZone: tz, month:'2-digit', day:'2-digit'
+    });
+    grid.innerHTML += `
+      <div class="tz-card">
+        <div class="tz-name">${label}</div>
+        <div class="tz-time">${fmt.format(now)}</div>
+        <div class="tz-date">${dateFmt.format(now)}</div>
+      </div>`;
+  });
+}
+
+function startTzClock() { renderTzGrid(); tzInterval = setInterval(renderTzGrid, 1000); }
+function stopTzClock()  { if (tzInterval) { clearInterval(tzInterval); tzInterval = null; } }
+
+/* ============================================================
+   初期化
+============================================================ */
+function init() {
+  applyLang(currentLang);
+  calcDisplay();
+}
+
+init();
+setInterval(updateInfo, 1000);
+</script>
+</body>
+</html>

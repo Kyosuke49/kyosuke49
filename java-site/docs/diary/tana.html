@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ただいま</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Space+Grotesk:wght@300;400;500;700&family=IM+Fell+English:ital@0;1&family=Fira+Code:wght@400;500&display=swap">
+
+<style>
+@font-face { font-family: '1880Kurrent';    src: url('java-site/docs/fonts/1880_Kurrentshrift_Normal.otf') format('opentype'); }
+@font-face { font-family: 'BreitkopfFraktur'; src: url('java-site/docs/fonts/BreitkopfFraktur.ttf') format('truetype'); }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Regular.ttf')   format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Light.ttf')      format('truetype'); font-weight: 300; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-ExtraLight.ttf') format('truetype'); font-weight: 200; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Bold.ttf')       format('truetype'); font-weight: 700; }
+@font-face { font-family: 'ImpactCustom'; src: url('java-site/docs/fonts/impact.ttf')          format('truetype'); }
+@font-face { font-family: 'Geosans';      src: url('java-site/docs/fonts/GeosansLight.ttf')    format('truetype'); }
+@font-face { font-family: 'Geosans';      src: url('java-site/docs/fonts/GeosansLight-Oblique.ttf') format('truetype'); font-style: oblique; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-ja:   'Noto Serif JP', 'Kazesawa', serif;
+  --font-de:   'Space Grotesk', 'Geosans', sans-serif;
+  --font-fi:   'IM Fell English', serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
+  --color-bg:         #f8f8f8;
+  --color-text:       #111;
+  --color-header-bg:  #000;
+  --color-header-text:#fff;
+  --color-muted:      #777;
+  --color-border:     #e0e0e0;
+  --color-accent:     #e83929;
+  --transition-lang:  300ms ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ja);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+body.lang-de { font-family: var(--font-de); }
+body.lang-fi { font-family: var(--font-fi); }
+
+::selection { background: #000; color: #fff; }
+
+/* =====================
+   キーフレーム
+===================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUpDelayed {
+  0%  { opacity: 0; transform: translateY(12px); }
+  40% { opacity: 0; transform: translateY(12px); }
+  100%{ opacity: 1; transform: translateY(0); }
+}
+
+/* 画面揺れ（カクつき） */
+@keyframes screen-shake {
+  0%   { transform: translate(-7px, 3px) skewX(-1.2deg); }
+  16%  { transform: translate(6px,-5px) skewX(0.9deg); }
+  33%  { transform: translate(-5px, 6px) skewX(0deg); }
+  50%  { transform: translate(8px,-3px) skewX(-0.7deg); }
+  66%  { transform: translate(-4px, 5px) skewX(0.5deg); }
+  83%  { transform: translate(5px,-4px) skewX(0deg); }
+  100% { transform: translate(0,0) skewX(0deg); }
+}
+
+/* 画面フラッシュ */
+@keyframes body-flash {
+  0%,94%,100% { filter: none; }
+  95%         { filter: brightness(1.3) invert(0.06); }
+  96%         { filter: none; }
+  97%         { filter: brightness(0.93); }
+  98%         { filter: none; }
+}
+
+/* タッチフラッシュ（カクつき） */
+@keyframes touch-flash {
+  0%   { opacity: 1; }
+  34%  { opacity: 0; }
+  67%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* モーダルのグリッチテキスト */
+@keyframes text-flicker {
+  0%,90%,100% { opacity: 1; }
+  92%         { opacity: 0.2; }
+  94%         { opacity: 1; }
+  96%         { opacity: 0.4; }
+}
+
+/* ヴィネット脈動 */
+@keyframes vignette-pulse {
+  0%,100% { opacity: 0.18; }
+  50%     { opacity: 0.35; }
+}
+
+.anim-title    { animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.anim-subtitle { animation: fadeInUpDelayed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* =====================
+   赤いヴィネット（常時）
+===================== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(180,10,10,0.18) 100%);
+  animation: vignette-pulse 7s ease-in-out infinite;
+  z-index: 9990;
+}
+
+/* =====================
+   タッチ波紋
+===================== */
+.touch-flash {
+  position: fixed;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: #e83929;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: touch-flash 0.18s steps(1) forwards;
+  z-index: 9999;
+  white-space: nowrap;
+  text-shadow: 2px 0 #fff, -2px 0 #000;
+}
+
+/* =====================
+   リンクアンダーライン
+===================== */
+.link-underline { position: relative; text-decoration: none; color: inherit; }
+.link-underline::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1px;
+  bottom: -2px; left: 0;
+  background-color: currentColor;
+  transform-origin: bottom right;
+  transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+}
+.link-underline:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+
+/* =====================
+   ヘッダー
+===================== */
+.site-header {
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  padding: 5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+.header-inner { position: relative; z-index: 1; }
+
+/* タイトル：各文字をspanで包む */
+.site-title {
+  display: none;
+  font-size: clamp(3rem, 10vw, 7rem);
+  letter-spacing: 0.15em;
+  line-height: 1;
+  font-weight: 700;
+}
+.site-title[data-lang="ja"] { font-family: 'Kazesawa', 'Noto Serif JP', sans-serif; }
+.site-title[data-lang="de"] { font-family: 'BreitkopfFraktur', 'Space Grotesk', sans-serif; letter-spacing: 0.08em; }
+.site-title[data-lang="fi"] { font-family: 'ImpactCustom', 'IM Fell English', sans-serif; letter-spacing: 0.04em; }
+
+/* 文字単体グリッチ */
+.tc {
+  display: inline-block;
+  position: relative;
+}
+.tc.g-flip {
+  transform: rotate(180deg) scaleX(-1);
+  color: #e83929;
+}
+.tc.g-symbol {
+  color: rgba(232,57,41,0.85);
+}
+.tc.g-float {
+  color: rgba(232,57,41,0.8);
+  position: relative;
+  z-index: 2;
+}
+/* extra: 文字の隣に記号が出る */
+.tc-extra {
+  display: inline-block;
+  color: rgba(232,57,41,0.8);
+  font-size: 0.65em;
+  vertical-align: super;
+  margin: 0 1px;
+  font-family: var(--font-mono);
+}
+
+.site-subtitle {
+  display: none;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* =====================
+   メインレイアウト
+===================== */
+.layout {
+  flex: 1;
+  max-width: 1200px; width: 100%;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 4rem;
+}
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 3rem; } }
+
+/* =====================
+   言語切替
+===================== */
+.lang-switch {
+  display: flex; flex-wrap: nowrap; overflow-x: auto;
+  gap: 0.75rem; margin-bottom: 3rem;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.lang-switch::-webkit-scrollbar { display: none; }
+.lang-btn {
+  padding: 0.5rem 1.5rem; font-size: 0.75rem; letter-spacing: 0.15em;
+  text-transform: uppercase; border: 1px solid #000;
+  background: transparent; color: #000; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-family: inherit; white-space: nowrap; flex-shrink: 0;
+}
+.lang-btn:hover  { background: #f0f0f0; }
+.lang-btn.active { background: #000; color: #fff; }
+
+/* =====================
+   本文
+===================== */
+.lang-block { display: none; }
+.lang-block.visible { display: block; }
+.content-text { opacity: 1; transition: opacity var(--transition-lang); }
+.content-text.fading { opacity: 0; }
+.lang-block p { font-size: clamp(1rem, 2.5vw, 1.2rem); line-height: 1.9; color: #222; }
+
+/* =====================
+   サイドバー
+===================== */
+.sidebar { display: flex; flex-direction: column; gap: 2.5rem; }
+
+/* =====================
+   情報ウィンドウ
+===================== */
+.info-window {
+  background: #0a0a0a; color: #e0e0e0;
+  padding: 1.5rem; font-family: var(--font-mono); font-size: 0.8rem;
+  position: relative; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.info-window::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #222, #888, #222); opacity: 0.6;
+}
+.info-row { padding: 1rem 0; border-bottom: 1px solid #1a1a1a; }
+.info-row:last-child { border-bottom: none; }
+.info-label {
+  font-size: 0.65rem; color: #555; letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 0.4rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.info-status { display: flex; justify-content: space-between; align-items: center; }
+.status-label { font-size: 0.65rem; color: #555; letter-spacing: 0.15em; text-transform: uppercase; }
+.status-online { color: #e83929; font-size: 0.75rem; }
+
+.info-datetime { font-size: 1.1rem; letter-spacing: 0.1em; color: #fff; font-variant-numeric: tabular-nums; }
+.info-jd { color: #aaa; letter-spacing: 0.1em; }
+
+/* システムメッセージ：ギリシャ語 + ノイズ */
+.system-message {
+  color: #aaa;
+  font-style: italic;
+  white-space: pre-line;
+  border-left: 2px solid #333;
+  padding-left: 0.75rem;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  animation: text-flicker 8s steps(1) infinite;
+}
+.system-message .noise-char { color: #e83929; opacity: 0.7; }
+
+/* コマンドラインアニメーション */
+.cmdline-area {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.7;
+  min-height: 4.5em;
+}
+.cmdline-cursor {
+  display: inline-block;
+  width: 7px; height: 1em;
+  background: #e83929;
+  vertical-align: middle;
+  margin-left: 1px;
+  animation: text-flicker 0.9s steps(1) infinite;
+}
+.cmdline-line { display: block; }
+.cmdline-line.err  { color: #e83929; }
+.cmdline-line.warn { color: #888; }
+.cmdline-line.ok   { color: #aaa; }
+
+/* =====================
+   コンテンツナビ
+===================== */
+.contents-nav { padding-top: 0.5rem; }
+.contents-heading {
+  font-size: 0.65rem; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--color-muted);
+  font-family: var(--font-mono); margin-bottom: 1.5rem;
+}
+.contents-list { list-style: none; }
+.contents-list li { border-bottom: 1px solid var(--color-border); padding: 1rem 0; }
+.contents-list a {
+  font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 300;
+  color: var(--color-text); letter-spacing: 0.05em;
+}
+
+/* =====================
+   フッター
+===================== */
+.site-footer { margin-top: auto; border-top: 1px solid var(--color-border); padding: 2.5rem 2rem; }
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; flex-wrap: wrap;
+}
+.footer-copy { font-size: 0.8rem; color: var(--color-muted); letter-spacing: 0.05em; }
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a {
+  font-size: 0.75rem; color: var(--color-muted);
+  text-transform: uppercase; letter-spacing: 0.15em; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--color-text); }
+
+/* =====================
+   モーダルオーバーレイ
+===================== */
+#modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 9000;
+  transition: background 0.25s ease;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.active {
+  display: flex;
+  background: rgba(0,0,0,0.55);
+}
+
+#modal-box {
+  background: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  color: #ddd;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 2rem 2.5rem;
+  max-width: 380px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(232,57,41,0.15), 0 30px 80px rgba(0,0,0,0.7);
+  animation: text-flicker 6s steps(1) infinite;
+}
+#modal-box::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, #e83929, transparent);
+  opacity: 0.5;
+}
+
+#modal-question {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.03em;
+  color: #eee;
+  min-height: 1.6em;
+}
+.modal-glitch-char { color: #e83929; display: inline-block; }
+
+#modal-subtext {
+  font-size: 0.7rem;
+  color: #444;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+}
+
+#modal-result {
+  display: none;
+  color: #e83929;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.2rem;
+  animation: text-flicker 0.5s steps(1) infinite;
+}
+
+.modal-buttons { display: flex; gap: 1rem; }
+.modal-btn {
+  padding: 0.5rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  border: 1px solid #333;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.modal-btn:hover { border-color: #e83929; color: #e83929; }
+.modal-btn.primary { border-color: #555; color: #ddd; }
+.modal-btn.primary:hover { border-color: #e83929; color: #e83929; }
+</style>
+</head>
+
+<body class="lang-ja">
+
+<!-- ヘッダー -->
+<header class="site-header">
+  <div class="header-inner">
+    <h1 class="site-title anim-title" data-lang="ja" id="titleJa"></h1>
+    <h1 class="site-title anim-title" data-lang="de" id="titleDe"></h1>
+    <h1 class="site-title anim-title" data-lang="fi" id="titleFi"></h1>
+    <p class="site-subtitle anim-subtitle" data-lang="ja">作品・文章・音楽</p>
+    <p class="site-subtitle anim-subtitle" data-lang="de">Werke · Texte · Musik</p>
+    <p class="site-subtitle anim-subtitle" data-lang="fi">Teoksia · Tekstejä · Musiikkia</p>
+  </div>
+</header>
+
+<!-- メイン -->
+<div class="layout">
+  <main class="content">
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('de')">Deutsch</button>
+      <button class="lang-btn" onclick="setLang('fi')">Suomi</button>
+    </div>
+    <div class="content-text" id="contentText">
+      <div class="lang-block visible" data-lang="ja"><p>おかえりなさい。</p></div>
+      <div class="lang-block" data-lang="de"><p>Willkommen zurück.</p></div>
+      <div class="lang-block" data-lang="fi"><p>Tervetuloa takaisin.</p></div>
+    </div>
+  </main>
+
+  <aside class="sidebar">
+    <div class="info-window">
+
+      <div class="info-row">
+        <div class="info-status">
+          <span class="status-label">STATUS</span>
+          <span class="status-online" id="statusText">SEVERED</span>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">DATE_TIME [LOCAL]</div>
+        <div class="info-datetime" id="infoDatetime">----</div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">JULIAN_DATE</div>
+        <div class="info-jd" id="infoJulian">----</div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">SYSTEM_MESSAGE</div>
+        <div class="system-message" id="infoDaily"></div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label"><span>FRAGMENTS</span></div>
+        <div class="cmdline-area" id="cmdlineArea"><span class="cmdline-cursor"></span></div>
+      </div>
+
+    </div>
+
+    <nav class="contents-nav">
+      <p class="contents-heading">Contents</p>
+      <ul class="contents-list" id="contentsList">
+        <li><a href="java-site/docs/art/index.html"     class="link-underline intercepted">Art</a></li>
+        <li><a href="java-site/docs/music/index.html"   class="link-underline intercepted">Music</a></li>
+        <li><a href="java-site/docs/text/index.html"    class="link-underline intercepted">Text</a></li>
+        <li><a href="java-site/docs/diary/index.html"   class="link-underline intercepted">Diary</a></li>
+        <li><a href="java-site/docs/pastime/index.html" class="link-underline intercepted">Pastime</a></li>
+      </ul>
+    </nav>
+  </aside>
+</div>
+
+<!-- フッター -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-copy">© 2025 Pfötchengebendeningen – 偽造切手 / LOS 49 / ERÄ 49</p>
+    <div class="footer-links">
+      <a href="https://x.com/ningaesst?s=21" class="link-underline" target="_blank" rel="noopener">X / Twitter</a>
+    </div>
+  </div>
+</footer>
+
+<!-- モーダル -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div id="modal-question"></div>
+    <div id="modal-subtext"></div>
+    <div id="modal-result"></div>
+    <div class="modal-buttons" id="modal-buttons">
+      <button class="modal-btn primary" id="modal-yes"></button>
+    </div>
+  </div>
+</div>
+
+<script src="js/daily.js"></script>
+<script>
+/* ============================================================
+   定数・データ
+============================================================ */
+const TITLE_STRINGS = {
+  ja: '偽造切手',
+  de: 'LOS 49',
+  fi: 'ERÄ 49'
+};
+
+const GLITCH_SYMBOLS = '!?@#%&*<>[]{}\\|/^~±§†‡×÷';
+const GLITCH_DIGITS  = '0123456789';
+const ALL_GLITCH     = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&!?><[]{}|';
+
+const STATUS_VARIANTS = ['SEVERED', 'S3V3R3D', 'ERR0R', '?????', '-----', 'SEVERED', 'SE̷V̶E̸R̵E̴D'];
+
+/* モーダルテキスト（言語別） */
+const MODAL_LANG = {
+  ja: {
+    questions: ['退出しますか？', 'ユーザー権限を確認しますか？', 'このセクションにアクセスしますか？', '接続を解除しますか？'],
+    subtext:   'WARNING :: access_violation_detected',
+    yes:       'はい',
+    failed:    '失敗しました'
+  },
+  de: {
+    questions: ['Verlassen?', 'Benutzerrechte überprüfen?', 'Auf diesen Bereich zugreifen?', 'Verbindung trennen?'],
+    subtext:   'WARNUNG :: zugriffsverletzung_erkannt',
+    yes:       'Ja',
+    failed:    'Fehlgeschlagen'
+  },
+  fi: {
+    questions: ['Poistuako?', 'Tarkistetaanko käyttäjäoikeudet?', 'Pääsetkö tälle osiolle?', 'Katkaistanko yhteys?'],
+    subtext:   'VAROITUS :: pääsyrikkomus_havaittu',
+    yes:       'Kyllä',
+    failed:    'Epäonnistui'
+  }
+};
+
+/* コマンドライン用シーケンス */
+const CMD_SEQUENCES = [
+  { type:'cmd',  text:'> init_connection --host=local' },
+  { type:'err',  text:'[ERR] timeout: 0x00FF4A' },
+  { type:'cmd',  text:'> retry --force --silent' },
+  { type:'warn', text:'[WARN] packet_loss: 94%' },
+  { type:'cmd',  text:'> access --override' },
+  { type:'err',  text:'[DENIED] 権限が不足しています' },
+  { type:'cmd',  text:'> sudo escalate' },
+  { type:'err',  text:'[ERR] user: unknown / id=?????' },
+  { type:'cmd',  text:'> ls -la /restricted/' },
+  { type:'warn', text:'[WARN] filesystem: corrupted' },
+  { type:'ok',   text:'...' },
+  { type:'cmd',  text:'> ping 192.168.0.███' },
+  { type:'err',  text:'[ERR] destination unreachable' },
+];
+
+/* ============================================================
+   状態
+============================================================ */
+let currentLang = localStorage.getItem('lang') || 'ja';
+let titleGlitchState = {}; // { ja: [{idx, originalChar}], de: [...], fi: [...] }
+
+/* ============================================================
+   ユーティリティ
+============================================================ */
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randFrom(str)   { return str[Math.floor(Math.random() * str.length)]; }
+function pad2(n)         { return String(n).padStart(2, '0'); }
+
+/* ============================================================
+   タイトルの文字span構築
+============================================================ */
+function buildTitleSpans(lang) {
+  const el = document.getElementById('title' + lang.charAt(0).toUpperCase() + lang.slice(1));
+  if (!el) return;
+  const text = TITLE_STRINGS[lang];
+  el.innerHTML = [...text].map((c, i) =>
+    `<span class="tc" data-orig="${c}" data-idx="${i}">${c}</span>`
+  ).join('');
+}
+
+function getTitleSpans(lang) {
+  const id = 'title' + lang.charAt(0).toUpperCase() + lang.slice(1);
+  return document.querySelectorAll(`#${id} .tc`);
+}
+
+/* ============================================================
+   タイトルグリッチ
+   - 最大2文字が同時に変化
+   - 新しい文字が変化するとき、前の文字は元に戻す
+   - 変化タイプ: flip / symbol / float
+============================================================ */
+const GLITCH_TYPES = ['flip', 'symbol', 'float', 'extra'];
+const EXTRA_SYMS   = '∇%!#■▲◆░†×÷§±∑∂≠≡∞';
+
+let titleActive = { ja: [], de: [], fi: [] };
+
+function revertTitleChar(lang, idx) {
+  const spans = getTitleSpans(lang);
+  if (!spans[idx]) return;
+  const sp = spans[idx];
+  sp.className = 'tc';
+  sp.style.cssText = '';
+  sp.textContent = sp.dataset.orig;
+}
+
+function applyTitleGlitch(lang) {
+  const text = TITLE_STRINGS[lang];
+  const spans = getTitleSpans(lang);
+  if (!spans.length) return;
+
+  const active = titleActive[lang];
+
+  /* 前の変化をひとつ元に戻す */
+  if (active.length > 0) {
+    const old = active.shift();
+    revertTitleChar(lang, old);
+  }
+
+  /* 変化させる文字数（1〜2） */
+  const changeCount = rand(1, 2);
+  const available = [...text].map((_, i) => i).filter(i => !active.includes(i) && text[i].trim() !== '');
+
+  for (let n = 0; n < Math.min(changeCount, available.length); n++) {
+    const pick = available.splice(Math.floor(Math.random() * available.length), 1)[0];
+    const sp = spans[pick];
+    if (!sp) continue;
+
+    const type = GLITCH_TYPES[Math.floor(Math.random() * GLITCH_TYPES.length)];
+
+    if (type === 'flip') {
+      sp.classList.add('g-flip');
+
+    } else if (type === 'symbol') {
+      sp.classList.add('g-symbol');
+      sp.textContent = randFrom(GLITCH_SYMBOLS);
+
+    } else if (type === 'float') {
+      /* カクつき版：即座にランダム位置へジャンプ → hold → 即座に戻る */
+      sp.classList.add('g-float');
+      const positions = [
+        [rand(-25,25), rand(-22,-8)],
+        [rand(-30,30), rand(8,22)],
+        [rand(-20,20), rand(-18,-6)]
+      ];
+      let step = 0;
+      const jumpSteps = () => {
+        if (step < positions.length) {
+          sp.style.transform = `translate(${positions[step][0]}px, ${positions[step][1]}px)`;
+          step++;
+          setTimeout(jumpSteps, rand(50, 90));
+        } else {
+          sp.style.transform = '';
+          sp.className = 'tc';
+          sp.style.cssText = '';
+          sp.textContent = sp.dataset.orig;
+          const i = titleActive[lang].indexOf(pick);
+          if (i !== -1) titleActive[lang].splice(i, 1);
+        }
+      };
+      setTimeout(jumpSteps, 30);
+
+    } else if (type === 'extra') {
+      /* 文字はそのまま、隣に記号spawnを追加 */
+      const extSym = randFrom(EXTRA_SYMS);
+      const extSpan = document.createElement('span');
+      extSpan.className = 'tc-extra';
+      extSpan.textContent = extSym;
+      /* 50%で前、50%で後ろに挿入 */
+      if (Math.random() < 0.5) sp.parentNode.insertBefore(extSpan, sp);
+      else sp.parentNode.insertBefore(extSpan, sp.nextSibling);
+      /* 自動削除 */
+      setTimeout(() => {
+        if (extSpan.parentNode) extSpan.parentNode.removeChild(extSpan);
+      }, rand(300, 900));
+    }
+
+    if (type !== 'float' && type !== 'extra') {
+      titleActive[lang].push(pick);
+    }
+  }
+}
+
+function scheduleTitleGlitch() {
+  const delay = rand(1200, 4500);
+  setTimeout(() => {
+    applyTitleGlitch(currentLang);
+    /* 短いバーストを起こすこともある */
+    if (Math.random() < 0.3) {
+      setTimeout(() => applyTitleGlitch(currentLang), rand(80, 180));
+    }
+    scheduleTitleGlitch();
+  }, delay);
+}
+
+/* ============================================================
+   時刻グリッチ（80ms更新）
+============================================================ */
+const TIME_ZONES = { ja: 'Asia/Tokyo', de: 'Europe/Berlin', fi: 'Europe/Helsinki' };
+
+function julianDate(d) { return d / 86400000 + 2440587.5; }
+
+function getRealDatetimeStr() {
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat('sv', {
+    timeZone: TIME_ZONES[currentLang],
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+  const p = {};
+  fmt.formatToParts(now).forEach(x => { p[x.type] = x.value; });
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+function corruptStr(real, probability) {
+  return [...real].map(c => /\d/.test(c) && Math.random() < probability ? randFrom(GLITCH_DIGITS) : c).join('');
+}
+
+function updateGlitchDatetime() {
+  const real = getRealDatetimeStr();
+  const showReal = Math.random() < 0.12;
+  document.getElementById('infoDatetime').textContent = showReal ? real : corruptStr(real, 0.65);
+
+  const jd = julianDate(Date.now()).toFixed(5);
+  document.getElementById('infoJulian').textContent =
+    Math.random() < 0.15 ? jd : corruptStr(jd, 0.55);
+}
+
+/* ============================================================
+   STATUSグリッチ
+============================================================ */
+function scheduleStatusGlitch() {
+  setTimeout(() => {
+    const el = document.getElementById('statusText');
+    let count = 0;
+    const total = rand(2, 5);
+    const flash = () => {
+      el.textContent = STATUS_VARIANTS[Math.floor(Math.random() * STATUS_VARIANTS.length)];
+      count++;
+      if (count < total) setTimeout(flash, rand(60, 160));
+      else setTimeout(() => { el.textContent = 'SEVERED'; }, 250);
+    };
+    flash();
+    scheduleStatusGlitch();
+  }, rand(6000, 22000));
+}
+
+/* ============================================================
+   システムメッセージ（ギリシャ語 + ノイズ）
+============================================================ */
+const SYS_MSG_BASE = 'Καλώς ήρθατε στη φυλακή μου';
+
+function renderSysMsg(withNoise) {
+  const el = document.getElementById('infoDaily');
+  if (!withNoise) { el.textContent = SYS_MSG_BASE; return; }
+  const arr = [...SYS_MSG_BASE];
+  el.innerHTML = arr.map(c => {
+    if (c !== ' ' && Math.random() < 0.12) {
+      return `<span class="noise-char">${randFrom(ALL_GLITCH)}</span>`;
+    }
+    return c;
+  }).join('');
+}
+
+function scheduleSysMsgNoise() {
+  setTimeout(() => {
+    renderSysMsg(true);
+    setTimeout(() => renderSysMsg(false), rand(80, 250));
+    scheduleSysMsgNoise();
+  }, rand(3000, 10000));
+}
+
+/* ============================================================
+   サブタイトルグリッチ
+============================================================ */
+function glitchSubtitle() {
+  document.querySelectorAll('.site-subtitle').forEach(el => {
+    if (!el.style.display || el.style.display === 'none') return;
+    const orig = el.textContent;
+    el.innerHTML = [...orig].map(c => {
+      if (c.trim() && Math.random() < 0.3)
+        return `<span style="color:#e83929;font-family:var(--font-mono)">${randFrom(GLITCH_SYMBOLS + EXTRA_SYMS)}</span>`;
+      return c;
+    }).join('');
+    setTimeout(() => { el.textContent = orig; }, rand(60, 180));
+  });
+}
+
+function scheduleSubtitleGlitch() {
+  setTimeout(() => {
+    glitchSubtitle();
+    scheduleSubtitleGlitch();
+  }, rand(2500, 9000));
+}
+
+/* ============================================================
+   Contentsセクショングリッチ（見出し + リンク）
+============================================================ */
+function glitchContents() {
+  /* 見出し */
+  const heading = document.querySelector('.contents-heading');
+  if (heading) {
+    const orig = heading.textContent;
+    heading.innerHTML = [...orig].map(c =>
+      c.trim() && Math.random() < 0.35
+        ? `<span style="color:#e83929;font-family:var(--font-mono)">${randFrom(GLITCH_SYMBOLS + EXTRA_SYMS)}</span>`
+        : c
+    ).join('');
+    setTimeout(() => { heading.textContent = orig; }, rand(100, 300));
+  }
+
+  /* リンク（1〜2個をランダムに選んでグリッチ） */
+  const links = Array.from(document.querySelectorAll('.contents-list a'));
+  const count = rand(1, 2);
+  links.sort(() => Math.random() - 0.5).slice(0, count).forEach(a => {
+    const orig = a.textContent;
+    const glitched = [...orig].map(c =>
+      Math.random() < 0.45 ? randFrom(GLITCH_SYMBOLS) : c
+    ).join('');
+    const pre  = Math.random() < 0.4 ? `<span class="tc-extra">${randFrom(EXTRA_SYMS)}</span>` : '';
+    const post = Math.random() < 0.4 ? `<span class="tc-extra">${randFrom(EXTRA_SYMS)}</span>` : '';
+    a.innerHTML = `${pre}<span style="color:#e83929">${glitched}</span>${post}`;
+    setTimeout(() => { a.textContent = orig; }, rand(120, 380));
+  });
+}
+
+function scheduleContentsGlitch() {
+  setTimeout(() => {
+    glitchContents();
+    scheduleContentsGlitch();
+  }, rand(2000, 8000));
+}
+
+/* ============================================================
+   コマンドラインアニメーション
+============================================================ */
+let cmdSeqIdx = 0;
+let cmdLines  = [];
+const CMD_MAX_LINES = 4;
+const CMD_AREA = () => document.getElementById('cmdlineArea');
+
+function cmdTypewriterLine(lineObj, onDone) {
+  const area  = CMD_AREA();
+  const full  = lineObj.text;
+  const cls   = lineObj.type === 'err' ? 'err' : lineObj.type === 'warn' ? 'warn' : lineObj.type === 'ok' ? 'ok' : '';
+  const span  = document.createElement('span');
+  span.className = 'cmdline-line' + (cls ? ' ' + cls : '');
+  area.appendChild(span);
+
+  let i = 0;
+  const cursor = area.querySelector('.cmdline-cursor');
+  if (cursor) area.appendChild(cursor); /* カーソルを末尾に */
+
+  const type = () => {
+    if (i <= full.length) {
+      span.textContent = full.slice(0, i);
+      i++;
+      setTimeout(type, rand(18, 55));
+    } else {
+      cmdLines.push(span);
+      if (cmdLines.length > CMD_MAX_LINES) {
+        const old = cmdLines.shift();
+        if (old.parentNode) old.parentNode.removeChild(old);
+      }
+      setTimeout(onDone, rand(300, 900));
+    }
+  };
+  type();
+}
+
+function runCmdLoop() {
+  const lineObj = CMD_SEQUENCES[cmdSeqIdx % CMD_SEQUENCES.length];
+  cmdSeqIdx++;
+  cmdTypewriterLine(lineObj, runCmdLoop);
+}
+
+/* ============================================================
+   画面フラッシュ / タッチ波紋
+============================================================ */
+function scheduleFlicker() {
+  setTimeout(() => {
+    document.body.style.animation = 'body-flash 0.35s steps(1) forwards';
+    setTimeout(() => { document.body.style.animation = ''; }, 400);
+    scheduleFlicker();
+  }, rand(5000, 18000));
+}
+
+const FLASH_SYMS = ['×', '∇', '%', '!', '#', '■', '▲', '◆', '░', '†', '≠', '∑'];
+
+function choppyFlash(x, y) {
+  const count = rand(2, 4);
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'touch-flash';
+      el.textContent = randFrom(FLASH_SYMS);
+      el.style.left = (x + rand(-18, 18)) + 'px';
+      el.style.top  = (y + rand(-18, 18)) + 'px';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }, i * 55);
+  }
+}
+
+function choppyShake() {
+  /* CSSではなくJSで即時ジャンプを繰り返す */
+  const jumps = [
+    [-7, 3], [6, -5], [-5, 6], [8, -3], [-4, 5], [5, -4], [0, 0]
+  ];
+  let i = 0;
+  const doJump = () => {
+    if (i < jumps.length) {
+      document.body.style.transform = `translate(${jumps[i][0]}px,${jumps[i][1]}px)`;
+      i++;
+      setTimeout(doJump, rand(45, 70));
+    } else {
+      document.body.style.transform = '';
+    }
+  };
+  doJump();
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('#modal-overlay')) return;
+  choppyFlash(e.clientX, e.clientY);
+  if (Math.random() < 0.25) choppyShake();
+});
+
+/* ============================================================
+   モーダル（ページ遷移インターセプト）
+============================================================ */
+const overlay = document.getElementById('modal-overlay');
+const modalBox = document.getElementById('modal-box');
+
+function glitchText(text) {
+  return [...text].map(c => {
+    if (c !== ' ' && Math.random() < 0.15)
+      return `<span class="modal-glitch-char">${randFrom(GLITCH_SYMBOLS)}</span>`;
+    return c;
+  }).join('');
+}
+
+let modalGlitchInterval = null;
+
+function openModal() {
+  const L = MODAL_LANG[currentLang];
+  const q = L.questions[Math.floor(Math.random() * L.questions.length)];
+
+  document.getElementById('modal-question').innerHTML = glitchText(q);
+  document.getElementById('modal-subtext').textContent = L.subtext;
+  document.getElementById('modal-result').style.display = 'none';
+  document.getElementById('modal-yes').textContent = L.yes;
+  document.getElementById('modal-buttons').style.display = 'flex';
+
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('active'));
+
+  /* モーダル内テキストを定期的に軽くグリッチ */
+  modalGlitchInterval = setInterval(() => {
+    if (Math.random() < 0.35) {
+      document.getElementById('modal-question').innerHTML = glitchText(q);
+    }
+  }, 800);
+}
+
+function closeModal() {
+  overlay.classList.remove('active');
+  clearInterval(modalGlitchInterval);
+  setTimeout(() => { overlay.style.display = 'none'; }, 260);
+}
+
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) closeModal();
+});
+
+document.getElementById('modal-yes').addEventListener('click', () => {
+  const L = MODAL_LANG[currentLang];
+  document.getElementById('modal-buttons').style.display = 'none';
+  const result = document.getElementById('modal-result');
+  result.style.display = 'block';
+
+  /* 失敗テキストをちらつかせてから確定 */
+  let count = 0;
+  const flashResult = setInterval(() => {
+    result.textContent = count % 2 === 0
+      ? corruptStr(L.failed.replace(/./g, c => c + ' ').trim(), 0.4)
+      : L.failed;
+    count++;
+    if (count > 6) {
+      clearInterval(flashResult);
+      result.textContent = L.failed;
+      setTimeout(closeModal, 1200);
+    }
+  }, 120);
+});
+
+/* リンクインターセプト */
+document.addEventListener('click', e => {
+  const link = e.target.closest('a.intercepted');
+  if (!link) return;
+  e.preventDefault();
+  openModal();
+});
+
+/* ============================================================
+   言語切替
+============================================================ */
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.body.className = 'lang-' + lang;
+
+  document.querySelectorAll('.site-title').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+  document.querySelectorAll('.site-subtitle').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+  document.querySelectorAll('.lang-block').forEach(el => {
+    el.classList.toggle('visible', el.dataset.lang === lang);
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
+  });
+  updateDailyText();
+}
+
+function setLang(lang) {
+  if (lang === currentLang) return;
+  const ct = document.getElementById('contentText');
+  ct.classList.add('fading');
+  setTimeout(() => { applyLang(lang); ct.classList.remove('fading'); }, 300);
+}
+
+function langLabel(lang) {
+  return { ja: '日本語', de: 'Deutsch', fi: 'Suomi' }[lang];
+}
+
+/* ============================================================
+   日替わりテキスト（システムメッセージは固定ギリシャ語）
+============================================================ */
+function updateDailyText() {
+  renderSysMsg(false);
+}
+
+/* ============================================================
+   初期化
+============================================================ */
+function init() {
+  /* タイトルspanを構築 */
+  buildTitleSpans('ja');
+  buildTitleSpans('de');
+  buildTitleSpans('fi');
+
+  applyLang(currentLang);
+
+  /* コマンドラインアニメーション開始 */
+  setTimeout(runCmdLoop, 800);
+
+  /* 各種スケジューラ起動 */
+  scheduleTitleGlitch();
+  scheduleFlicker();
+  scheduleStatusGlitch();
+  scheduleSysMsgNoise();
+  scheduleSubtitleGlitch();
+  scheduleContentsGlitch();
+}
+
+init();
+setInterval(updateGlitchDatetime, 80);
+</script>
+</body>
+</html>
