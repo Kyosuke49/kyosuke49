@@ -124,6 +124,65 @@
       100% { transform: translateX(-110%); }
     }
 
+    /* ── クイズモーダル ── */
+    #quiz-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    #quiz-overlay.open { display: flex; }
+    #quiz-dialog {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 2rem 2.2rem;
+      width: min(88vw, 400px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    #quiz-question {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.85;
+      color: var(--fg);
+      margin: 0;
+      letter-spacing: 0.04em;
+    }
+    #quiz-input {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-size: 0.9rem;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      padding: 0.4rem 0;
+      outline: none;
+      width: 100%;
+      background: transparent;
+      color: var(--fg);
+      transition: border-color 0.12s;
+    }
+    #quiz-input:focus { border-color: var(--fg); }
+    #quiz-dialog-btns { display: flex; justify-content: flex-end; }
+    #quiz-submit {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--border);
+      background: none;
+      padding: 0.38rem 1.1rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    #quiz-submit:hover {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+
     /* ── エントリーなし ── */
     .diary-empty {
       text-align: center;
@@ -237,36 +296,43 @@ var ENTRIES = [
     tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
   },
 {
-     date:  '2026-05-21',
+     date:  '2026-05-22',
      title: { ja: '公開範囲を拡大！' },
      body:  { ja: '一部のネッ友たちに公開してみました。みんなのアドバイスを待ってるよ！', de:'Ich habe die Seite ein paar Freunden gezeigt. Bin gespannt auf eure Vorschläge!', fi:'Julkaisin sivuston jo muutamille nettikavereille. Odotan teidän kommenttejanne!' },
      tags:  [{ ja: 'お知らせ', de: 'Mitteilung', fi: 'Ilmoitus' }]
    },
 {
-    date:  '2026-05-20',
+    date:  '2026-05-21',
     title: { ja: '☆大改革☆' },
     body:  { ja: '本当はこれまでもちょくちょく更新してたんですよ？独り言ページに記述し忘れてただけで…' },
     tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
   },
 {
-    date:  '2026-05-21',
+    date:  '2026-5-22',
     title: { ja: '幻リプのガチャで大爆死した' },
     body:  { ja: '全部が全部意味のある独り言だと思うなよ。' },
     tags:  [{ ja: '雑談', de: 'Gelaber', fi: 'Höpinää' }]
   },
 {
-    date:  '2026-05-22',
+    date:  '2026-5-23',
+    title: { ja: '何これ！楽しい！' },
+    body:  { ja: 'ここの文タップしてみ？' },
+    tap:   { ja: 'へへ！びっくりした？' },
+    tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
+  },
+  {
+    date:  '2026-5-23',
     title: { ja: 'なにこれ！楽しい！(2)' },
     body:  { ja: 'ここの文字動かせるやんけ！' },
     animate: 'scroll',
     tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
   },
-{
-    date:  '2026-05-22',
-    title: { ja: 'なにこれ！楽しい！' },
-    body:  { ja: 'ここの文タップしてみ？' },
-    tap:   { ja: 'へへ！びっくりした？' },
-    tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
+  {
+    date:  '2026-5-24',
+    title: { ja: 'いつもの独り言だと思うじゃん？', de: 'Du denkst, das ist ein normaler Eintrag?', fi: 'Luuletko tämän olevan tavallinen merkintä?' },
+    body:  { ja: 'あなたはだあれ？', de: 'Wer bist du?', fi: 'Kuka olet?' },
+    quiz:  true,
+    tags:  [{ ja: '？', de: '？', fi: '？' }]
   }
 ];
 
@@ -348,10 +414,19 @@ function buildCard(entry, absIdx) {
 
   /* ── 本文 ── */
   var isTapEntry    = !!entry.tap;
+  var isQuizEntry   = !!entry.quiz;
   var isTapRevealed = isTapEntry && !!tapRevealed[absIdx];
   var bodyHTML = bodyLangs.map(function(l) {
-    var hidden  = l !== entryLang ? ' style="display:none"' : '';
-    var text    = isTapRevealed
+    var hidden = l !== entryLang ? ' style="display:none"' : '';
+    /* クイズ仕掛け */
+    if (isQuizEntry) {
+      var qs = l !== entryLang
+        ? ' style="display:none;cursor:pointer;"'
+        : ' style="cursor:pointer;"';
+      return '<p class="entry-body-text" data-lang="' + l + '"' + qs +
+        ' onclick="openQuiz()">' + esc(entry.body[l] || '').replace(/\n/g, '<br>') + '</p>';
+    }
+    var text = isTapRevealed
       ? esc(entry.tap[l] || entry.tap['ja'] || '').replace(/\n/g, '<br>')
       : esc(entry.body[l] || '').replace(/\n/g, '<br>');
     var tapAttr = (isTapEntry && !isTapRevealed)
@@ -435,8 +510,8 @@ function switchEntryLang(absIdx, newLang) {
   var card = document.querySelector('[data-entry-idx="' + absIdx + '"]');
   if (!card) return;
 
-  /* title/body の各言語スパンを切替 */
-  card.querySelectorAll('[data-lang]').forEach(function(el) {
+  /* title/body の各言語スパンを切替（ボタン自身は除外） */
+  card.querySelectorAll('.entry-title-text[data-lang], .entry-body-text[data-lang]').forEach(function(el) {
     el.style.display = el.getAttribute('data-lang') === newLang ? '' : 'none';
   });
 
@@ -527,6 +602,150 @@ window.addEventListener('hashchange', function() {
 ==================================================== */
 currentPage = getPageFromHash();
 renderAll();
+
+/* ====================================================
+   クイズモーダル
+==================================================== */
+(function() {
+  /* DOM注入 */
+  var overlay = document.createElement('div');
+  overlay.id = 'quiz-overlay';
+  overlay.innerHTML =
+    '<div id="quiz-dialog">' +
+      '<p id="quiz-question"></p>' +
+      '<input id="quiz-input" type="text" autocomplete="off" spellcheck="false">' +
+      '<div id="quiz-dialog-btns"><button id="quiz-submit">→</button></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  var quizStep = 0;
+  var quizPath = null; /* 'pynchon' | 'tanakana' */
+
+  var QS = {
+    ja: {
+      q1:    '競介の好きな飲み物は？',
+      q2:    '競介の好きな銘柄は？',
+      q3:    '競介の好きな作家は？',
+      q3a:   'その作家の作品で競介が一番好きなものは？',
+      q3b:   '…その作家の作品で競介が一番好きなものは？',
+      q4:    '魔法の番号を入力してね',
+      wrong: '残念…'
+    },
+    de: {
+      q1:    'Was trinkt Kyōsuke am liebsten?',
+      q2:    'Welche Marke mag Kyōsuke am liebsten?',
+      q3:    'Wer ist Kyōsukes Lieblingsautor?',
+      q3a:   'Welches Werk dieses Autors mag Kyōsuke am meisten?',
+      q3b:   '…Welches Werk dieses Autors mag Kyōsuke am meisten?',
+      q4:    'Gib die magische Zahl ein',
+      wrong: 'Schade…'
+    },
+    fi: {
+      q1:    'Mikä on Kyōsuken suosijuoma?',
+      q2:    'Mikä on Kyōsuken suosimerkki?',
+      q3:    'Kuka on Kyōsuken suosikirjailija?',
+      q3a:   'Mikä on Kyōsuken suositeos tältä kirjailijalta?',
+      q3b:   '…Mikä on Kyōsuken suositeos tältä kirjailijalta?',
+      q4:    'Syötä taikanluku',
+      wrong: 'Harmi…'
+    }
+  };
+
+  function qq(key) { return ((QS[lang] || QS['ja'])[key]) || ''; }
+
+  /* 全角英数→半角、小文字化、連続スペース圧縮 */
+  function norm(s) {
+    return s.trim()
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); })
+      .toLowerCase()
+      .replace(/\s+/g, ' ');
+  }
+
+  function showInput(v) {
+    document.getElementById('quiz-input').style.display       = v ? '' : 'none';
+    document.getElementById('quiz-dialog-btns').style.display = v ? '' : 'none';
+  }
+
+  window.openQuiz = function() {
+    quizStep = 1; quizPath = null;
+    document.getElementById('quiz-question').textContent = qq('q1');
+    document.getElementById('quiz-input').value = '';
+    showInput(true);
+    overlay.classList.add('open');
+    setTimeout(function() { document.getElementById('quiz-input').focus(); }, 50);
+  };
+
+  function closeQuiz() { overlay.classList.remove('open'); }
+
+  function wrongAnswer() {
+    document.getElementById('quiz-question').textContent = qq('wrong');
+    showInput(false);
+    setTimeout(closeQuiz, 1600);
+  }
+
+  function nextQ(key) {
+    document.getElementById('quiz-question').textContent = qq(key);
+    document.getElementById('quiz-input').value = '';
+    setTimeout(function() { document.getElementById('quiz-input').focus(); }, 20);
+  }
+
+  function handleSubmit() {
+    if (quizStep === 0) return;
+    var val = norm(document.getElementById('quiz-input').value);
+    if (!val) return;
+
+    if (quizStep === 1) {
+      /* 飲み物: ZONe */
+      (val === 'zone') ? (quizStep = 2, nextQ('q2')) : wrongAnswer();
+
+    } else if (quizStep === 2) {
+      /* 銘柄: ラッキーストライク / ラキスト / Lucky Strike */
+      var ok2 = val === 'ラッキーストライク' || val === 'ラキスト' ||
+                val === 'lucky strike'      || val === 'luckystrike';
+      ok2 ? (quizStep = 3, nextQ('q3')) : wrongAnswer();
+
+    } else if (quizStep === 3) {
+      /* 作家 */
+      var isPynchon = val === 'トマス・ピンチョン' ||
+                      val === 'thomas pynchon'   ||
+                      val === 'ピンチョン'   ||
+                      val === 'thomas ruggles pynchon jr.' ||
+                      val === 'thomas ruggles pynchon jr';
+      var isTana    = val === 'たなかな';
+      if (isPynchon)     { quizPath = 'pynchon';  quizStep = 4; nextQ('q3a'); }
+      else if (isTana)   { quizPath = 'tanakana'; quizStep = 4; nextQ('q3b'); }
+      else               { wrongAnswer(); }
+
+    } else if (quizStep === 4) {
+      /* 作品 */
+      var ok4;
+      if (quizPath === 'pynchon') {
+        ok4 = val === '競売ナンバー49の叫び'          ||
+              val === 'die versteigerung von no. 49' ||
+              val === 'the crying of lot 49'          ||
+              val === 'huuto 49';
+      } else {
+        ok4 = val === '犬飼先輩と後輩わんこ' || val === '犬飼先輩と発情わんこ';
+      }
+      ok4 ? (quizStep = 5, nextQ('q4')) : wrongAnswer();
+
+    } else if (quizStep === 5) {
+      /* 魔法の番号: 117649 */
+      if (val === '117649') {
+        closeQuiz();
+        location.href = quizPath === 'pynchon' ? 'kyo.html' : 'tana.html';
+      } else { wrongAnswer(); }
+    }
+  }
+
+  document.getElementById('quiz-submit').addEventListener('click', handleSubmit);
+  document.getElementById('quiz-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleSubmit();
+  });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeQuiz();
+  });
+})();
 </script>
 </body>
 </html>
