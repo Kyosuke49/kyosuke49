@@ -136,7 +136,7 @@ body::after {
   color: #e83929;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  animation: touch-flash 0.18s steps(1) forwards;
+  animation: touch-flash 0.1s steps(1) forwards;
   z-index: 9999;
   white-space: nowrap;
   text-shadow: 2px 0 #fff, -2px 0 #000;
@@ -731,12 +731,12 @@ function applyTitleGlitch(lang) {
 }
 
 function scheduleTitleGlitch() {
-  const delay = rand(1200, 4500);
+  const delay = rand(800, 1000);
   setTimeout(() => {
     applyTitleGlitch(currentLang);
     /* 短いバーストを起こすこともある */
     if (Math.random() < 0.3) {
-      setTimeout(() => applyTitleGlitch(currentLang), rand(80, 180));
+      setTimeout(() => applyTitleGlitch(currentLang), rand(200, 300));
     }
     scheduleTitleGlitch();
   }, delay);
@@ -768,11 +768,11 @@ function corruptStr(real, probability) {
 function updateGlitchDatetime() {
   const real = getRealDatetimeStr();
   const showReal = Math.random() < 0.12;
-  document.getElementById('infoDatetime').textContent = showReal ? real : corruptStr(real, 0.65);
+  document.getElementById('infoDatetime').textContent = showReal ? real : corruptStr(real, 100);
 
   const jd = julianDate(Date.now()).toFixed(5);
   document.getElementById('infoJulian').textContent =
-    Math.random() < 0.15 ? jd : corruptStr(jd, 0.55);
+    Math.random() < 0.005 ? jd : corruptStr(jd, 500);
 }
 
 /* ============================================================
@@ -791,7 +791,7 @@ function scheduleStatusGlitch() {
     };
     flash();
     scheduleStatusGlitch();
-  }, rand(6000, 22000));
+  }, rand(300, 1000));
 }
 
 /* ============================================================
@@ -816,7 +816,7 @@ function scheduleSysMsgNoise() {
     renderSysMsg(true);
     setTimeout(() => renderSysMsg(false), rand(80, 250));
     scheduleSysMsgNoise();
-  }, rand(3000, 10000));
+  }, rand(30, 100));
 }
 
 /* ============================================================
@@ -831,7 +831,7 @@ function glitchSubtitle() {
         return `<span style="color:#e83929;font-family:var(--font-mono)">${randFrom(GLITCH_SYMBOLS + EXTRA_SYMS)}</span>`;
       return c;
     }).join('');
-    setTimeout(() => { el.textContent = orig; }, rand(60, 180));
+    setTimeout(() => { el.textContent = orig; }, rand(6, 18));
   });
 }
 
@@ -839,7 +839,7 @@ function scheduleSubtitleGlitch() {
   setTimeout(() => {
     glitchSubtitle();
     scheduleSubtitleGlitch();
-  }, rand(2500, 9000));
+  }, rand(250, 900));
 }
 
 /* ============================================================
@@ -864,7 +864,7 @@ function glitchContents() {
   links.sort(() => Math.random() - 0.5).slice(0, count).forEach(a => {
     const orig = a.textContent;
     const glitched = [...orig].map(c =>
-      Math.random() < 0.45 ? randFrom(GLITCH_SYMBOLS) : c
+      Math.random() < 0.75 ? randFrom(GLITCH_SYMBOLS) : c
     ).join('');
     const pre  = Math.random() < 0.4 ? `<span class="tc-extra">${randFrom(EXTRA_SYMS)}</span>` : '';
     const post = Math.random() < 0.4 ? `<span class="tc-extra">${randFrom(EXTRA_SYMS)}</span>` : '';
@@ -877,7 +877,7 @@ function scheduleContentsGlitch() {
   setTimeout(() => {
     glitchContents();
     scheduleContentsGlitch();
-  }, rand(2000, 8000));
+  }, rand(200, 800));
 }
 
 /* ============================================================
@@ -931,13 +931,13 @@ function scheduleFlicker() {
     document.body.style.animation = 'body-flash 0.35s steps(1) forwards';
     setTimeout(() => { document.body.style.animation = ''; }, 400);
     scheduleFlicker();
-  }, rand(5000, 18000));
+  }, rand(500, 1800));
 }
 
 const FLASH_SYMS = ['×', '∇', '%', '!', '#', '■', '▲', '◆', '░', '†', '≠', '∑'];
 
 function choppyFlash(x, y) {
-  const count = rand(2, 4);
+  const count = rand(2, 8);
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       const el = document.createElement('div');
@@ -954,7 +954,7 @@ function choppyFlash(x, y) {
 function choppyShake() {
   /* CSSではなくJSで即時ジャンプを繰り返す */
   const jumps = [
-    [-7, 3], [6, -5], [-5, 6], [8, -3], [-4, 5], [5, -4], [0, 0]
+    [-10, 3], [6, -5], [-5, 6], [8, -3], [-4, 5], [5, -4], [0, 0]
   ];
   let i = 0;
   const doJump = () => {
@@ -1006,16 +1006,16 @@ function openModal() {
 
   /* モーダル内テキストを定期的に軽くグリッチ */
   modalGlitchInterval = setInterval(() => {
-    if (Math.random() < 0.35) {
+    if (Math.random() < 0.1) {
       document.getElementById('modal-question').innerHTML = glitchText(q);
     }
-  }, 800);
+  }, 80);
 }
 
 function closeModal() {
   overlay.classList.remove('active');
   clearInterval(modalGlitchInterval);
-  setTimeout(() => { overlay.style.display = 'none'; }, 260);
+  setTimeout(() => { overlay.style.display = 'none'; }, 26);
 }
 
 overlay.addEventListener('click', e => {
@@ -1104,7 +1104,7 @@ function init() {
   applyLang(currentLang);
 
   /* コマンドラインアニメーション開始 */
-  setTimeout(runCmdLoop, 800);
+  setTimeout(runCmdLoop, 300);
 
   /* 各種スケジューラ起動 */
   scheduleTitleGlitch();
