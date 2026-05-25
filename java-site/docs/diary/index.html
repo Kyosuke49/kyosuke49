@@ -609,22 +609,22 @@ renderAll();
       '66b0fbb12e4d8f2baf6c325839fa06365b5d7edcdafa36f59440de323751848c',
       '3daf3064e699483c225d155b22bbb7ee5c3675cf5d120a3e35cc4ce28c6e987d'
     ],
-    step3_pynchon: [
+    step3_oedipa: [
       '6a9be37c64fdd0a4191b8f52ae39cfb2e893904989c48614639278f407615663',
       '2213ef363d675360b9cd892959dae3c849db68087ebd60908e9aad72664bfef0',
       'dec701935bde39d7d60439ebe78e5c89d978f1cbe6558191b423226913da5f32',
       '7731113c180782fccac6877a9357493d997a0f19203b7d91c89c22f9a81fa595'
     ],
-    step3_tanakana: [
+    step3_tonio: [
       '3ce7429acfbe25067e35e5a0fc227c30ffe62ededbce326d119264d62fd45cd0'
     ],
-    step4_pynchon: [
+    step4_oedipa: [
       'e81de341385623daaad3511d196c1808f2cb1d3b7ac2d6bece0151b2596775b5',
       'a558fdc8b8f3cc014e70922ac011b7150399b6023b9124c569b5c35dfe6919a8',
       '09ce3b1f10913394ebab89dfaeb0c622abd48632a662e99be0c915caac61dad6',
       '631e198109d7db211427843efb4c0fe5023942bfbeee492fdd772fe669d158db'
     ],
-    step4_tanakana: [
+    step4_tonio: [
       '1ab27950901e74c7426a06b5e894dea503546865cb82223087ca8016200835ea',
       '0e71fddbdb1d8565ca66a671fedd458a6ccad6307dccceb68de3bfbfb5ffe8e1'
     ],
@@ -632,8 +632,8 @@ renderAll();
   };
 
   var ENCODED_URLS = {
-    pynchon:  '5a4858185c4d5c5d',
-    tanakana: '455059571a51455c5b'
+    oedipa:  '5a4858185c4d5c5d',
+    tonio: '455059571a51455c5b'
   };
 
   var QS = {
@@ -748,12 +748,12 @@ renderAll();
         : wrongAnswer();
 
     } else if (quizStep === 3) {
-      if      (await hashMatches(val, H.step3_pynchon))  { quizPath = 'pynchon';  quizStep = 4; nextQ('q3a'); }
-      else if (await hashMatches(val, H.step3_tanakana)) { quizPath = 'tanakana'; quizStep = 4; nextQ('q3b'); }
+      if      (await hashMatches(val, H.step3_oedipa))  { quizPath = 'oedipa';  quizStep = 4; nextQ('q3a'); }
+      else if (await hashMatches(val, H.step3_tonio)) { quizPath = 'tonio'; quizStep = 4; nextQ('q3b'); }
       else                                               { wrongAnswer(); }
 
     } else if (quizStep === 4) {
-      var hset = quizPath === 'pynchon' ? H.step4_pynchon : H.step4_tanakana;
+      var hset = quizPath === 'oedipa' ? H.step4_oedipa : H.step4_tonio;
       (await hashMatches(val, hset))
         ? (quizStep = 5, nextQ('q4'))
         : wrongAnswer();
@@ -762,7 +762,10 @@ renderAll();
       if (await hashMatches(val, H.step5)) {
         closeQuiz();
         /* 正解の入力値（魔法の番号）をキーにXORデコードしてURLを復元 */
-        location.href = xorDecode(ENCODED_URLS[quizPath], val);
+        var h = await sha256hex(val);
+          var suffix = quizPath === 'oedipa' ? ':kyo' : ':tana';
+          var token = await sha256hex(h + suffix);
+          location.href = xorDecode(ENCODED_URLS[quizPath], val) + '?t=' + token;
       } else {
         wrongAnswer();
       }
