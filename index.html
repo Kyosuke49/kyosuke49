@@ -432,6 +432,177 @@ body.lang-fi { font-family: var(--font-fi); }
   transition: color 0.2s;
 }
 .footer-links a:hover { color: var(--color-text); }
+
+      /* =====================
+         フッター Credits リンク
+      ===================== */
+      .footer-credits-row {
+        text-align: center;
+        padding-top: 1.2rem;
+        margin-top: 0.8rem;
+        border-top: 1px solid var(--color-border);
+      }
+      .footer-credits-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        transition: color 0.2s;
+        position: relative;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .footer-credits-btn::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        transform: scaleX(0);
+        height: 1px;
+        bottom: -2px;
+        left: 0;
+        background-color: currentColor;
+        transform-origin: bottom right;
+        transition: transform 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+      }
+      .footer-credits-btn:hover { color: var(--color-text); }
+      .footer-credits-btn:hover::after {
+        transform: scaleX(1);
+        transform-origin: bottom left;
+      }
+
+      /* =====================
+         確認ダイアログ（共通）
+      ===================== */
+      #credits-confirm-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 9000;
+        align-items: center;
+        justify-content: center;
+      }
+      #credits-confirm-overlay.open { display: flex; }
+      #credits-confirm-dialog {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 1.8rem 2rem;
+        width: min(90vw, 400px);
+        display: flex;
+        flex-direction: column;
+        gap: 1.3rem;
+      }
+      #credits-confirm-msg {
+        font-family: 'Kazesawa', system-ui, sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.85;
+        color: #111;
+        margin: 0;
+        letter-spacing: 0.03em;
+      }
+      .credits-confirm-btns {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.6rem;
+      }
+      .credits-confirm-btns button {
+        font-family: 'Geosans', sans-serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        border: 1px solid #ccc;
+        background: none;
+        padding: 0.35rem 1.1rem;
+        cursor: pointer;
+        color: #111;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+      }
+      .credits-confirm-btns button:hover {
+        background: #111;
+        color: #fff;
+        border-color: #111;
+      }
+
+      /* =====================
+         クレジットパネル
+      ===================== */
+      #credits-panel {
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      #credits-panel.open {
+        max-height: 6000px;
+      }
+      .credits-panel-inner {
+        background: #0a0a0a;
+        color: #e0e0e0;
+        padding: 2.2rem 2rem 2.8rem;
+        margin-top: 1rem;
+      }
+      .credits-panel-title {
+        font-family: 'Kazesawa', system-ui, sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        color: #888;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      /* ─── エントリー ─── */
+      .credit-entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.4rem;
+        padding: 1.6rem 0;
+        border-bottom: 1px solid #00000000;
+      }
+      .credit-entry:last-child { border-bottom: none; }
+
+      /* 左寄せ：テキスト左・画像右 */
+      .credit-entry.align-left  { flex-direction: row; }
+      /* 右寄せ：画像左・テキスト右 */
+      .credit-entry.align-right { flex-direction: row-reverse; }
+
+      .credit-text { flex: 1; }
+      .credit-entry.align-left  .credit-text { text-align: left; }
+      .credit-entry.align-right .credit-text { text-align: right; }
+
+      .credit-name {
+        font-family: 'Kazesawa', system-ui, sans-serif;
+        font-size: 0.95rem;
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        color: #fff;
+        line-height: 1.4;
+      }
+      .credit-handle {
+        font-family: 'Geosans', 'Fira Code', monospace;
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        color: #555;
+        margin-top: 0.2rem;
+      }
+
+      /* 画像（存在する時だけ表示） */
+      .credit-img {
+        width: 130px;
+        height: 130px;
+        flex-shrink: 0;
+        overflow: hidden;
+        border: 1px solid #00000000;
+      }
+      .credit-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+  
 </style>
 </head>
 
@@ -533,6 +704,17 @@ body.lang-fi { font-family: var(--font-fi); }
       <a href="https://x.com/ningaesst?s=21" class="link-underline" target="_blank" rel="noopener">X / Twitter</a>
     </div>
   </div>
+
+    <div class="footer-credits-row">
+      <button class="footer-credits-btn" onclick="handleCreditsClick()">Credits</button>
+    </div>
+    <div id="credits-panel">
+      <div class="credits-panel-inner">
+        <p id="credits-panel-title" class="credits-panel-title"></p>
+        <div id="credits-list"></div>
+      </div>
+    </div>
+  
 </footer>
 
 <!-- daily.js: dailyByDate と specialConditions をグローバルに定義 -->
@@ -704,10 +886,127 @@ document.getElementById('fragmentsArea').addEventListener('click', () => {
   fragmentIndex = (fragmentIndex + 1) % RANDOM_TEXTS.length;
   updateFragment();
 });
+  /* =====================
+     クレジットデータ
+     image: null   → 画像なし
+     image: 'パス'  → 画像表示
+  ===================== */
+  const CREDITS = [
+    { name: { ja: 'たまる', de: 'たまる', fi: 'たまる' }, handle: '@tamutamutime777', image: 'tamu.PNG' },
+    { name: { ja: 'あたりめ', de: 'あたりめ',   fi: 'あたりめ'   }, handle: '@ika_atarime04',    image: 'ata.PNG' },
+    { name: { ja: ' 名執翔一',   de: '名執翔一',    fi: '名執翔一'    }, handle: '@TERAKOMARIGANDE',     image:'nato.PNG' },
+    { name: { ja: 'Tatsu/タツ/達',  de: 'Tatsu/タツ/達',  fi: 'Tatsu/タツ/達'  }, handle: '@StealthOrc',  image: 'tats.PNG' },
+  ];
 
-/* =====================
-   初期化 & インターバル
-===================== */
+  /* ─── ダイアログ用テキスト ─── */
+  const CREDITS_STRINGS = {
+    ja: {
+      openMsg:   'このサイトの制作に関して超絶ありがてえ最高ウルトラスペシャルサンクスな方々を表示しますか？',
+      closeMsg:  'クレジットを閉じますか？',
+      yes: 'はい',
+      no:  'いいえ',
+      title: '〜 超絶ありがてえ最高ウルトラスペシャルサンクスな方々 〜',
+    },
+    de: {
+      openMsg:   'Sollen die ultra-mega-special-awesome Danksagungen angezeigt werden?',
+      closeMsg:  'Danksagungen schließen?',
+      yes: 'Ja',
+      no:  'Nein',
+      title: '〜 Ultra-mega-special-awesome Danksagungen 〜',
+    },
+    fi: {
+      openMsg:   'Näytetäänkö tämän projektin äärimmäisen mahtavan ultrasupererikoistason kiitokset?',
+      closeMsg:  'Suljetaanko kiitokset?',
+      yes: 'Kyllä',
+      no:  'Ei',
+      title: '〜 Äärimmäisen mahtavat ultrasupererikoistason kiitokset 〜',
+    },
+  };
+
+  var _confirmCallback = null;
+
+  function _openConfirm(msg, yesCb) {
+    const s = CREDITS_STRINGS[currentLang] || CREDITS_STRINGS.ja;
+    document.getElementById('credits-confirm-msg').textContent = msg;
+    document.getElementById('credits-confirm-yes').textContent = s.yes;
+    document.getElementById('credits-confirm-no').textContent  = s.no;
+    _confirmCallback = yesCb;
+    document.getElementById('credits-confirm-overlay').classList.add('open');
+  }
+
+  function _closeConfirm() {
+    document.getElementById('credits-confirm-overlay').classList.remove('open');
+    _confirmCallback = null;
+  }
+
+  /* Credits ボタンを押したとき */
+  function handleCreditsClick() {
+    const panel = document.getElementById('credits-panel');
+    const s = CREDITS_STRINGS[currentLang] || CREDITS_STRINGS.ja;
+    if (panel.classList.contains('open')) {
+      /* 開いているとき → 閉じる確認 */
+      _openConfirm(s.closeMsg, function() { closeCredits(); });
+    } else {
+      /* 閉じているとき → 開く確認 */
+      _openConfirm(s.openMsg, function() { showCredits(); });
+    }
+  }
+
+  function showCredits() {
+    _closeConfirm();
+    const s = CREDITS_STRINGS[currentLang] || CREDITS_STRINGS.ja;
+
+    /* タイトル */
+    document.getElementById('credits-panel-title').textContent = s.title;
+
+    /* エントリー生成 */
+    const list = document.getElementById('credits-list');
+    list.innerHTML = '';
+
+    CREDITS.forEach(function(person, i) {
+      var isLeft = (i % 2 === 0);
+      var entry  = document.createElement('div');
+      entry.className = 'credit-entry ' + (isLeft ? 'align-left' : 'align-right');
+
+      var textHtml =
+        '<div class="credit-text">' +
+          '<div class="credit-name">' + (person.name[currentLang] || person.name.ja) + '</div>' +
+          '<div class="credit-handle">' + person.handle + '</div>' +
+        '</div>';
+
+      var imgHtml = person.image
+        ? '<div class="credit-img"><img src="' + person.image + '" alt=""></div>'
+        : '';
+
+      /* 左: テキスト→画像、右: 画像→テキスト（row-reverse で反転） */
+      entry.innerHTML = textHtml + imgHtml;
+      list.appendChild(entry);
+    });
+
+    /* パネルを開く */
+    var panel = document.getElementById('credits-panel');
+    panel.classList.add('open');
+    setTimeout(function() {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
+
+  function closeCredits() {
+    _closeConfirm();
+    document.getElementById('credits-panel').classList.remove('open');
+  }
+
+  /* ダイアログイベント（DOMContentLoaded後に登録） */
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('credits-confirm-yes').addEventListener('click', function() {
+      if (_confirmCallback) _confirmCallback();
+    });
+    document.getElementById('credits-confirm-no').addEventListener('click', _closeConfirm);
+    document.getElementById('credits-confirm-overlay').addEventListener('click', function(e) {
+      if (e.target === this) _closeConfirm();
+    });
+  });
+  
 function init() {
   applyLang(currentLang);
   updateFragment();
@@ -719,5 +1018,17 @@ setInterval(() => {
   updateDailyText();
 }, 1000);
 </script>
+
+  <!-- Credits 確認ダイアログ -->
+  <div id="credits-confirm-overlay">
+    <div id="credits-confirm-dialog">
+      <p id="credits-confirm-msg"></p>
+      <div class="credits-confirm-btns">
+        <button id="credits-confirm-no"></button>
+        <button id="credits-confirm-yes"></button>
+      </div>
+    </div>
+  </div>
+  
 </body>
 </html>
