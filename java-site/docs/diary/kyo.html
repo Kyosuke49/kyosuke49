@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script>
+  (function() {
+    var EXPECTED = '7065edc8eea8f72bd8ae24f033554330dbfcd197dc21b8256821043480ce532b';
+    var t = new URLSearchParams(window.location.search).get('t');
+    if (t !== EXPECTED) { window.location.replace('../diary/'); }
+  })();
+  </script>
+  
 <meta charset="UTF-8">
 <title>おかえりなさい</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
