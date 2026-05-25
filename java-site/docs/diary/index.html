@@ -295,25 +295,25 @@ var ENTRIES = [
     body:  { ja: '2025のうちに作っといた方がいいことあるかなって' },
     tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
   },
-{
-     date:  '2026-05-22',
-     title: { ja: '公開範囲を拡大！' },
-     body:  { ja: '一部のネッ友たちに公開してみました。みんなのアドバイスを待ってるよ！', de:'Ich habe die Seite ein paar Freunden gezeigt. Bin gespannt auf eure Vorschläge!', fi:'Julkaisin sivuston jo muutamille nettikavereille. Odotan teidän kommenttejanne!' },
-     tags:  [{ ja: 'お知らせ', de: 'Mitteilung', fi: 'Ilmoitus' }]
-   },
-{
+  {
+    date:  '2026-05-22',
+    title: { ja: '公開範囲を拡大！' },
+    body:  { ja: '一部のネッ友たちに公開してみました。みんなのアドバイスを待ってるよ！', de:'Ich habe die Seite ein paar Freunden gezeigt. Bin gespannt auf eure Vorschläge!', fi:'Julkaisin sivuston jo muutamille nettikavereille. Odotan teidän kommenttejanne!' },
+    tags:  [{ ja: 'お知らせ', de: 'Mitteilung', fi: 'Ilmoitus' }]
+  },
+  {
     date:  '2026-05-21',
     title: { ja: '☆大改革☆' },
     body:  { ja: '本当はこれまでもちょくちょく更新してたんですよ？独り言ページに記述し忘れてただけで…' },
     tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
   },
-{
+  {
     date:  '2026-5-22',
     title: { ja: '幻リプのガチャで大爆死した' },
     body:  { ja: '全部が全部意味のある独り言だと思うなよ。' },
     tags:  [{ ja: '雑談', de: 'Gelaber', fi: 'Höpinää' }]
   },
-{
+  {
     date:  '2026-5-23',
     title: { ja: '何これ！楽しい！' },
     body:  { ja: 'ここの文タップしてみ？' },
@@ -358,10 +358,7 @@ ENTRIES.sort(function(a, b) { return b.date.localeCompare(a.date); });
 ==================================================== */
 var lang        = localStorage.getItem('lang') || 'ja';
 var currentPage = 1;
-/* エントリーごとの表示言語（絶対インデックス → 言語コード）
-   グローバル言語切替の影響を受けず、エントリー内ボタンでのみ変化する */
 var entryLangs  = {};
-/* タップ済みエントリー（絶対インデックス → true） */
 var tapRevealed = {};
 
 /* ====================================================
@@ -380,7 +377,6 @@ function esc(s) {
     .replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function formatDate(iso) {
-  /* 日付フォーマットはページのグローバル言語に従う */
   var p = iso.split('-');
   if (lang === 'de' || lang === 'fi') return parseInt(p[2]) + '.' + parseInt(p[1]) + '.' + p[0];
   return p[0] + '.' + p[1] + '.' + p[2];
@@ -395,30 +391,23 @@ function setPageHash(n) {
 
 /* ====================================================
    カードHTML生成
-   ─────────────────────────────────────────────────
-   ・日付・タグ:  グローバル lang に従って描画
-   ・タイトル・本文: エントリーごとの言語（entryLangs[absIdx]）
-                 複数言語があればカード内にボタンを表示
 ==================================================== */
 function buildCard(entry, absIdx) {
   var bodyLangs  = Object.keys(entry.body || {});
   var titleLangs = Object.keys(entry.title || {});
   var entryLang  = entryLangs[absIdx] || bodyLangs[0] || 'ja';
 
-  /* ── タイトル ── */
   var titleHTML = titleLangs.map(function(l) {
     var hidden = l !== entryLang ? ' style="display:none"' : '';
     return '<span class="entry-title-text" data-lang="' + l + '"' + hidden + '>' +
       esc(entry.title[l]) + '</span>';
   }).join('');
 
-  /* ── 本文 ── */
   var isTapEntry    = !!entry.tap;
   var isQuizEntry   = !!entry.quiz;
   var isTapRevealed = isTapEntry && !!tapRevealed[absIdx];
   var bodyHTML = bodyLangs.map(function(l) {
     var hidden = l !== entryLang ? ' style="display:none"' : '';
-    /* クイズ仕掛け */
     if (isQuizEntry) {
       var qs = l !== entryLang
         ? ' style="display:none;cursor:pointer;"'
@@ -439,7 +428,6 @@ function buildCard(entry, absIdx) {
     return '<p class="entry-body-text" data-lang="' + l + '"' + hidden + '>' + text + '</p>';
   }).join('');
 
-  /* ── エントリー内言語切替ボタン（翻訳版がある場合のみ） ── */
   var langBtnsHTML = '';
   if (bodyLangs.length > 1) {
     langBtnsHTML = '<div class="entry-lang-btns">' +
@@ -451,7 +439,6 @@ function buildCard(entry, absIdx) {
       '</div>';
   }
 
-  /* ── タグ（グローバル言語） ── */
   var tagsHTML = '';
   if (entry.tags && entry.tags.length) {
     tagsHTML = '<div class="diary-tags">' +
@@ -478,9 +465,6 @@ function buildCard(entry, absIdx) {
 
 /* ====================================================
    タップ仕掛けの発動
-   ─────────────────────────────────────────────────
-   tap フィールドを持つエントリーの本文をタップしたとき呼ばれる。
-   状態を記録してカードだけ再描画する。
 ==================================================== */
 function revealTap(absIdx) {
   tapRevealed[absIdx] = true;
@@ -501,21 +485,16 @@ function revealTap(absIdx) {
 
 /* ====================================================
    エントリー内言語切替
-   ─────────────────────────────────────────────────
-   そのカードの title/body のみ切り替える。
-   グローバル lang・他のカードには一切影響しない。
 ==================================================== */
 function switchEntryLang(absIdx, newLang) {
   entryLangs[absIdx] = newLang;
   var card = document.querySelector('[data-entry-idx="' + absIdx + '"]');
   if (!card) return;
 
-  /* title/body の各言語スパンを切替（ボタン自身は除外） */
   card.querySelectorAll('.entry-title-text[data-lang], .entry-body-text[data-lang]').forEach(function(el) {
     el.style.display = el.getAttribute('data-lang') === newLang ? '' : 'none';
   });
 
-  /* ボタンのアクティブ状態 */
   card.querySelectorAll('.entry-lang-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.getAttribute('data-lang') === newLang);
   });
@@ -574,9 +553,6 @@ function goPage(n) {
 
 /* ====================================================
    言語切替フック
-   ─────────────────────────────────────────────────
-   グローバル言語が変わっても entryLangs は保持される。
-   re-render 後もエントリー内の言語状態が維持される。
 ==================================================== */
 (function() {
   var _orig = window.setLang;
@@ -584,8 +560,6 @@ function goPage(n) {
     lang = l;
     if (_orig) _orig(l);
     renderAll();
-    /* entryLangs はそのまま保持 — 再描画でも各エントリーの
-       選択言語は buildCard 内で entryLangs から復元される */
   };
 })();
 
@@ -605,6 +579,11 @@ renderAll();
 
 /* ====================================================
    クイズモーダル
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ここから下にはクイズの答えが書いてあります。
+　　ソースコード見て答え知ろうと思ったあなたは賢いですね。
+　　簡単に答えが分かったらなんか面白くないなと思ったので一応答えはハッシュ化してありますが、どうにか頑張ったら多分答えは分かると思います。
+　　というかそんなことしなくてもどこのページに飛ぶかは分かるとは思いますが、暇つぶしと思って付き合ってくださると嬉しいです。
 ==================================================== */
 (function() {
   /* DOM注入 */
@@ -619,7 +598,43 @@ renderAll();
   document.body.appendChild(overlay);
 
   var quizStep = 0;
-  var quizPath = null; /* 'pynchon' | 'tanakana' */
+  var quizPath = null;
+  var H = {
+    step1: [
+      '543e33c48b3c23d3b3ef151358533bc206fa0225ba66b89933a795451f016479'
+    ],
+    step2: [
+      '6e0b1be2a81bcbe9d08ccf03dfd28cfdc4bad37ee6bf4fc7e3131415a58855ff',
+      '5741143da164ff7dac2e63a31912a0b922059a557c26d2a3c8c6f5b3804e1193',
+      '66b0fbb12e4d8f2baf6c325839fa06365b5d7edcdafa36f59440de323751848c',
+      '3daf3064e699483c225d155b22bbb7ee5c3675cf5d120a3e35cc4ce28c6e987d'
+    ],
+    step3_pynchon: [
+      '6a9be37c64fdd0a4191b8f52ae39cfb2e893904989c48614639278f407615663',
+      '2213ef363d675360b9cd892959dae3c849db68087ebd60908e9aad72664bfef0',
+      'dec701935bde39d7d60439ebe78e5c89d978f1cbe6558191b423226913da5f32',
+      '7731113c180782fccac6877a9357493d997a0f19203b7d91c89c22f9a81fa595'
+    ],
+    step3_tanakana: [
+      '3ce7429acfbe25067e35e5a0fc227c30ffe62ededbce326d119264d62fd45cd0'
+    ],
+    step4_pynchon: [
+      'e81de341385623daaad3511d196c1808f2cb1d3b7ac2d6bece0151b2596775b5',
+      'a558fdc8b8f3cc014e70922ac011b7150399b6023b9124c569b5c35dfe6919a8',
+      '09ce3b1f10913394ebab89dfaeb0c622abd48632a662e99be0c915caac61dad6',
+      '631e198109d7db211427843efb4c0fe5023942bfbeee492fdd772fe669d158db'
+    ],
+    step4_tanakana: [
+      '1ab27950901e74c7426a06b5e894dea503546865cb82223087ca8016200835ea',
+      '0e71fddbdb1d8565ca66a671fedd458a6ccad6307dccceb68de3bfbfb5ffe8e1'
+    ],
+    step5: 'e99ecd955e7648433b86bfeeec9a235cfbe5caae601589b778b7369f56d00a49'
+  };
+
+  var ENCODED_URLS = {
+    pynchon:  '5a4858185c4d5c5d',
+    tanakana: '455059571a51455c5b'
+  };
 
   var QS = {
     ja: {
@@ -661,6 +676,30 @@ renderAll();
       .replace(/\s+/g, ' ');
   }
 
+  /* Web Crypto API でSHA-256ハッシュを計算（16進数文字列で返す） */
+  async function sha256hex(s) {
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(buf))
+      .map(function(b) { return b.toString(16).padStart(2, '0'); })
+      .join('');
+  }
+
+  /* ハッシュ一覧のいずれかと一致するか確認 */
+  async function hashMatches(val, hashes) {
+    var h = await sha256hex(val);
+    var list = Array.isArray(hashes) ? hashes : [hashes];
+    return list.indexOf(h) !== -1;
+  }
+
+  /* XORデコード：hex文字列をキー文字列でXOR復号してURLを得る */
+  function xorDecode(hex, key) {
+    var keyBytes = Array.from(new TextEncoder().encode(key));
+    var bytes    = hex.match(/.{2}/g).map(function(h) { return parseInt(h, 16); });
+    return new TextDecoder().decode(
+      new Uint8Array(bytes.map(function(b, i) { return b ^ keyBytes[i % keyBytes.length]; }))
+    );
+  }
+
   function showInput(v) {
     document.getElementById('quiz-input').style.display       = v ? '' : 'none';
     document.getElementById('quiz-dialog-btns').style.display = v ? '' : 'none';
@@ -689,53 +728,47 @@ renderAll();
     setTimeout(function() { document.getElementById('quiz-input').focus(); }, 20);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (quizStep === 0) return;
     var val = norm(document.getElementById('quiz-input').value);
     if (!val) return;
 
+    /* ボタンを一時的に無効化（連打・二重送信防止） */
+    var btn = document.getElementById('quiz-submit');
+    btn.disabled = true;
+
     if (quizStep === 1) {
-      /* 飲み物: ZONe */
-      (val === 'zone') ? (quizStep = 2, nextQ('q2')) : wrongAnswer();
+      (await hashMatches(val, H.step1))
+        ? (quizStep = 2, nextQ('q2'))
+        : wrongAnswer();
 
     } else if (quizStep === 2) {
-      /* 銘柄: ラッキーストライク / ラキスト / Lucky Strike */
-      var ok2 = val === 'ラッキーストライク' || val === 'ラキスト' ||
-                val === 'lucky strike'      || val === 'luckystrike';
-      ok2 ? (quizStep = 3, nextQ('q3')) : wrongAnswer();
+      (await hashMatches(val, H.step2))
+        ? (quizStep = 3, nextQ('q3'))
+        : wrongAnswer();
 
     } else if (quizStep === 3) {
-      /* 作家 */
-      var isPynchon = val === 'トマス・ピンチョン' ||
-                      val === 'thomas pynchon'   ||
-                      val === 'ピンチョン'   ||
-                      val === 'thomas ruggles pynchon jr.' ||
-                      val === 'thomas ruggles pynchon jr';
-      var isTana    = val === 'たなかな';
-      if (isPynchon)     { quizPath = 'pynchon';  quizStep = 4; nextQ('q3a'); }
-      else if (isTana)   { quizPath = 'tanakana'; quizStep = 4; nextQ('q3b'); }
-      else               { wrongAnswer(); }
+      if      (await hashMatches(val, H.step3_pynchon))  { quizPath = 'pynchon';  quizStep = 4; nextQ('q3a'); }
+      else if (await hashMatches(val, H.step3_tanakana)) { quizPath = 'tanakana'; quizStep = 4; nextQ('q3b'); }
+      else                                               { wrongAnswer(); }
 
     } else if (quizStep === 4) {
-      /* 作品 */
-      var ok4;
-      if (quizPath === 'pynchon') {
-        ok4 = val === '競売ナンバー49の叫び'          ||
-              val === 'die versteigerung von no. 49' ||
-              val === 'the crying of lot 49'          ||
-              val === 'huuto 49';
-      } else {
-        ok4 = val === '犬飼先輩と後輩わんこ' || val === '犬飼先輩と発情わんこ';
-      }
-      ok4 ? (quizStep = 5, nextQ('q4')) : wrongAnswer();
+      var hset = quizPath === 'pynchon' ? H.step4_pynchon : H.step4_tanakana;
+      (await hashMatches(val, hset))
+        ? (quizStep = 5, nextQ('q4'))
+        : wrongAnswer();
 
     } else if (quizStep === 5) {
-      /* 魔法の番号: 117649 */
-      if (val === '117649') {
+      if (await hashMatches(val, H.step5)) {
         closeQuiz();
-        location.href = quizPath === 'pynchon' ? 'kyo.html' : 'tana.html';
-      } else { wrongAnswer(); }
+        /* 正解の入力値（魔法の番号）をキーにXORデコードしてURLを復元 */
+        location.href = xorDecode(ENCODED_URLS[quizPath], val);
+      } else {
+        wrongAnswer();
+      }
     }
+
+    btn.disabled = false;
   }
 
   document.getElementById('quiz-submit').addEventListener('click', handleSubmit);
