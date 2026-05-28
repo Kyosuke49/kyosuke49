@@ -1,563 +1,660 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>外余擺線上のマキナ — 偽造切手</title>
-  <link rel="stylesheet" href="../style.css">
-  <style>
+  <html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外余擺線上のマキナ — 偽造切手</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+      /* ====================================================
+         縦書き小説リーダー — 文庫本スタイル
+      ==================================================== */
+      body { background: #f0ece2; }
+
+      .novel-wrap {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px);
+        min-height: 500px;
+        background: #f0ece2;
+      }
+
+      /* ── 柱（上部バー） ── */
+      .novel-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.6rem;
+        height: 34px;
+        border-bottom: 1px solid #c8bfb0;
+        flex-shrink: 0;
+      }
+      .novel-back {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        color: #9a8e82;
+        text-decoration: none;
+        transition: color 0.15s;
+        flex-shrink: 0;
+      }
+      .novel-back:hover { color: #2e2218; opacity: 1; }
+
+      .novel-top-center {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
+        overflow: hidden;
+      }
+      .novel-pillar {
+        font-family: 'Noto Serif JP', 'Hiragino Mincho Pro', 'Yu Mincho', serif;
+        font-weight: 300;
+        font-size: 0.64rem;
+        letter-spacing: 0.16em;
+        color: #6e6256;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .novel-pillar-sep { color: #b0a496; font-size: 0.56rem; flex-shrink: 0; }
+
+      .novel-page-indicator {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
+        color: #b0a496;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      /* ── テキストエリア（クリッピング） ── */
+      .novel-text-area {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* ── ページ ── */
+      .novel-page {
+        display: none;
+        writing-mode: vertical-rl;
+        -webkit-writing-mode: vertical-rl;
+        text-orientation: mixed;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        box-sizing: border-box;
+        font-family: 'Noto Serif JP', 'Hiragino Mincho Pro', 'Yu Mincho', serif;
+        font-weight: 300;
+        color: #1c1612;
+        overflow: hidden;      /* ← ページ全体でクリップ（各列の最終文字が欠けるのを防ぐ） */
+      }
+      .novel-page.active { display: block; }
+
+      /* ★ 各列（段落） — white-space: nowrap で折り返し禁止 */
+      .novel-page p {
+        display: block;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;   /* ← ★ これが句読点ズレを防ぐ核心 */
+        /* overflow: hidden は .novel-page 側に移動。ここで切ると最終文字が見切れる */
+      }
+
+      /* 章タイトル列 */
+      .novel-chapter-head {
+        font-weight: 400;
+        color: #2e2218;
+        letter-spacing: 0.22em !important;
+      }
+      .chapter-num {
+        -webkit-text-combine: horizontal;
+        -ms-text-combine-horizontal: all;
+        text-combine-upright: all;
+      }
+
+      /* 挿絵 */
+      .novel-illus-page {
+        display: none;
+        position: absolute;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        background: #f0ece2;
+      }
+      .novel-illus-page.active { display: flex; }
+      .novel-illus-page img { max-height: 100%; max-width: 100%; object-fit: contain; }
+      .novel-illus-caption {
+        writing-mode: vertical-rl;
+        font-family: 'Noto Serif JP', serif;
+        font-size: 0.68rem;
+        color: #9a8e82;
+        letter-spacing: 0.1em;
+        margin-left: 0.6rem;
+        align-self: flex-end;
+      }
+
+      /* ── ナビゲーション ── */
+      .novel-nav-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.6rem;
+        height: 42px;
+        border-top: 1px solid #c8bfb0;
+        flex-shrink: 0;
+      }
+
+      /* ★ ボタンの見た目：本のページをめくるイメージ（矢印のみ・シンプル） */
+      .novel-nav-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: 'Noto Serif JP', serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        color: #5a4e44;
+        padding: 0.25rem 0.5rem;
+        transition: color 0.12s;
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+      }
+      .novel-nav-btn:hover:not(:disabled) { color: #1c1612; }
+      .novel-nav-btn:disabled { opacity: 0.18; cursor: default; }
+      .nav-arr { font-size: 0.65rem; }
+
+      .novel-nav-center { display: flex; align-items: center; }
+      .novel-toc-btn {
+        background: none;
+        border: none;
+        font-family: 'Noto Serif JP', serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.12em;
+        color: #9a8e82;
+        cursor: pointer;
+        padding: 0.3rem 0.6rem;
+        transition: color 0.12s;
+      }
+      .novel-toc-btn:hover { color: #2e2218; }
+
+      /* 目次 */
+      .novel-toc-dropdown {
+        display: none;
+        position: fixed;
+        bottom: 52px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #f8f5ee;
+        border: 1px solid #c8bfb0;
+        padding: 0.4rem 0;
+        min-width: 160px;
+        max-width: 86vw;
+        max-height: 42vh;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 4px 18px rgba(28,22,18,0.14);
+      }
+      .novel-toc-dropdown.open { display: block; }
+      .novel-toc-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 0.42rem 1rem;
+        font-family: 'Noto Serif JP', serif;
+        font-weight: 300;
+        font-size: 0.76rem;
+        letter-spacing: 0.08em;
+        color: #2e2218;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: background 0.1s;
+      }
+      .novel-toc-item:hover { background: #e8e2d6; }
+      .novel-toc-item.toc-chapter {
+        font-weight: 400;
+        font-size: 0.68rem;
+        color: #8a7e72;
+        border-top: 1px solid #dedad2;
+        padding-top: 0.5rem;
+      }
+      .novel-toc-item.toc-chapter:first-child { border-top: none; }
+
+      @media (max-width: 600px) {
+        .novel-top-bar, .novel-nav-bar { padding: 0 0.9rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="shared-header"></div>
+
+    <div class="novel-wrap">
+      <div class="novel-top-bar">
+        <a href="index.html" class="novel-back">← 字置き場</a>
+        <div class="novel-top-center">
+          <span class="novel-pillar" id="novel-disp-title">外余擺線上のマキナ</span>
+          <span class="novel-pillar-sep" id="novel-sep" style="display:none">—</span>
+          <span class="novel-pillar" id="novel-disp-chapter"></span>
+        </div>
+        <span class="novel-page-indicator" id="novel-indicator">1 / 1</span>
+      </div>
+
+      <div class="novel-text-area" id="novel-text-area"></div>
+      <div class="novel-toc-dropdown" id="novel-toc"></div>
+
+      <div class="novel-nav-bar">
+        <!--
+          ★ 縦書き・右→左読みに合わせたボタン配置
+             左ボタン = 次へ（ページが左へ進む）
+             右ボタン = 前へ（ページが右へ戻る）
+        -->
+        <button class="novel-nav-btn" id="btn-next" onclick="nextPage()">
+          <span class="nav-arr">◁</span> 次へ
+        </button>
+        <div class="novel-nav-center">
+          <button class="novel-toc-btn" id="toc-toggle" onclick="toggleToc()">目次</button>
+        </div>
+        <button class="novel-nav-btn" id="btn-prev" onclick="prevPage()">
+          前へ <span class="nav-arr">▷</span>
+        </button>
+      </div>
+    </div>
+
+    <script src="../shared-nav.js"></script>
+    <script>
     /* ====================================================
-       縦書き小説リーダー
+       小説データ
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+       CHAPTERS 配列に章を追加してください。
+       ページ分割は自動です。段落は空行で区切ってください。
+
+         title   : 章タイトル（目次・柱に表示）
+         illus   : 挿絵ファイル名 または null
+         caption : 挿絵キャプション（省略可）
+         text    : 本文。段落は空行で区切る。
+                   各段落の先頭に自動で字下げが付きます。
     ==================================================== */
 
-    /* ヘッダーを上書きしてリーダー専用の背景に */
-    body {
-      background: #faf8f4;
+    var NOVEL_TITLE = '外余擺線上のマキナ';
+
+    var CHAPTERS = [
+      {
+        title: '一',
+        illus: null,
+        caption: null,
+        text: `とある夏の昼下がり、蒔那という少女は石膏ボードの天井をぼやけた視界の背景にしながら、嘲るように笑った。窓から差す太陽光線は室内の明度を上昇させ、空間は熱を帯び、澱んだ空気は飽和して、蒔那の視界に広がる景色は白飛びした写真のようである。興奮した神経細胞がその正常な働きを徐々に取り戻していくにつれて、アドレナリンの離脱症状か、事態をようやく認識し始めたためか、蒔那の口角は下がり始める。どうしてアタシがこんな状況に置かれたのか、どうしてアタシがこんな目に遭っているのか──あまり深く考えないことにした。蒔那の性分では、その物思いに耽った結果が、「私が悪かった」であった日には、脳みそがきっと沸騰してしまうからである。部屋の時計はカチ、カチ、と、病的に六畳少しの部屋に響く。これが、フロイトの示した精神分析に関する症例の一つであるわけもない。まるで自分自身のパラノイアを知覚した気分だ。(今はここまでですよ。これでも一章のごくごく最初の方だけです。引き返すなら今のうちです。続きはそのうち更新します。)`
+      }
+
+      /* 章を追加するときはカンマで続ける
+      ,{
+        title: '二',
+        illus: null,
+        text: `
+          第二章の本文。
+        `
+      }
+      */
+    ];
+
+    /* ====================================================
+       レイアウト定数（固定）
+    ==================================================== */
+    var CHARS_PER_COL = 40;   /* 1列の最大文字数 */
+    var LINE_HEIGHT   = 1.50; /* 列間（行間）比率 — 文庫本寄せで狭め */
+
+    /* ====================================================
+       状態
+    ==================================================== */
+    var PAGES          = [];
+    var currentPage    = 0;
+    var tocOpen        = false;
+    var chapterPageMap = [];
+
+    /* ====================================================
+       ユーティリティ
+    ==================================================== */
+    function esc(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+        .replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function tcyWrap(s) {
+      return String(s).replace(/(\d{1,2})/g, '<span class="chapter-num">$1</span>');
     }
 
-    /* ── リーダー全体ラッパー ── */
-    .novel-wrap {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 60px); /* shared-header の高さを引く */
-      min-height: 500px;
-      background: #faf8f4;
-    }
-
-    /* ── 上部バー ── */
-    .novel-top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.65rem 2rem;
-      border-bottom: 1px solid #e2ddd6;
-      background: #faf8f4;
-      flex-shrink: 0;
-    }
-
-    .novel-back {
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      color: #aaa;
-      text-decoration: none;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: color 0.15s;
-    }
-    .novel-back:hover { color: #333; opacity: 1; }
-
-    .novel-top-center {
-      flex: 1;
-      text-align: center;
-      overflow: hidden;
-    }
-    .novel-top-main-title {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 400;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      color: #555;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .novel-top-chapter {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.7rem;
-      color: #aaa;
-      letter-spacing: 0.08em;
-      margin-top: 0.1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-height: 1em;
-    }
-
-    .novel-page-indicator {
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      color: #bbb;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ── 縦書きテキスト領域 ── */
-    .novel-text-area {
-      flex: 1;
-      writing-mode: vertical-rl;
-      -webkit-writing-mode: vertical-rl;
-      text-orientation: mixed;
-      overflow: hidden;
-      padding: 2rem 2.5rem;
-
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 1rem;
-      line-height: 2.2;
-      letter-spacing: 0.1em;
-      color: #1e1e1e;
-    }
-
-    /* ── ページ（1ページずつ表示） ── */
-    .novel-page {
-      display: none;
-      height: 100%;
-    }
-    .novel-page.active {
-      display: block;
-      animation: pageIn 0.28s ease;
-    }
-    @keyframes pageIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
-    /* 章タイトル（ページ内） */
-    .novel-chapter-head {
-      font-weight: 400;
-      font-size: 1rem;
-      letter-spacing: 0.2em;
-      padding-inline-end: 0.5em;  /* vertical-rl: inline-end = 下 */
-      margin-inline-end: 2em;     /* 章タイトルの後ろのスペース */
-      border-inline-end: 1px solid #ccc; /* 縦の区切り線 */
-    }
-
-    /* 本文段落 */
-    .novel-page p {
-      margin-inline-end: 1.8em; /* 段落間のスペース（縦書き: 列間） */
-    }
-    .novel-page p:last-child {
-      margin-inline-end: 0;
-    }
-
-    /* ── 挿絵（全ページ挿絵型） ── */
-    .novel-illus-page {
-      writing-mode: horizontal-tb; /* 挿絵ページは横書きに戻す */
-      display: none;
-      height: 100%;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .novel-illus-page.active {
-      display: flex;
-      animation: pageIn 0.28s ease;
-    }
-    .novel-illus-page img {
-      max-height: 100%;
-      max-width: 100%;
-      object-fit: contain;
-      display: block;
-    }
-    .novel-illus-caption {
-      writing-mode: vertical-rl;
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.75rem;
-      color: #aaa;
-      letter-spacing: 0.1em;
-      margin-left: 0.8rem;
-      align-self: flex-end;
-    }
-
-    /* ── 下部ナビゲーション ── */
-    .novel-nav-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.75rem 2rem;
-      border-top: 1px solid #e2ddd6;
-      background: #faf8f4;
-      flex-shrink: 0;
-    }
-
-    .novel-nav-btn {
-      background: none;
-      border: 1px solid #ccc;
-      padding: 0.42rem 1.4rem;
-      cursor: pointer;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      color: #333;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-    }
-    .novel-nav-btn:hover:not(:disabled) {
-      background: #111;
-      color: #fff;
-      border-color: #111;
-    }
-    .novel-nav-btn:disabled { opacity: 0.22; cursor: default; }
-
-    .novel-nav-center {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* 目次ボタン */
-    .novel-toc-btn {
-      background: none;
-      border: none;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      color: #aaa;
-      cursor: pointer;
-      padding: 0.3rem 0.6rem;
-      transition: color 0.15s;
-    }
-    .novel-toc-btn:hover { color: #333; }
-
-    /* 目次ドロップダウン */
-    .novel-toc-dropdown {
-      display: none;
-      position: fixed;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 0.8rem 0;
-      min-width: 220px;
-      max-width: 90vw;
-      max-height: 50vh;
-      overflow-y: auto;
-      z-index: 100;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    }
-    .novel-toc-dropdown.open { display: block; }
-    .novel-toc-item {
-      display: block;
-      width: 100%;
-      text-align: left;
-      background: none;
-      border: none;
-      padding: 0.55rem 1.2rem;
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.85rem;
-      letter-spacing: 0.06em;
-      color: #333;
-      cursor: pointer;
-      transition: background 0.12s;
-    }
-    .novel-toc-item:hover { background: #f5f3ef; }
-    .novel-toc-item.toc-chapter {
-      font-weight: 400;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      color: #888;
-      padding-top: 0.8rem;
-      border-top: 1px solid #eee;
-    }
-    .novel-toc-item.toc-chapter:first-child { border-top: none; }
-
-    /* モバイル対応 */
-    @media (max-width: 600px) {
-      .novel-top-bar  { padding: 0.55rem 1rem; }
-      .novel-nav-bar  { padding: 0.6rem 1rem; }
-      .novel-text-area { padding: 1.2rem 1.5rem; font-size: 0.95rem; }
-      .novel-nav-btn  { padding: 0.38rem 0.9rem; font-size: 0.7rem; }
-    }
-  </style>
-</head>
-<body>
-  <div id="shared-header"></div>
-
-  <div class="novel-wrap">
-
-    <!-- 上部バー -->
-    <div class="novel-top-bar">
-      <a href="index.html" class="novel-back">&larr; 字置き場</a>
-      <div class="novel-top-center">
-        <div class="novel-top-main-title" id="novel-disp-title">外余擺線上のマキナ</div>
-        <div class="novel-top-chapter"    id="novel-disp-chapter"></div>
-      </div>
-      <span class="novel-page-indicator" id="novel-indicator">1 / 1</span>
-    </div>
-
-    <!-- 縦書きテキスト領域 -->
-    <div class="novel-text-area" id="novel-text-area">
-      <!-- JS でページを生成 -->
-    </div>
-
-    <!-- 目次ドロップダウン（JS で内容生成） -->
-    <div class="novel-toc-dropdown" id="novel-toc"></div>
-
-    <!-- 下部ナビ -->
-    <div class="novel-nav-bar">
-      <button class="novel-nav-btn" id="btn-prev" onclick="prevPage()">&#8592; 前のページ</button>
-      <div class="novel-nav-center">
-        <button class="novel-toc-btn" id="toc-toggle" onclick="toggleToc()">目次</button>
-      </div>
-      <button class="novel-nav-btn" id="btn-next" onclick="nextPage()">次のページ &#8594;</button>
-    </div>
-
-  </div><!-- /novel-wrap -->
-
-  <script src="../shared-nav.js"></script>
-  <script>
-  /* ====================================================
-     小説データ
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ページを追加するには PAGES 配列に追記してください。
-
-     各ページのフィールド：
-       chapter  : 章タイトル文字列（この行から新章開始）または null
-       illus    : 挿絵ファイル名（例: 'illus01.jpg'）または null
-                  illus を指定すると挿絵専用ページになります
-       caption  : 挿絵のキャプション（省略可）
-       text     : 段落の配列（illus ページでは省略可）
-
-     目次には chapter が設定されたページが自動登録されます。
-  ==================================================== */
-
-  var NOVEL_TITLE = '外余擺線上のマキナ';
-
-  var PAGES = [
-
-    /* ─── 表紙ページ（挿絵を置く場合はここに illus を指定） ───
-    {
-      chapter:  null,
-      illus:    'cover.jpg',
-      caption:  null,
-      text:     []
-    },
+    /*
+      列本文に縦中横（数字を立てる）を適用してHTMLを返す。
+      esc() 後に呼ぶこと。数字1〜4桁を text-combine-upright で立てる。
     */
-
-    /* ─── 第一章 ─── */
-    {
-      chapter:  null,
-      illus:    null,
-      text: [
-        '（鋭意執筆中です。しばらくお待ちください。）'
-      ]
+    function applyTcy(escaped) {
+      return escaped.replace(/[0-9]{1,4}/g, function(m) {
+        return '<span style="text-combine-upright:all;-webkit-text-combine:horizontal;">' + m + '</span>';
+      });
     }
 
-    /* ─── ページ追加例 ───────────────────────────────────
-    ,{
-      chapter:  '第一章　機械と少女',  // 章名を入れると目次に登録される
-      illus:    null,
-      text: [
-        '最初の段落。段落はこのように配列の要素として書きます。',
-        '次の段落。1ページに入りきる量を目安に調整してください。'
-      ]
+    /* ====================================================
+       禁則文字定義
+       行頭禁則 : 列の先頭に来てはいけない文字
+       行末禁則 : 列の末尾に来てはいけない文字
+    ==================================================== */
+    var KINSOKU_HEAD = '、。，．）」』】〕〉》〙〗・：；！？…‥ー～';
+    var KINSOKU_TAIL = '（「『【〔〈《〘〖';
+
+    /* ====================================================
+       テキスト → 列配列
+       ・段落の先頭に字下げ（U+3000）
+       ・禁則処理（行頭・行末）を適用しつつ CHARS_PER_COL 文字ずつ切る
+    ==================================================== */
+    function splitIntoColumns(text) {
+      var paras = text
+        .split(/\n[ \t]*\n/)                          /* 空行で段落分割 */
+        .map(function(s){
+          return s
+            .replace(/^[ \t\n]+|[ \t\n]+$/g, '')   /* 前後の空白除去 */
+            .replace(/[ \t]*\n[ \t]*/g, '');         /* 段落内改行を詰める */
+        })
+        .filter(function(s){ return s.length > 0; });
+
+      var cols = [];
+      paras.forEach(function(para) {
+        var t = '\u3000' + para;                       /* 字下げ */
+        var i = 0;
+        while (i < t.length) {
+          var end = Math.min(i + CHARS_PER_COL, t.length);
+
+          /* 行頭禁則: 次の列の先頭が禁則文字なら現列に追い込む（最大2文字） */
+          var pull = 0;
+          while (end < t.length && KINSOKU_HEAD.indexOf(t[end]) >= 0 && pull < 2) {
+            end++; pull++;
+          }
+
+          /* 行末禁則: 現列末尾が禁則文字なら1文字押し出す */
+          if (end < t.length && KINSOKU_TAIL.indexOf(t[end - 1]) >= 0) {
+            end--;
+          }
+
+          cols.push(t.slice(i, end));
+          i = end;
+        }
+      });
+      return cols;
     }
-    ,{
-      chapter:  null,     // 同じ章の続きなので null
-      illus:    null,
-      text: [
-        '続きの段落。',
-        'もう一つの段落。'
-      ]
+
+    /* ====================================================
+       CHAPTERS → PAGES
+    ==================================================== */
+    function buildPages(colsPerPage) {
+      PAGES = [];
+      chapterPageMap = [];
+
+      CHAPTERS.forEach(function(chapter) {
+        if (chapter.illus) {
+          PAGES.push({
+            type: 'illus',
+            chapter: chapter.title,
+            illus: chapter.illus,
+            caption: chapter.caption || null
+          });
+        }
+
+        var allCols = splitIntoColumns(chapter.text || '');
+        var isFirst = true;
+
+        /* colsが0の場合でも章タイトルページだけは作る */
+        if (allCols.length === 0) allCols = [''];
+
+        var i = 0;
+        while (i < allCols.length) {
+          var avail = isFirst ? colsPerPage - 1 : colsPerPage;
+          avail = Math.max(1, avail);
+          var slice = allCols.slice(i, i + avail);
+          chapterPageMap.push({ title: chapter.title, pageIdx: PAGES.length });
+          PAGES.push({
+            type:     'text',
+            chapter:  chapter.title,
+            hasTitle: isFirst,
+            cols:     slice
+          });
+          i += avail;
+          isFirst = false;
+        }
+      });
     }
-    ──────────────────────────────────────────────────── */
 
-  ];
+    /* ====================================================
+       DOM 構築
+    ==================================================== */
+    function renderPages(fontSize, colsPerPage) {
+      var area = document.getElementById('novel-text-area');
 
-  /* ====================================================
-     状態
-  ==================================================== */
-  var currentIdx = 0;
-  var tocOpen    = false;
+      /* パディング（フォントサイズに連動） */
+      var padTop    = Math.round(fontSize * 1.6);
+      var padBottom = Math.round(fontSize * 1.4);
+      var padH      = Math.round(fontSize * 3.0);
 
-  /* ====================================================
-     ユーティリティ
-  ==================================================== */
-  function esc(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-      .replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+      /* 列間スペース（文庫本寄せで狭め） */
+      var colGap    = Math.round(fontSize * 0.4) + 'px';
 
-  /* ====================================================
-     ページ HTML 生成
-  ==================================================== */
-  function buildAllPages() {
-    var area = document.getElementById('novel-text-area');
+      /* 章タイトル列の幅マージン */
+      var titleGap  = Math.round(fontSize * 1.4) + 'px';
+      var titleBorderPad = Math.round(fontSize * 0.4) + 'px';
 
-    area.innerHTML = PAGES.map(function(page, idx) {
+      area.innerHTML = PAGES.map(function(page, idx) {
+        var active = idx === 0 ? ' active' : '';
 
-      /* 挿絵ページ */
-      if (page.illus) {
-        var cap = page.caption
-          ? '<span class="novel-illus-caption">' + esc(page.caption) + '</span>'
-          : '';
-        return '<div class="novel-illus-page' + (idx === 0 ? ' active' : '') + '" id="novel-page-' + idx + '">' +
-          '<img src="' + esc(page.illus) + '" alt="' + esc(page.caption || '') + '">' +
-          cap +
-          '</div>';
-      }
+        if (page.type === 'illus') {
+          var cap = page.caption
+            ? '<span class="novel-illus-caption">' + esc(page.caption) + '</span>' : '';
+          return '<div class="novel-illus-page' + active + '" id="novel-page-' + idx + '">' +
+            '<img src="' + esc(page.illus) + '" alt="">' + cap + '</div>';
+        }
 
-      /* テキストページ */
-      var inner = '';
-      if (page.chapter) {
-        inner += '<p class="novel-chapter-head">' + esc(page.chapter) + '</p>';
-      }
-      if (page.text && page.text.length) {
-        inner += page.text.map(function(para) {
-          return '<p>' + esc(para).replace(/\n/g, '<br>') + '</p>';
+        var colStyle =
+          'white-space:nowrap;margin:0;padding:0;' +
+          'display:block;margin-block-end:' + colGap + ';';
+          /* margin-block-end = vertical-rl では物理的な左マージン = 列間スペース */
+
+        var inner = '';
+        if (page.hasTitle) {
+          inner += '<p class="novel-chapter-head" style="' + colStyle +
+            'margin-block-end:' + titleGap + ';' +
+            'padding-block-end:' + titleBorderPad + ';' +
+            'border-block-end:1px solid #b0a490;">' +
+            tcyWrap(esc(page.chapter)) + '</p>';
+        }
+
+        inner += page.cols.map(function(col) {
+          return '<p style="' + colStyle + '">' + applyTcy(esc(col)) + '</p>';
         }).join('');
+
+        return '<div class="novel-page' + active + '" id="novel-page-' + idx + '" style="' +
+          'font-size:' + fontSize + 'px;' +
+          'line-height:' + LINE_HEIGHT + ';' +
+          'letter-spacing:0.04em;' +
+          'padding:' + padTop + 'px ' + padH + 'px ' + padBottom + 'px ' + padH + 'px;' +
+          '">' + inner + '</div>';
+      }).join('');
+    }
+
+    /* ====================================================
+       目次 DOM
+    ==================================================== */
+    function buildToc() {
+      var toc = document.getElementById('novel-toc');
+      var seen = {}, items = [];
+      chapterPageMap.forEach(function(item) {
+        if (!seen[item.title]) { seen[item.title] = true; items.push(item); }
+      });
+      if (!items.length) {
+        var b = document.getElementById('toc-toggle');
+        if (b) b.style.display = 'none';
+        return;
       }
+      toc.innerHTML = items.map(function(item) {
+        return '<button class="novel-toc-item toc-chapter" onclick="goToPage(' +
+          item.pageIdx + ');closeToc();">' + esc(item.title) + '</button>';
+      }).join('');
+    }
 
-      return '<div class="novel-page' + (idx === 0 ? ' active' : '') + '" id="novel-page-' + idx + '">' +
-        inner +
-        '</div>';
+    /* ====================================================
+       初期化
+    ==================================================== */
+    function init() {
+      var area  = document.getElementById('novel-text-area');
+      var areaH = area.clientHeight;
+      var areaW = area.clientWidth;
 
-    }).join('');
-  }
+      /*
+        フォントサイズを CHARS_PER_COL から逆算:
+          padTop = fs × 1.6,  padBottom = fs × 1.4
+          usableH = areaH - fs×(1.6+1.4) = areaH - fs×3
+          charsPerCol × fs × (1 + letterSpacing) = usableH
+          39 × fs × 1.04 = areaH - 3×fs
+          39 × 1.04 × fs + 3×fs = areaH
+          fs × (40.56 + 3) = areaH
+          fs = areaH / 43.56
+      */
+      var fs = areaH / (CHARS_PER_COL * 1.04 + 3.0);
+      fs = Math.max(10, Math.min(20, fs));
+      fs = Math.round(fs * 10) / 10;
 
-  /* ====================================================
-     目次生成
-  ==================================================== */
-  function buildToc() {
-    var items = [];
-    PAGES.forEach(function(page, idx) {
-      if (page.chapter) {
-        items.push({ idx: idx, chapter: page.chapter });
+      var padH   = Math.round(fs * 1.2);
+      var colW   = Math.round(fs * LINE_HEIGHT);  /* 列幅 */
+      var colGap = Math.round(fs * 0.4);           /* 列間（renderPages と一致させること） */
+      var usableW = areaW - padH * 2;
+      var cols   = Math.max(1, Math.floor(usableW / (colW + colGap)));
+
+      buildPages(cols);
+      renderPages(fs, cols);
+      buildToc();
+      currentPage = 0;
+      updateUI();
+    }
+
+    /* ====================================================
+       ページ移動
+    ==================================================== */
+    function goToPage(idx) {
+      if (idx < 0 || idx >= PAGES.length) return;
+      var cur = document.getElementById('novel-page-' + currentPage);
+      if (cur) cur.classList.remove('active');
+      currentPage = idx;
+      var nxt = document.getElementById('novel-page-' + currentPage);
+      if (nxt) {
+        nxt.classList.add('active');
+        /* ページ切り替え後にスクロール位置をリセット。
+           vertical-rl では scrollLeft=0 が右端（テキスト先頭）に対応する。
+           margin-inline-end の残影で scrollTop がずれることがあるため両方リセット。 */
+        var area = document.getElementById('novel-text-area');
+        if (area) { area.scrollTop = 0; area.scrollLeft = 0; }
+        nxt.scrollTop = 0;
+        nxt.scrollLeft = 0;
       }
+      updateUI();
+    }
+    function prevPage() { goToPage(currentPage - 1); }
+    function nextPage() { goToPage(currentPage + 1); }
+
+    /* ====================================================
+       UI 更新
+    ==================================================== */
+    function updateUI() {
+      document.getElementById('novel-indicator').textContent =
+        (currentPage + 1) + ' / ' + PAGES.length;
+
+      var label = '';
+      for (var i = chapterPageMap.length - 1; i >= 0; i--) {
+        if (chapterPageMap[i].pageIdx <= currentPage) {
+          label = chapterPageMap[i].title; break;
+        }
+      }
+      var sep  = document.getElementById('novel-sep');
+      var chap = document.getElementById('novel-disp-chapter');
+      sep.style.display  = label ? '' : 'none';
+      chap.textContent   = label;
+
+      document.getElementById('btn-prev').disabled = currentPage <= 0;
+      document.getElementById('btn-next').disabled = currentPage >= PAGES.length - 1;
+    }
+
+    /* ====================================================
+       目次開閉
+    ==================================================== */
+    function toggleToc() {
+      tocOpen = !tocOpen;
+      document.getElementById('novel-toc').classList.toggle('open', tocOpen);
+    }
+    function closeToc() {
+      tocOpen = false;
+      document.getElementById('novel-toc').classList.remove('open');
+    }
+    document.addEventListener('click', function(e) {
+      if (!tocOpen) return;
+      var t = document.getElementById('novel-toc');
+      var b = document.getElementById('toc-toggle');
+      if (t && !t.contains(e.target) && b && !b.contains(e.target)) closeToc();
     });
 
-    var toc = document.getElementById('novel-toc');
-    if (items.length === 0) {
-      /* 目次ボタン自体を非表示 */
-      var btn = document.getElementById('toc-toggle');
-      if (btn) btn.style.display = 'none';
-      return;
-    }
+    /* ====================================================
+       キーボード
+       ★ 縦書き読み方向に合わせた割り当て
+         ← / PageDown / Space = 次のページ（左へ進む）
+         → / PageUp           = 前のページ（右へ戻る）
+    ==================================================== */
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown')  nextPage();
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp')    prevPage();
+      if (e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextPage(); }
+      if (e.key === 'PageUp')                    { e.preventDefault(); prevPage(); }
+    });
 
-    toc.innerHTML = items.map(function(item) {
-      return '<button class="novel-toc-item toc-chapter" onclick="goToPage(' + item.idx + '); closeToc();">' +
-        esc(item.chapter) +
-        '</button>';
-    }).join('') +
-    /* 全ページへのリンクも追加 */
-    '<div style="border-top:1px solid #eee; margin-top:0.5rem; padding-top:0.5rem;">' +
-    PAGES.map(function(page, idx) {
-      var label = page.chapter ? page.chapter : 'p.' + (idx + 1);
-      return '<button class="novel-toc-item" onclick="goToPage(' + idx + '); closeToc();">' +
-        esc(label) +
-        '</button>';
-    }).join('') +
-    '</div>';
-  }
+    /* ====================================================
+       スワイプ（モバイル）
+       左スワイプ = 次（縦書き読み進む方向）
+       右スワイプ = 前（縦書き戻る方向）
+    ==================================================== */
+    (function() {
+      var sx = 0, sy = 0;
+      var area = document.getElementById('novel-text-area');
+      area.addEventListener('touchstart', function(e) {
+        sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      }, { passive: true });
+      area.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - sx;
+        var dy = e.changedTouches[0].clientY - sy;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        if (dx < 0) nextPage(); else prevPage();
+      }, { passive: true });
+    })();
 
-  /* ====================================================
-     UI 更新
-  ==================================================== */
-  function updateUI() {
-    var total = PAGES.length;
-    var page  = PAGES[currentIdx];
+    /* ====================================================
+       リサイズ
+    ==================================================== */
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(init, 250);
+    });
 
-    document.getElementById('novel-indicator').textContent = (currentIdx + 1) + ' / ' + total;
-
-    /* 章タイトル：現在ページかそれより前で最後に chapter を持つもの */
-    var chapterLabel = '';
-    for (var i = currentIdx; i >= 0; i--) {
-      if (PAGES[i].chapter) { chapterLabel = PAGES[i].chapter; break; }
-    }
-    document.getElementById('novel-disp-chapter').textContent = chapterLabel;
-
-    document.getElementById('btn-prev').disabled = currentIdx <= 0;
-    document.getElementById('btn-next').disabled = currentIdx >= total - 1;
-  }
-
-  /* ====================================================
-     ページ移動
-  ==================================================== */
-  function goToPage(idx) {
-    if (idx < 0 || idx >= PAGES.length) return;
-
-    /* 現在ページを非表示 */
-    var cur = document.getElementById('novel-page-' + currentIdx);
-    if (cur) cur.classList.remove('active');
-
-    currentIdx = idx;
-
-    /* 新ページを表示 */
-    var next = document.getElementById('novel-page-' + currentIdx);
-    if (next) next.classList.add('active');
-
-    updateUI();
-    window.scrollTo({ top: 0 });
-  }
-
-  function prevPage() { goToPage(currentIdx - 1); }
-  function nextPage() { goToPage(currentIdx + 1); }
-
-  /* ====================================================
-     目次開閉
-  ==================================================== */
-  function toggleToc() {
-    tocOpen = !tocOpen;
-    document.getElementById('novel-toc').classList.toggle('open', tocOpen);
-  }
-  function closeToc() {
-    tocOpen = false;
-    document.getElementById('novel-toc').classList.remove('open');
-  }
-
-  /* 目次外クリックで閉じる */
-  document.addEventListener('click', function(e) {
-    if (!tocOpen) return;
-    var toc = document.getElementById('novel-toc');
-    var btn = document.getElementById('toc-toggle');
-    if (toc && !toc.contains(e.target) && btn && !btn.contains(e.target)) {
-      closeToc();
-    }
-  });
-
-  /* ====================================================
-     キーボード操作
-     ←  = 前のページ
-     →  = 次のページ
-     Space / PageDown = 次のページ
-  ==================================================== */
-  document.addEventListener('keydown', function(e) {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
-    if (e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextPage(); }
-    if (e.key === 'PageUp') { e.preventDefault(); prevPage(); }
-  });
-
-  /* ====================================================
-     スワイプ操作（モバイル）
-     左スワイプ = 次のページ
-     右スワイプ = 前のページ
-  ==================================================== */
-  (function() {
-    var touchStartX = 0;
-    var touchStartY = 0;
-    var area = document.getElementById('novel-text-area');
-
-    area.addEventListener('touchstart', function(e) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    area.addEventListener('touchend', function(e) {
-      var dx = e.changedTouches[0].clientX - touchStartX;
-      var dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      if (dx < 0) nextPage(); /* 左スワイプ → 次 */
-      else        prevPage(); /* 右スワイプ → 前 */
-    }, { passive: true });
-  })();
-
-  /* ====================================================
-     初期化
-  ==================================================== */
-  buildAllPages();
-  buildToc();
-  updateUI();
-  </script>
-</body>
-</html>
+    /* ====================================================
+       起動（フォントロード待ち）
+    ==================================================== */
+    window.addEventListener('DOMContentLoaded', function() {
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(init);
+      } else {
+        setTimeout(init, 500);
+      }
+    });
+    </script>
+  </body>
+  </html>
