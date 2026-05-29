@@ -1,0 +1,77 @@
+# .github/workflows/compile-omikuji.yml
+#
+# omikuji.nim を変更したとき、自動的に WASM にコンパイルして
+# omikuji.wasm をコミットします。
+#
+# 配置場所: リポジトリルートの .github/workflows/compile-omikuji.yml
+
+name: Compile omikuji.nim → WASM
+
+on:
+  push:
+    paths:
+      - 'java-site/docs/pastime/omikuji.nim'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: 'stable'
+
+      # wasi-sdk: Nim が生成した C コードを wasm32-wasi ターゲットでコンパイルする
+      - name: Install wasi-sdk
+        run: |
+          WASI_SDK_VERSION=22
+          WASI_URL="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_VERSION}.0-linux.tar.gz"
+          wget -q "$WASI_URL" -O wasi-sdk.tar.gz
+          tar -xzf wasi-sdk.tar.gz
+          echo "WASI_SDK=$PWD/wasi-sdk-${WASI_SDK_VERSION}.0" >> "$GITHUB_ENV"
+
+      # Step 1: Nim → C (nimcache/ に .c ファイルを生成)
+      - name: Nim → C (compile only)
+        run: |
+          nim c \
+            --compileOnly \
+            --cpu:wasm32 \
+            --os:any \
+            --gc:none \
+            --noMain:on \
+            -d:danger \
+            -d:noSignalHandler \
+            --nimcache:./nimcache \
+            java-site/docs/pastime/omikuji.nim
+
+      # Step 2: C → WASM (wasi-sdk の clang を使用)
+      - name: C → WASM
+        run: |
+          "$WASI_SDK/bin/clang" \
+            --target=wasm32-unknown-wasi \
+            --sysroot="$WASI_SDK/share/wasi-sysroot" \
+            -nostartfiles \
+            -Wl,--export=draw \
+            -Wl,--no-entry \
+            -O3 \
+            -o java-site/docs/pastime/omikuji.wasm \
+            ./nimcache/@omikuji.nim.c
+
+      - name: Verify WASM binary
+        run: |
+          ls -lh java-site/docs/pastime/omikuji.wasm
+          file java-site/docs/pastime/omikuji.wasm
+
+      - name: Commit omikuji.wasm
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add java-site/docs/pastime/omikuji.wasm
+          git diff --staged --quiet \
+            || git commit -m "ci: compile omikuji.nim → omikuji.wasm [skip ci]"
+          git push
