@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>おみくじ — 偽造切手</title>
   <link rel="stylesheet" href="../style.css">
-  <script src="omikuji.js"></script>
   <style>
     .game-area {
       margin: 2rem 0;
@@ -13,7 +12,6 @@
       padding-top: 2rem;
     }
 
-    /* ── ボタン列 ── */
     .btn-row {
       display: flex;
       gap: 0.6rem;
@@ -32,7 +30,21 @@
       transition: background 0.15s ease, color 0.15s ease;
     }
     .draw-btn:hover  { background: var(--black); color: var(--white); }
-    .draw-btn.active { background: var(--black); color: var(--white); }
+    .draw-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .draw-btn:disabled:hover { background: none; color: var(--fg); }
+
+    .wasm-status {
+      text-align: center;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      min-height: 1.2em;
+    }
 
     /* ── 単発 結果 ── */
     .single-result {
@@ -47,10 +59,10 @@
 
     .rank-display {
       font-family: 'Geosans', sans-serif;
-      font-size: clamp(2.8rem, 10vw, 5rem);
-      letter-spacing: 0.1em;
+      font-size: clamp(2.2rem, 8vw, 4.2rem);
+      letter-spacing: 0.08em;
       text-align: center;
-      line-height: 1;
+      line-height: 1.1;
       margin-bottom: 0.7rem;
     }
     .rank-desc {
@@ -75,7 +87,7 @@
       color: var(--muted);
       text-align: left;
       padding: 0.55rem 0.5rem 0.55rem 0;
-      width: 5rem;
+      width: 6.5rem;
     }
     .fortune-table td {
       font-family: 'Kazesawa', system-ui, sans-serif;
@@ -115,9 +127,9 @@
 
     .gacha-rank {
       font-family: 'Geosans', sans-serif;
-      font-size: 1.35rem;
-      letter-spacing: 0.06em;
-      line-height: 1;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
       margin-bottom: 0.4rem;
       color: var(--fg);
     }
@@ -128,7 +140,6 @@
       color: var(--muted);
       line-height: 1.4;
     }
-
     .gacha-num {
       font-family: 'Geosans', sans-serif;
       font-size: 0.6rem;
@@ -148,8 +159,8 @@
     .detail-panel.visible { display: block; animation: fadeIn 0.2s ease; }
     .detail-rank {
       font-family: 'Geosans', sans-serif;
-      font-size: 1.6rem;
-      letter-spacing: 0.08em;
+      font-size: 1.4rem;
+      letter-spacing: 0.06em;
       margin-bottom: 0.3rem;
     }
     .detail-desc {
@@ -168,24 +179,6 @@
       from { opacity: 0; transform: scale(0.88); }
       to   { opacity: 1; transform: scale(1); }
     }
-
-    .nim-note { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
-    .nim-note summary {
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-    }
-    .nim-note pre {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.82rem;
-      line-height: 1.7;
-      margin-top: 1rem;
-      color: var(--muted);
-      white-space: pre-wrap;
-    }
   </style>
 </head>
 <body>
@@ -193,17 +186,19 @@
 
   <div class="container">
     <main class="sub-main">
-      <h1 class="page-title font-kazesawa">おみくじ</h1>
+      <h1 class="page-title font-kazesawa" data-i18n="title">おみくじ</h1>
 
-      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted);">
+      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted);" data-i18n="subtitle">
         レッツスタート！
       </p>
 
       <div class="game-area">
 
+        <div class="wasm-status" id="wasmStatus" data-i18n="loading">読み込み中…</div>
+
         <div class="btn-row">
-          <button class="draw-btn font-geosans" onclick="drawSingle()">単発</button>
-          <button class="draw-btn font-geosans" onclick="drawMulti()">10連</button>
+          <button class="draw-btn font-geosans" onclick="drawSingle()" disabled data-i18n="single">単発</button>
+          <button class="draw-btn font-geosans" onclick="drawMulti()" disabled data-i18n="multi">10連</button>
         </div>
 
         <!-- 単発 結果 -->
@@ -211,10 +206,10 @@
           <div class="rank-display font-geosans" id="rankDisplay"></div>
           <div class="rank-desc font-kazesawa-light" id="descDisplay"></div>
           <table class="fortune-table">
-            <tr><th>恋愛</th><td id="loveTd"></td></tr>
-            <tr><th>仕事</th><td id="workTd"></td></tr>
-            <tr><th>健康</th><td id="healthTd"></td></tr>
-            <tr><th>ラッキーカラー</th><td id="luckyTd"></td></tr>
+            <tr><th data-i18n="love">恋愛</th><td id="loveTd"></td></tr>
+            <tr><th data-i18n="work">仕事</th><td id="workTd"></td></tr>
+            <tr><th data-i18n="health">健康</th><td id="healthTd"></td></tr>
+            <tr><th data-i18n="lucky">ラッキーカラー</th><td id="luckyTd"></td></tr>
           </table>
         </div>
 
@@ -225,106 +220,270 @@
             <div class="detail-rank font-geosans" id="detailRank"></div>
             <div class="detail-desc font-kazesawa-light" id="detailDesc"></div>
             <table class="fortune-table">
-              <tr><th>恋愛</th><td id="detailLove"></td></tr>
-              <tr><th>仕事</th><td id="detailWork"></td></tr>
-              <tr><th>健康</th><td id="detailHealth"></td></tr>
-              <tr><th>ラッキーカラー</th><td id="detailLucky"></td></tr>
+              <tr><th data-i18n="love">恋愛</th><td id="detailLove"></td></tr>
+              <tr><th data-i18n="work">仕事</th><td id="detailWork"></td></tr>
+              <tr><th data-i18n="health">健康</th><td id="detailHealth"></td></tr>
+              <tr><th data-i18n="lucky">ラッキーカラー</th><td id="detailLucky"></td></tr>
             </table>
           </div>
         </div>
 
-        <details class="nim-note">
-          <summary>Nimコードを見る (omikuji.nim)</summary>
-          <pre id="nimSource">読み込み中…</pre>
-        </details>
       </div>
 
-      <a href="index.html" class="back-link font-geosans">← Pastimeへ</a>
+      <a href="index.html" class="back-link font-geosans" data-i18n="back">← Pastimeへ</a>
     </main>
     <div id="shared-footer"></div>
   </div>
 
+<script src="../shared-nav.js"></script>
 <script>
-fetch('omikuji.nim')
-  .then(r => r.text())
-  .then(code => { document.getElementById('nimSource').textContent = code; });
+/* =====================================================================
+   多言語データ
+===================================================================== */
+var pageI18n = {
+  ja: {
+    title:    'おみくじ',
+    subtitle: 'レッツスタート！',
+    loading:  '読み込み中…',
+    ready:    '',
+    error:    '読み込みエラー',
+    single:   '単発',
+    multi:    '10連',
+    love:     '恋愛',
+    work:     '仕事',
+    health:   '健康',
+    lucky:    'ラッキーカラー',
+    back:     '← Pastimeへ',
+  },
+  de: {
+    title:    'Orakel',
+    subtitle: 'Los geht\'s!',
+    loading:  'Lädt…',
+    ready:    '',
+    error:    'Ladefehler',
+    single:   'Einzel',
+    multi:    '10er-Zug',
+    love:     'Liebe',
+    work:     'Arbeit',
+    health:   'Gesundheit',
+    lucky:    'Glücksfarbe',
+    back:     '← Zeitvertreib',
+  },
+  fi: {
+    title:    'Arpa',
+    subtitle: 'Aloitetaan!',
+    loading:  'Ladataan…',
+    ready:    '',
+    error:    'Latausvirhe',
+    single:   'Yksittäinen',
+    multi:    '10 kertaa',
+    love:     'Rakkaus',
+    work:     'Työ',
+    health:   'Terveys',
+    lucky:    'Onnenvärisi',
+    back:     '← Ajanviete',
+  }
+};
 
-function getSeed(offset) {
-  return (Date.now() + offset * 137) % 100;
+var fortunes = {
+  ja: [
+    { rank: '大吉',   desc: '運勢最高。何事にも挑戦すべし。',   love: '君はモテモテ',         work: '何をやっても上手く行く',   health: '逆上がりも余裕で3回転',   lucky: '赤'   },
+    { rank: '中吉',   desc: '大体良いと思う',                   love: '告られるかも',           work: '大体の努力が実を結ぶ',     health: '風邪ひかなさそう',         lucky: '青'   },
+    { rank: '小吉',   desc: '悪くはない',                       love: '友達できるかも',         work: '努力を怠るべからず',       health: 'ZONe飲んでおこう',         lucky: '黄'   },
+    { rank: '吉',     desc: '当たり前を享受すべし',             love: '誠実さが大事',           work: '石の上にもなんとやら',     health: '早寝早起き大事',           lucky: '緑'   },
+    { rank: '末吉',   desc: '最近調子乗ってない？',             love: '会話に変な間とか入る',   work: 'あせらずいつも通りに',     health: '禁煙しとく？',             lucky: '白'   },
+    { rank: '凶',     desc: '踏ん張りどころだね',               love: '浮気とかした？',         work: '横着すんなよ',             health: '人間ドック行っとこう',     lucky: '灰'   },
+    { rank: '大凶',   desc: 'やばいよこれ',                     love: '刺されそう',             work: '石橋を叩きまくれ',         health: '血とか吐くかも',           lucky: '紫'   },
+  ],
+  de: [
+    { rank: 'Großes Glück',  desc: 'Das Schicksal ist auf deiner Seite. Wage alles.',   love: 'Du bist absolut unwiderstehlich',   work: 'Alles gelingt wie von selbst',        health: 'Du schaffst dreifachen Salto rückwärts',   lucky: 'Rot'   },
+    { rank: 'Gutes Glück',   desc: 'Läuft ganz gut, würde ich sagen.',                  love: 'Vielleicht gesteht jemand seine Gefühle', work: 'Dein Einsatz zahlt sich aus',    health: 'Du wirst wohl nicht krank',                lucky: 'Blau'  },
+    { rank: 'Kleines Glück', desc: 'Nicht schlecht.',                                    love: 'Du findest vielleicht neue Freunde',work: 'Nicht nachlassen, streng dich an',    health: 'Trink mal was Ordentliches',               lucky: 'Gelb'  },
+    { rank: 'Glück',         desc: 'Schätze das Gewöhnliche.',                           love: 'Aufrichtigkeit ist alles',          work: 'Beharrlichkeit zahlt sich aus',        health: 'Früh schlafen, früh aufstehen',            lucky: 'Grün'  },
+    { rank: 'Wenig Glück',   desc: 'Wirst du gerade etwas überheblich?',                love: 'Gespräche verlaufen etwas holprig', work: 'Keine Hast, bleib wie immer',          health: 'Vielleicht mit dem Rauchen aufhören?',    lucky: 'Weiß'  },
+    { rank: 'Pech',          desc: 'Zeit zum Durchhalten.',                              love: 'Hast du etwa fremdgeflirtet?',      work: 'Hör auf zu faulenzen',                 health: 'Mach mal einen Gesundheitscheck',          lucky: 'Grau'  },
+    { rank: 'Großes Pech',   desc: 'Das sieht nicht gut aus.',                          love: 'Jemand will dir übel mitspielen',   work: 'Sei äußerst vorsichtig',               health: 'Pass wirklich auf dich auf',               lucky: 'Lila'  },
+  ],
+  fi: [
+    { rank: 'Suuri onni',    desc: 'Kohtalo suosii sinua. Uskalla haastaa kaikki.',     love: 'Olet täysin vastustamaton',         work: 'Kaikki onnistuu kuin itsestään',       health: 'Teet kolmoissalton taaksepäin',            lucky: 'Punainen'  },
+    { rank: 'Hyvä onni',     desc: 'Menee aika hyvin.',                                 love: 'Joku saattaa tunnustaa tunteensa',  work: 'Vaivannäkösi palkitaan',               health: 'Et taida sairastua',                       lucky: 'Sininen'   },
+    { rank: 'Pieni onni',    desc: 'Ei huono.',                                          love: 'Saatat löytää uusia ystäviä',      work: 'Älä laiskottele, tee töitä',           health: 'Juo jotain kunnollista',                   lucky: 'Keltainen' },
+    { rank: 'Onni',          desc: 'Arvosta tavallista arkeasi.',                        love: 'Rehellisyys on tärkeää',           work: 'Sinnikkyys kannattaa',                 health: 'Nuku ajoissa, herää varhain',              lucky: 'Vihreä'    },
+    { rank: 'Vähän onnea',   desc: 'Oletko viime aikoina turhan ylpeä?',                love: 'Keskustelut takkuavat hieman',      work: 'Älä hosuu, ole oma itsesi',            health: 'Ehkä lopeta tupakointi?',                  lucky: 'Valkoinen' },
+    { rank: 'Epäonni',       desc: 'On aika jaksaa eteenpäin.',                          love: 'Oletko kenties pettänyt?',         work: 'Älä laiskottele töissä',               health: 'Käy lääkärissä',                           lucky: 'Harmaa'    },
+    { rank: 'Suuri epäonni', desc: 'Ei hyvältä näytä.',                                 love: 'Joku haluaa kostaa sinulle',       work: 'Ole erittäin varovainen',              health: 'Pidä itsestäsi hyvää huolta',              lucky: 'Violetti'  },
+  ]
+};
+
+/* =====================================================================
+   状態
+===================================================================== */
+var wasmExports   = null;
+var singleIdx     = -1;
+var multiIdxs     = [];
+var selectedMulti = -1;
+
+function currentLang() {
+  return localStorage.getItem('lang') || 'ja';
 }
 
-/* ── 単発 ── */
-function drawSingle() {
-  const f = jsDrawOmikuji(getSeed(0));
+function getFortune(idx) {
+  return fortunes[currentLang()][idx];
+}
 
+/* =====================================================================
+   WASM 初期化
+===================================================================== */
+function initWasm() {
+  fetch('omikuji.wasm')
+    .then(function(r) { return r.arrayBuffer(); })
+    .then(function(buf) {
+      return WebAssembly.instantiate(buf);
+    })
+    .then(function(result) {
+      wasmExports = result.instance.exports;
+      document.querySelectorAll('.draw-btn').forEach(function(b) {
+        b.disabled = false;
+      });
+      document.getElementById('wasmStatus').textContent = '';
+    })
+    .catch(function(e) {
+      var lang = currentLang();
+      var t = pageI18n[lang] || pageI18n['ja'];
+      document.getElementById('wasmStatus').textContent = t.error;
+      console.error('WASM load failed:', e);
+    });
+}
+
+function nimDraw() {
+  var seed = (Math.random() * 0xFFFFFFFF) >>> 0;
+  return wasmExports.draw(seed);
+}
+
+/* =====================================================================
+   単発
+===================================================================== */
+function drawSingle() {
+  singleIdx = nimDraw();
+  renderSingle();
+  document.getElementById('singleResult').classList.add('visible');
+  document.getElementById('multiResult').classList.remove('visible');
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+
+function renderSingle() {
+  if (singleIdx < 0) return;
+  var f = getFortune(singleIdx);
   document.getElementById('rankDisplay').textContent = f.rank;
   document.getElementById('descDisplay').textContent = f.desc;
   document.getElementById('loveTd').textContent      = f.love;
   document.getElementById('workTd').textContent      = f.work;
   document.getElementById('healthTd').textContent    = f.health;
   document.getElementById('luckyTd').textContent     = f.lucky;
-
-  document.getElementById('singleResult').classList.add('visible');
-  document.getElementById('multiResult').classList.remove('visible');
-  document.getElementById('detailPanel').classList.remove('visible');
 }
 
-/* ── 10連 ── */
-let draws = [];
-let selectedIdx = -1;
-
+/* =====================================================================
+   10連
+===================================================================== */
 function drawMulti() {
-  draws = [];
-  for (let i = 0; i < 10; i++) {
-    draws.push(jsDrawOmikuji(getSeed(i)));
+  multiIdxs = [];
+  for (var i = 0; i < 10; i++) {
+    multiIdxs.push(nimDraw());
   }
-
-  const grid = document.getElementById('gachaGrid');
-  grid.innerHTML = '';
-
-  draws.forEach((f, i) => {
-    const card = document.createElement('div');
-    card.className = 'gacha-card';
-    card.style.animationDelay = (i * 0.04) + 's';
-    card.innerHTML =
-      '<div class="gacha-num font-geosans">' + (i + 1) + '</div>' +
-      '<div class="gacha-rank font-geosans">' + f.rank + '</div>' +
-      '<div class="gacha-subdesc font-kazesawa-light">' + f.desc + '</div>';
-    card.addEventListener('click', () => selectCard(i));
-    grid.appendChild(card);
-  });
-
-  selectedIdx = -1;
+  selectedMulti = -1;
+  renderMultiGrid();
   document.getElementById('detailPanel').classList.remove('visible');
   document.getElementById('multiResult').classList.add('visible');
   document.getElementById('singleResult').classList.remove('visible');
 }
 
-function selectCard(idx) {
-  const cards = document.querySelectorAll('.gacha-card');
+function renderMultiGrid() {
+  var grid = document.getElementById('gachaGrid');
+  grid.innerHTML = '';
+  multiIdxs.forEach(function(idx, i) {
+    var f = getFortune(idx);
+    var card = document.createElement('div');
+    card.className = 'gacha-card';
+    card.style.animationDelay = (i * 0.04) + 's';
+    if (i === selectedMulti) card.classList.add('selected');
+    card.innerHTML =
+      '<div class="gacha-num font-geosans">' + (i + 1) + '</div>' +
+      '<div class="gacha-rank font-geosans">' + f.rank + '</div>' +
+      '<div class="gacha-subdesc font-kazesawa-light">' + f.desc + '</div>';
+    card.addEventListener('click', (function(ii) {
+      return function() { selectCard(ii); };
+    })(i));
+    grid.appendChild(card);
+  });
+}
 
-  if (selectedIdx === idx) {
-    cards[idx].classList.remove('selected');
+function selectCard(idx) {
+  if (selectedMulti === idx) {
+    selectedMulti = -1;
+    document.querySelectorAll('.gacha-card').forEach(function(c) {
+      c.classList.remove('selected');
+    });
     document.getElementById('detailPanel').classList.remove('visible');
-    selectedIdx = -1;
     return;
   }
+  selectedMulti = idx;
+  document.querySelectorAll('.gacha-card').forEach(function(c) {
+    c.classList.remove('selected');
+  });
+  document.querySelectorAll('.gacha-card')[idx].classList.add('selected');
+  renderDetail();
+  document.getElementById('detailPanel').classList.add('visible');
+}
 
-  cards.forEach(c => c.classList.remove('selected'));
-  cards[idx].classList.add('selected');
-  selectedIdx = idx;
-
-  const f = draws[idx];
-  document.getElementById('detailRank').textContent  = f.rank + '　' + f.desc;
-  document.getElementById('detailDesc').textContent  = '';
+function renderDetail() {
+  if (selectedMulti < 0) return;
+  var f = getFortune(multiIdxs[selectedMulti]);
+  document.getElementById('detailRank').textContent   = f.rank;
+  document.getElementById('detailDesc').textContent   = f.desc;
   document.getElementById('detailLove').textContent   = f.love;
   document.getElementById('detailWork').textContent   = f.work;
   document.getElementById('detailHealth').textContent = f.health;
   document.getElementById('detailLucky').textContent  = f.lucky;
+}
 
-  document.getElementById('detailPanel').classList.add('visible');
+/* =====================================================================
+   多言語 — UI テキスト
+===================================================================== */
+function applyPageLang(lang) {
+  var t = pageI18n[lang] || pageI18n['ja'];
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (key in t) el.textContent = t[key];
+  });
+  /* 結果が表示中なら言語を切り替えて再描画 */
+  if (document.getElementById('singleResult').classList.contains('visible')) {
+    renderSingle();
+  }
+  if (document.getElementById('multiResult').classList.contains('visible')) {
+    renderMultiGrid();
+    if (selectedMulti >= 0) renderDetail();
+  }
+}
+
+/* =====================================================================
+   初期化 — shared-nav.js の setLang をラップ
+===================================================================== */
+var _origSetLang = window.setLang;
+window.setLang = function(lang) {
+  _origSetLang(lang);
+  applyPageLang(lang);
+};
+
+function init() {
+  applyPageLang(currentLang());
+  initWasm();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }
 </script>
-<script src="../shared-nav.js"></script>
 </body>
 </html>
