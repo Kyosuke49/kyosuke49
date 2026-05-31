@@ -734,6 +734,154 @@ body.lang-fi { font-family: var(--font-mono); }
   text-decoration: none; transition: color var(--transition);
 }
 .footer-links a:hover { color: var(--accent); }
+
+/* =====================
+   ストップウォッチ
+===================== */
+.sw-display {
+  font-size: 3rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-align: center;
+  padding: 1.2rem 0 1.4rem;
+  text-shadow: 0 0 16px var(--accent-glow);
+  font-family: var(--font-mono);
+}
+.sw-controls {
+  display: flex; gap: 0.5rem; justify-content: center;
+}
+.sw-controls .tool-btn { flex: 1; text-align: center; }
+
+/* =====================
+   競介クイズ
+===================== */
+#panel-quiz { max-width: 560px; }
+
+.quiz-subtitle {
+  font-size: 0.62rem; color: var(--text-dim);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 1.2rem; font-family: var(--font-mono);
+}
+.quiz-meta {
+  display: flex; align-items: center; gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.quiz-q-num {
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-mid); white-space: nowrap; flex-shrink: 0;
+}
+.quiz-prog-wrap {
+  flex: 1; height: 2px; background: var(--border);
+}
+.quiz-prog-fill {
+  height: 100%; background: var(--accent);
+  transition: width 0.35s ease;
+}
+.quiz-question {
+  font-size: 0.9rem; line-height: 1.65;
+  color: var(--text-bright);
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+}
+.quiz-hint {
+  font-size: 0.62rem; color: var(--accent-mid);
+  letter-spacing: 0.1em; margin-bottom: 1rem; min-height: 1em;
+}
+.quiz-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+.quiz-choice {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.35;
+  transition: border-color var(--transition), color var(--transition),
+              background var(--transition), box-shadow var(--transition);
+}
+.quiz-choice:hover {
+  border-color: var(--border-hard);
+  color: var(--text);
+  background: rgba(0,200,240,0.04);
+}
+.quiz-choice.selected {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.quiz-choice.selected::before { content: '❯ '; }
+.quiz-next-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-hard);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem; letter-spacing: 0.15em;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition),
+              opacity var(--transition);
+}
+.quiz-next-btn:not(:disabled):hover {
+  background: var(--accent-dim);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.quiz-next-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+.quiz-tabulating {
+  text-align: center; padding: 3.5rem 0;
+}
+.quiz-tab-label {
+  font-size: 1rem; letter-spacing: 0.25em;
+  color: var(--accent);
+  text-shadow: 0 0 12px var(--accent-glow);
+  margin-bottom: 1.4rem;
+  font-family: var(--font-mono);
+}
+.quiz-tab-dots {
+  display: flex; gap: 0.5rem; justify-content: center;
+}
+.quiz-tab-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-mid);
+  animation: glow-pulse 0.8s ease-in-out infinite;
+}
+.quiz-tab-dots span:nth-child(2) { animation-delay: 0.25s; }
+.quiz-tab-dots span:nth-child(3) { animation-delay: 0.5s; }
+
+.quiz-result { text-align: center; padding: 0.3rem 0; }
+.result-label {
+  font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--accent-mid); margin-bottom: 1rem; font-family: var(--font-mono);
+}
+.result-score-val {
+  font-size: 4rem; font-family: var(--font-mono);
+  color: var(--accent); line-height: 1;
+  text-shadow: 0 0 24px var(--accent-glow);
+  margin-bottom: 0.2rem;
+}
+.result-score-max {
+  font-size: 0.68rem; color: var(--text-dim);
+  letter-spacing: 0.1em; margin-bottom: 1.5rem;
+}
+.result-heading-text {
+  font-size: 1.05rem; color: var(--text-bright);
+  margin-bottom: 0.8rem; line-height: 1.5;
+  font-family: var(--font-ja);
+}
+.result-desc-text {
+  font-size: 0.78rem; color: var(--text);
+  line-height: 1.85; font-family: var(--font-mono);
+  text-align: left;
+}
 </style>
 </head>
 
@@ -844,6 +992,24 @@ body.lang-fi { font-family: var(--font-mono); }
           <span class="qa-label">
             <span class="qa-label-main" data-ja="世界時計" data-de="Weltzeituhr" data-fi="Maailmankello">世界時計</span>
             <span class="qa-label-sub">world clock</span>
+          </span>
+        </button>
+
+        <!-- ストップウォッチ -->
+        <button class="qa-btn" onclick="openStopwatch()">
+          <i class="qa-icon">⊙</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="ストップウォッチ" data-de="Stoppuhr" data-fi="Sekuntikello">ストップウォッチ</span>
+            <span class="qa-label-sub">stopwatch</span>
+          </span>
+        </button>
+
+        <!-- 競介クイズ -->
+        <button class="qa-btn" onclick="openQuiz()">
+          <i class="qa-icon">？</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="競介クイズ" data-de="Kyosuke-Quiz" data-fi="Kyosuken tietovisa">競介クイズ</span>
+            <span class="qa-label-sub" data-ja="君は競介の何を知っているのか" data-de="Was weißt du über Kyosuke?" data-fi="Mitä tiedät Kyosukesta?">君は競介の何を知っているのか</span>
           </span>
         </button>
       </div>
@@ -986,6 +1152,69 @@ body.lang-fi { font-family: var(--font-mono); }
     </div>
     <div class="tool-body">
       <div class="tz-grid" id="tzGrid"></div>
+    </div>
+  </div>
+
+  <!-- ストップウォッチ -->
+  <div class="tool-panel" id="panel-stopwatch">
+    <div class="tool-titlebar">
+      <span id="swTitle">ストップウォッチ</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="sw-display" id="swDisplay">00:00.00</div>
+      <div class="sw-controls">
+        <button class="tool-btn" id="swStartBtn" onclick="swToggle()">スタート</button>
+        <button class="tool-btn" id="swResetBtn" onclick="swReset()">リセット</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 競介クイズ -->
+  <div class="tool-panel" id="panel-quiz">
+    <div class="tool-titlebar">
+      <span id="quizPanelTitle">競介クイズ</span>
+      <button class="tool-close" onclick="closeQuiz()">✕</button>
+    </div>
+    <div class="tool-body">
+
+      <!-- 問題ビュー -->
+      <div id="quizViewQuestion">
+        <p class="quiz-subtitle" id="quizSubtitle">君は競介の何を知っているのか</p>
+        <div class="quiz-meta">
+          <span class="quiz-q-num" id="quizQNum">問 1 / 8</span>
+          <div class="quiz-prog-wrap">
+            <div class="quiz-prog-fill" id="quizProgFill" style="width:0%"></div>
+          </div>
+        </div>
+        <p class="quiz-question" id="quizQuestion"></p>
+        <p class="quiz-hint" id="quizHint"></p>
+        <div class="quiz-choices" id="quizChoices"></div>
+        <button class="quiz-next-btn" id="quizNextBtn" onclick="quizNext()" disabled>次へ →</button>
+      </div>
+
+      <!-- 集計中ビュー -->
+      <div id="quizViewTabulating" style="display:none">
+        <div class="quiz-tabulating">
+          <p class="quiz-tab-label" id="quizTabText">集計中…</p>
+          <div class="quiz-tab-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 結果ビュー -->
+      <div id="quizViewResult" style="display:none">
+        <div class="quiz-result">
+          <p class="result-label" id="quizResultLabel">結果は…</p>
+          <div class="result-score-val" id="quizScoreVal">0</div>
+          <div class="result-score-max" id="quizScoreMax">/ 8 問正解</div>
+          <div class="result-heading-text" id="quizResultHeading"></div>
+          <div class="result-desc-text" id="quizResultDesc"></div>
+          <button class="tool-btn" id="quizCloseBtn" onclick="closeQuiz()" style="width:100%;margin-top:1.5rem;letter-spacing:0.15em">閉じる</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1306,6 +1535,303 @@ function init() {
 
 init();
 setInterval(updateInfo, 1000);
+
+/* ============================================================
+   ストップウォッチ
+============================================================ */
+let swRunning  = false;
+let swStart    = 0;
+let swElapsed  = 0;
+let swInterval = null;
+
+function openStopwatch() {
+  openTool('stopwatch');
+  const titles  = { ja: 'ストップウォッチ', de: 'Stoppuhr', fi: 'Sekuntikello' };
+  const starts  = { ja: swRunning ? 'ストップ' : 'スタート', de: swRunning ? 'Stopp' : 'Start', fi: swRunning ? 'Pysäytä' : 'Käynnistä' };
+  const resets  = { ja: 'リセット', de: 'Zurücksetzen', fi: 'Nollaa' };
+  document.getElementById('swTitle').textContent    = titles[currentLang];
+  document.getElementById('swStartBtn').textContent = starts[currentLang];
+  document.getElementById('swResetBtn').textContent = resets[currentLang];
+  updateSwDisplay();
+}
+
+function updateSwDisplay() {
+  const ms     = swElapsed + (swRunning ? Date.now() - swStart : 0);
+  const mins   = Math.floor(ms / 60000);
+  const secs   = Math.floor((ms % 60000) / 1000);
+  const cs     = Math.floor((ms % 1000) / 10);
+  document.getElementById('swDisplay').textContent =
+    String(mins).padStart(2,'0') + ':' +
+    String(secs).padStart(2,'0') + '.' +
+    String(cs).padStart(2,'0');
+}
+
+function swToggle() {
+  const starts = { ja: 'スタート', de: 'Start',  fi: 'Käynnistä' };
+  const stops  = { ja: 'ストップ', de: 'Stopp',  fi: 'Pysäytä'   };
+  const btn    = document.getElementById('swStartBtn');
+  if (!swRunning) {
+    swStart    = Date.now();
+    swRunning  = true;
+    swInterval = setInterval(updateSwDisplay, 50);
+    btn.textContent = stops[currentLang];
+  } else {
+    swElapsed += Date.now() - swStart;
+    swRunning  = false;
+    clearInterval(swInterval); swInterval = null;
+    updateSwDisplay();
+    btn.textContent = starts[currentLang];
+  }
+}
+
+function swReset() {
+  swRunning = false;
+  clearInterval(swInterval); swInterval = null;
+  swElapsed = 0; swStart = 0;
+  const starts = { ja: 'スタート', de: 'Start', fi: 'Käynnistä' };
+  document.getElementById('swStartBtn').textContent = starts[currentLang];
+  updateSwDisplay();
+}
+
+/* ============================================================
+   競介クイズ — データ
+============================================================ */
+const Q_MAXSEL = [1, 1, 2, 1, 2, 2, 1, 6]; /* 問ごとの最大選択数 */
+const Q_SALT   = 'kyo_quiz_v1_';
+const Q_HASHES = [
+  '2b8df8114731d70d7b411a60b03a14ea63d36c0a916d6e9b49bd956242494a86',
+  '2b8df8114731d70d7b411a60b03a14ea63d36c0a916d6e9b49bd956242494a86',
+  '5d6fc12dc30eafe03abb03282130c06dc7f3f7d4746d9b580db819f0a37f3ace',
+  '2b8df8114731d70d7b411a60b03a14ea63d36c0a916d6e9b49bd956242494a86',
+  'cdc5d590a40808b0f2f9b5d2bc6552d53fce623dd35020599863f995f74a30a0',
+  '292096dbfc39a68af38c002e56e93526c75e73128d10eafd1cfb2d267165a4a3',
+  'fcd536a30bb50680924dea7ec857944921b8c4d74276d3e08a9af8780adf7d57',
+  '8d3cf55940168f92e6e6d2929aeca870c2947a58ef2e12f484add4523bb57aca',
+];
+
+const Q_DATA = {
+  ja: {
+    panelTitle: '競介クイズ',
+    subtitle:   '君は競介の何を知っているのか',
+    nextBtn:    '次へ →',
+    finishBtn:  '結果を見る',
+    tabText:    '集計中…',
+    resultLabel:'結果は…',
+    closeBtn:   '閉じる',
+    qLabel:     '問', of: '/',
+    scoreUnit:  '問正解',
+    questions: [
+      { q: '競介の一番好きなZONeの味は？',      multi: false, hint: '',
+        choices: ['NORMAL','WHITE SODA','5772K','ZERO','POWER MORNING','BLACK PUNCH'] },
+      { q: '競介の一番好きな数字は？',           multi: false, hint: '',
+        choices: ['7','17','29','1001','1729','114514'] },
+      { q: '競介の好きな国を二つ選べ',           multi: true,  hint: '（2つ選べ）',
+        choices: ['台湾','ドイツ','カナダ','イギリス','フィンランド','フィリピン'] },
+      { q: '競介の好きな数学の分野は？',         multi: false, hint: '',
+        choices: ['解析学','球面幾何学','和分差分学','双曲幾何学','統計学','トポロジー'] },
+      { q: '競介の好きな漫画家を2人選べ',        multi: true,  hint: '（2つ選べ）',
+        choices: ['紀伊カンナ','水炊き','秋★枝','水野英多','氏家ト全','中村明日美子'] },
+      { q: '競介の好きな食べ物を２つ選んでね',   multi: true,  hint: '（2つ選べ）',
+        choices: ['サルミアッキ','鰹節','パセリ','ミンティア','バター','あたりめ'] },
+      { q: '競介の好きな犬種は？',               multi: false, hint: '',
+        choices: ['チワワ','毒チワワ','柴犬','ボルゾイ','毒チワワ','毒チワワ'] },
+      { q: '競介のやっているゲームを全て選べ',   multi: true,  hint: '（全て選べ）',
+        choices: ['Arcaea','東方ロストワード','東方幻想エクリプス','オンゲキ','Lanota','World Box'] },
+    ],
+    results: [
+      { min:0, max:2, heading:'これはひどい！', desc:'つーかどうやってここまで来たんだよお前' },
+      { min:3, max:5, heading:'あらあら…', desc:'俺たちもっと仲良くなれそうだね！' },
+      { min:6, max:7, heading:'すごいね！', desc:'俺たち、完全に友達！' },
+      { min:8, max:8, heading:'満点！！', desc:'ここまで来ると逆にキモいかも！' },
+    ],
+  },
+  de: {
+    panelTitle: 'Kyosuke-Quiz',
+    subtitle:   'Was weißt du über Kyosuke?',
+    nextBtn:    'Weiter →',
+    finishBtn:  'Ergebnis ansehen',
+    tabText:    'Auswertung…',
+    resultLabel:'Das Ergebnis ist…',
+    closeBtn:   'Schließen',
+    qLabel:     'Frage', of: '/',
+    scoreUnit:  'richtig',
+    questions: [
+      { q: 'Was ist Kyosukes liebster ZONe-Geschmack?',      multi: false, hint: '',
+        choices: ['NORMAL','WHITE SODA','5772K','ZERO','POWER MORNING','BLACK PUNCH'] },
+      { q: 'Was ist Kyosukes Lieblingszahl?',                multi: false, hint: '',
+        choices: ['7','17','29','1001','1729','114514'] },
+      { q: 'Wähle Kyosukes zwei Lieblingsländer',            multi: true,  hint: '(Wähle 2)',
+        choices: ['Taiwan','Deutschland','Kanada','Großbritannien','Finnland','Philippinen'] },
+      { q: 'Was ist Kyosukes Lieblingsgebiet der Mathematik?', multi: false, hint: '',
+        choices: ['Analysis','Sphärische Geometrie','Differenzenrechnung','Hyperbolische Geometrie','Statistik','Topologie'] },
+      { q: 'Wähle Kyosukes 2 Lieblingsmangaka',              multi: true,  hint: '(Wähle 2)',
+        choices: ['紀伊カンナ','水炊き','秋★枝','水野英多','氏家ト全','中村明日美子'] },
+      { q: 'Wähle Kyosukes 2 Lieblingsessen',                multi: true,  hint: '(Wähle 2)',
+        choices: ['Salmiakki','Katsuobushi','Petersilie','Mintia','Butter','Getrockneter Tintenfisch'] },
+      { q: 'Was ist Kyosukes Lieblingsrasse?',               multi: false, hint: '',
+        choices: ['Chihuahua','Gift-Chihuahua','Shiba Inu','Barsoi','Gift-Chihuahua','Gift-Chihuahua'] },
+      { q: 'Wähle alle Spiele, die Kyosuke spielt',          multi: true,  hint: '(Alle auswählen)',
+        choices: ['Arcaea','東方ロストワード','東方幻想エクリプス','オンゲキ','Lanota','World Box'] },
+    ],
+    results: [
+      { min:0, max:2, heading:'Das ist ja furchtbar!', desc:'Mal ehrlich, wie bist du überhaupt auf diese Seite gekommen?' },
+      { min:3, max:5, heading:'Na, na...', desc:'Ich glaube, wir könnten noch gute Freunde werden!' },
+      { min:6, max:7, heading:'Beeindruckend!', desc:'Wir sind praktisch schon Freunde!' },
+      { min:8, max:8, heading:'Volle Punktzahl!!', desc:'Auf diesem Niveau wirds fast schon unheimlich!' },
+    ],
+  },
+  fi: {
+    panelTitle: 'Kyosuken tietovisa',
+    subtitle:   'Mitä tiedät Kyosukesta?',
+    nextBtn:    'Seuraava →',
+    finishBtn:  'Katso tulos',
+    tabText:    'Lasketaan…',
+    resultLabel:'Tulos on…',
+    closeBtn:   'Sulje',
+    qLabel:     'Kysymys', of: '/',
+    scoreUnit:  'oikein',
+    questions: [
+      { q: 'Mikä on Kyosuken suosikki ZONe-maku?',        multi: false, hint: '',
+        choices: ['NORMAL','WHITE SODA','5772K','ZERO','POWER MORNING','BLACK PUNCH'] },
+      { q: 'Mikä on Kyosuken lempiluku?',                  multi: false, hint: '',
+        choices: ['7','17','29','1001','1729','114514'] },
+      { q: 'Valitse kaksi Kyosuken suosikkimaata',         multi: true,  hint: '(Valitse 2)',
+        choices: ['Taiwan','Saksa','Kanada','Yhdistynyt kuningaskunta','Suomi','Filippiinit'] },
+      { q: 'Mikä on Kyosuken suosikki matematiikan ala?',  multi: false, hint: '',
+        choices: ['Analyysi','Pallogeometria','Differenssilasku','Hyperbolinen geometria','Tilastotiede','Topologia'] },
+      { q: 'Valitse 2 Kyosuken suosikkimangakaa',          multi: true,  hint: '(Valitse 2)',
+        choices: ['紀伊カンナ','水炊き','秋★枝','水野英多','氏家ト全','中村明日美子'] },
+      { q: 'Valitse 2 Kyosuken suosikkiruokaa',            multi: true,  hint: '(Valitse 2)',
+        choices: ['Salmiakki','Katsuobushi','Persilja','Mintia','Voi','Kuivattu mustekala'] },
+      { q: 'Mikä on Kyosuken suosikkikoirarotu?',          multi: false, hint: '',
+        choices: ['Chihuahua','Myrkky-chihuahua','Shiba Inu','Borzoi','Myrkky-chihuahua','Myrkky-chihuahua'] },
+      { q: 'Valitse kaikki Kyosuken pelaamat pelit',       multi: true,  hint: '(Valitse kaikki)',
+        choices: ['Arcaea','東方ロストワード','東方幻想エクリプス','オンゲキ','Lanota','World Box'] },
+    ],
+    results: [
+      { min:0, max:2, heading:'Tämä on kamalaa!', desc:'Miten ihmeessä edes päädyit tälle sivulle?' },
+      { min:3, max:5, heading:'No jopas...', desc:'Meistä voisi vielä tulla hyviä ystäviä!' },
+      { min:6, max:7, heading:'Hienoa!', desc:'Me olemme jo käytännössä ystäviä!' },
+      { min:8, max:8, heading:'Täydet pisteet!!', desc:'Tässä vaiheessa se alkaa jo olla vähän karmivaa!' },
+    ],
+  },
+};
+
+/* ============================================================
+   競介クイズ — ロジック
+============================================================ */
+let quizIdx        = 0;
+let quizSelections = [];
+
+async function sha256hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function openQuiz() {
+  quizIdx        = 0;
+  quizSelections = Array.from({ length: 8 }, () => new Set());
+  renderQuizQuestion();
+  document.getElementById('quizViewQuestion').style.display   = '';
+  document.getElementById('quizViewTabulating').style.display = 'none';
+  document.getElementById('quizViewResult').style.display     = 'none';
+  openTool('quiz');
+}
+
+function closeQuiz() { closeTool(); }
+
+function renderQuizQuestion() {
+  const lang  = Q_DATA[currentLang];
+  const q     = lang.questions[quizIdx];
+  const total = lang.questions.length;
+
+  document.getElementById('quizPanelTitle').textContent = lang.panelTitle;
+  document.getElementById('quizSubtitle').textContent   = lang.subtitle;
+  document.getElementById('quizQNum').textContent =
+    `${lang.qLabel} ${quizIdx + 1} ${lang.of} ${total}`;
+  document.getElementById('quizProgFill').style.width   = (quizIdx / total * 100) + '%';
+  document.getElementById('quizQuestion').textContent   = q.q;
+  document.getElementById('quizHint').textContent       = q.hint || '';
+
+  const choicesEl = document.getElementById('quizChoices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className   = 'quiz-choice' + (quizSelections[quizIdx].has(i) ? ' selected' : '');
+    btn.textContent = choice;
+    btn.onclick     = () => toggleQuizChoice(i, q.multi);
+    choicesEl.appendChild(btn);
+  });
+
+  const nextBtn       = document.getElementById('quizNextBtn');
+  nextBtn.textContent = (quizIdx === total - 1) ? lang.finishBtn : lang.nextBtn;
+  nextBtn.disabled    = quizSelections[quizIdx].size === 0;
+}
+
+function toggleQuizChoice(idx, multi) {
+  const sel    = quizSelections[quizIdx];
+  const maxSel = Q_MAXSEL[quizIdx];
+
+  if (sel.has(idx)) {
+    sel.delete(idx);
+  } else if (!multi) {
+    sel.clear();
+    sel.add(idx);
+  } else if (sel.size < maxSel) {
+    sel.add(idx);
+  }
+  /* maxSel 以上はこれ以上選択できない (何もしない) */
+
+  document.querySelectorAll('.quiz-choice').forEach((btn, i) => {
+    btn.classList.toggle('selected', sel.has(i));
+  });
+  document.getElementById('quizNextBtn').disabled = sel.size === 0;
+}
+
+async function quizNext() {
+  const lang  = Q_DATA[currentLang];
+  const total = lang.questions.length;
+
+  if (quizIdx < total - 1) {
+    quizIdx++;
+    renderQuizQuestion();
+    return;
+  }
+
+  /* 最終問 → 集計 */
+  document.getElementById('quizViewQuestion').style.display   = 'none';
+  document.getElementById('quizViewTabulating').style.display = '';
+  document.getElementById('quizTabText').textContent          = lang.tabText;
+
+  /* 2秒演出 */
+  await new Promise(r => setTimeout(r, 2200));
+
+  /* 採点 (ハッシュで照合) */
+  let score = 0;
+  await Promise.all(quizSelections.map(async (sel, i) => {
+    const key  = [...sel].sort((a, b) => a - b).join(',');
+    const hash = await sha256hex(Q_SALT + key);
+    if (hash === Q_HASHES[i]) score++;
+  }));
+
+  showQuizResult(score);
+}
+
+function showQuizResult(score) {
+  const lang = Q_DATA[currentLang];
+  const tier = lang.results.find(r => score >= r.min && score <= r.max);
+
+  document.getElementById('quizViewTabulating').style.display = 'none';
+  document.getElementById('quizViewResult').style.display     = '';
+
+  document.getElementById('quizProgFill').style.width         = '100%';
+  document.getElementById('quizResultLabel').textContent      = lang.resultLabel;
+  document.getElementById('quizScoreVal').textContent         = score;
+  document.getElementById('quizScoreMax').textContent         = `/ ${lang.questions.length} ${lang.scoreUnit}`;
+  document.getElementById('quizResultHeading').textContent    = tier ? tier.heading : '';
+  document.getElementById('quizResultDesc').textContent       = tier ? tier.desc    : '';
+  document.getElementById('quizCloseBtn').textContent         = lang.closeBtn;
+}
 </script>
 </body>
 </html>
