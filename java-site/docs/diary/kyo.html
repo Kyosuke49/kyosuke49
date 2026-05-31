@@ -877,6 +877,27 @@ body.lang-fi { font-family: var(--font-mono); }
   margin-bottom: 0.8rem; line-height: 1.5;
   font-family: var(--font-ja);
 }
+.result-prize {
+  display: none;
+  margin: 0.9rem 0 1rem;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  border: 1px solid rgba(200,168,74,0.35);
+  padding: 0.5rem 0.9rem;
+  text-align: left;
+  animation: badge-glow 3s ease-in-out infinite;
+}
+.result-prize a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity var(--transition);
+}
+.result-prize a:hover { opacity: 0.75; }
+.result-prize.visible { display: block; }
+
 .result-desc-text {
   font-size: 0.78rem; color: var(--text);
   line-height: 1.85; font-family: var(--font-mono);
@@ -1210,6 +1231,7 @@ body.lang-fi { font-family: var(--font-mono); }
           <div class="result-score-val" id="quizScoreVal">0</div>
           <div class="result-score-max" id="quizScoreMax">/ 8 問正解</div>
           <div class="result-heading-text" id="quizResultHeading"></div>
+          <div class="result-prize" id="quizResultPrize"></div>
           <div class="result-desc-text" id="quizResultDesc"></div>
           <button class="tool-btn" id="quizCloseBtn" onclick="closeQuiz()" style="width:100%;margin-top:1.5rem;letter-spacing:0.15em">閉じる</button>
         </div>
@@ -1661,7 +1683,7 @@ const Q_DATA = {
       { q: 'Was ist Kyosukes Lieblingszahl?',                multi: false, hint: '',
         choices: ['7','17','29','1001','1729','114514'] },
       { q: 'Wähle Kyosukes zwei Lieblingsländer',            multi: true,  hint: '(Wähle 2)',
-        choices: ['Taiwan','Deutschland','Kanada','Großbritannien','Finnland','Philippinen'] },
+        choices: ['Taiwan','Deutschland','Kanada','Vereinigtes Königreich','Finnland','Philippinen'] },
       { q: 'Was ist Kyosukes Lieblingsgebiet der Mathematik?', multi: false, hint: '',
         choices: ['Analysis','Sphärische Geometrie','Differenzenrechnung','Hyperbolische Geometrie','Statistik','Topologie'] },
       { q: 'Wähle Kyosukes 2 Lieblingsmangaka',              multi: true,  hint: '(Wähle 2)',
@@ -1831,6 +1853,28 @@ function showQuizResult(score) {
   document.getElementById('quizResultHeading').textContent    = tier ? tier.heading : '';
   document.getElementById('quizResultDesc').textContent       = tier ? tier.desc    : '';
   document.getElementById('quizCloseBtn').textContent         = lang.closeBtn;
+
+  /* 全問正解時のみ景品を表示 */
+  const prizeEl = document.getElementById('quizResultPrize');
+  if (score === lang.questions.length) {
+    const prizeLabel = { ja: '景品：', de: 'Preis: ', fi: 'Palkinto: ' }[currentLang];
+    const contactLabel = { ja: '競介の連絡先', de: 'Kyosukes Kontakt', fi: 'Kyosuken yhteystieto' }[currentLang];
+    /* 鍵 = 全問の正解選択インデックスをジョイン（ソース非掲載）
+       正解した人の quizSelections からのみ復元可能               */
+    const prizeKey = quizSelections.map(sel =>
+      [...sel].sort((a, b) => a - b).join(',')
+    ).join('|');
+    const PRIZE_ENC = '5a08460c43161c535615434f5b0e5402551b1c2648567f6166564f';
+    const encBytes  = PRIZE_ENC.match(/.{2}/g).map(h => parseInt(h, 16));
+    const prizeUrl  = encBytes.map((b, i) =>
+      String.fromCharCode(b ^ prizeKey.charCodeAt(i % prizeKey.length))
+    ).join('');
+    prizeEl.innerHTML = prizeLabel + `<a href="${prizeUrl}" target="_blank" rel="noopener">${contactLabel}</a>`;
+    prizeEl.classList.add('visible');
+  } else {
+    prizeEl.innerHTML = '';
+    prizeEl.classList.remove('visible');
+  }
 }
 </script>
 </body>
