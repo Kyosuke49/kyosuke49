@@ -1,0 +1,422 @@
+package site;
+
+/**
+ * サイト全体のCSSスタイルシートを管理するクラス。
+ * デザイン変更はここで行います。
+ */
+public class Styles {
+
+    public static String getStylesheet() {
+        return """
+/* ==========================================================
+   偽造切手 — スタイルシート
+   自動生成: SiteGenerator.java
+   ========================================================== */
+
+/* ---------- カスタムフォント ---------- */
+@font-face {
+  font-family: '1880Kurrent';
+  src: url('fonts/1880_Kurrentshrift_Normal.otf') format('opentype');
+}
+@font-face {
+  font-family: 'BreitkopfFraktur';
+  src: url('fonts/BreitkopfFraktur.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Geosans';
+  src: url('fonts/GeosansLight.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Geosans';
+  src: url('fonts/GeosansLight-Oblique.ttf') format('truetype');
+  font-style: oblique;
+}
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-Light.ttf') format('truetype');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Kazesawa';
+  src: url('fonts/Kazesawa-Bold.ttf') format('truetype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'SUETTER';
+  src: url('fonts/SUETTER.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Impact';
+  src: url('fonts/impact.ttf') format('truetype');
+}
+
+/* ---------- フォントユーティリティクラス ---------- */
+.font-kazesawa        { font-family: 'Kazesawa', system-ui, sans-serif; font-weight: 400; }
+.font-kazesawa-light  { font-family: 'Kazesawa', system-ui, sans-serif; font-weight: 300; }
+.font-kazesawa-bold   { font-family: 'Kazesawa', system-ui, sans-serif; font-weight: 700; }
+.font-fraktur         { font-family: 'BreitkopfFraktur', serif; }
+.font-kurrent         { font-family: '1880Kurrent', serif; }
+.font-geosans         { font-family: 'Geosans', sans-serif; }
+.font-suetter         { font-family: 'SUETTER', cursive; }
+.font-impact          { font-family: 'Impact', serif; }
+
+/* ---------- リセット・基本 ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #f5f5f5;
+  --fg:        #111;
+  --white:     #ffffff;
+  --black:     #000000;
+  --muted:     #666;
+  --border:    #ccc;
+  --transition: 0.18s ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Kazesawa', system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+/* ---------- コンテナ ---------- */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ==========================================================
+   トップページ ヘッダー
+   ========================================================== */
+.site-header {
+  background: var(--black);
+  color: var(--white);
+  padding: 2.5rem 0;
+}
+
+.site-title {
+  font-family: 'Kazesawa', system-ui, sans-serif;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  display: none;
+}
+.site-title[data-lang="ja"] { display: block; }
+
+.lang-switch {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.lang-switch button {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.65);
+  font-family: 'Kazesawa', system-ui, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  padding: 0.4rem 1.1rem;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.lang-switch button.active,
+.lang-switch button:hover {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--white);
+}
+
+/* ==========================================================
+   サブページ ヘッダー（shared-nav.js が注入）
+   ========================================================== */
+.sub-header { padding: 0; }
+
+/* ロゴ＋ナビ行 */
+.sub-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-logo {
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  color: var(--white);
+  text-decoration: none;
+  padding: 1rem 0;
+  transition: opacity var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.site-logo:hover { opacity: 0.6; }
+
+/* ナビゲーション（横スクロールタブ） */
+nav {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+nav::-webkit-scrollbar { display: none; }
+
+nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+nav li a {
+  display: block;
+  padding: 1rem 1rem;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-family: 'Kazesawa', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  transition: color var(--transition), background var(--transition);
+}
+nav li a:hover {
+  color: var(--black);
+  background: var(--white);
+}
+
+/* ==========================================================
+   言語切替（サブページ・横スクロールタブ）
+   ========================================================== */
+.sub-lang-switch {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sub-lang-switch::-webkit-scrollbar { display: none; }
+
+.sub-lang-btn {
+  background: none;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55);
+  font-family: 'Kazesawa', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color var(--transition), background var(--transition);
+}
+.sub-lang-btn:last-child { border-right: none; }
+.sub-lang-btn:hover,
+.sub-lang-btn.active {
+  background: var(--white);
+  color: var(--black);
+}
+
+/* ==========================================================
+   言語ブロック（サブページ）
+   ========================================================== */
+.lang-block[data-lang] { display: none; }
+.lang-block[data-lang="ja"] { display: block; }
+
+/* ==========================================================
+   トップページ レイアウト
+   ========================================================== */
+.page-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 0;
+  max-width: 860px;
+  margin: 0 auto;
+  min-height: calc(100vh - 160px);
+}
+
+.page-left {
+  padding: 2.5rem 2rem 3rem;
+  border-right: 1px solid var(--border);
+}
+
+.lang-section {
+  padding: 0 0 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+  display: none;
+}
+
+.section-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  font-weight: 400;
+}
+
+.nav-section { padding-top: 0; }
+
+.contents-list {
+  list-style: none;
+  margin-top: 0.8rem;
+}
+.contents-list li {
+  border-bottom: 1px dashed var(--border);
+}
+.contents-list li:first-child {
+  border-top: 1px dashed var(--border);
+}
+.contents-list a {
+  display: block;
+  padding: 0.7rem 0;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  transition: padding-left var(--transition), color var(--transition);
+}
+.contents-list a:hover {
+  padding-left: 0.5rem;
+  color: var(--black);
+}
+
+.site-footer-top {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  line-height: 2;
+}
+.site-footer-top a { color: var(--muted); }
+
+/* ==========================================================
+   情報ウィンドウ（サイドバー）
+   ========================================================== */
+.info-window {
+  background: var(--white);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.info-block {
+  padding: 1.4rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  flex: 1;
+}
+.info-block:last-child { border-bottom: none; }
+.info-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+.info-content {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  word-break: break-word;
+}
+.info-time {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ==========================================================
+   サブページ共通
+   ========================================================== */
+.sub-main {
+  padding: 3rem 0 4rem;
+}
+
+.page-title {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--black);
+}
+
+a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: opacity var(--transition);
+}
+a:hover { opacity: 0.55; }
+
+.back-link {
+  display: inline-block;
+  margin-top: 2.5rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- サブページフッター ---------- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.8rem 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+}
+
+/* ==========================================================
+   レスポンシブ
+   ========================================================== */
+@media (max-width: 680px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+  }
+  .page-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 1.2rem 2rem;
+  }
+  .info-window {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .info-block {
+    flex: 1 1 45%;
+    min-width: 140px;
+  }
+  .site-title {
+    font-size: clamp(2rem, 12vw, 4rem);
+  }
+  .sub-lang-btn {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.72rem;
+  }
+  nav li a {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.78rem;
+  }
+}
+""";
+    }
+}
