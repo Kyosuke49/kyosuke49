@@ -711,6 +711,41 @@ body.lang-fi { font-family: var(--font-mono); }
 .tz-date  { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.15rem; }
 
 /* =====================
+   タイマー
+===================== */
+.timer-setup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.7rem;
+}
+.timer-col { text-align: center; }
+.timer-digit-input {
+  width: 3.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  text-align: center;
+  padding: 0.4rem 0.2rem;
+  outline: none;
+  -moz-appearance: textfield;
+  display: block;
+}
+.timer-digit-input::-webkit-outer-spin-button,
+.timer-digit-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.timer-digit-input:focus { border-color: var(--accent-mid); }
+.timer-sep { color: var(--accent); font-size: 1.4rem; font-family: var(--font-mono); padding-top: 0; }
+.timer-col-label { font-size: 0.52rem; color: var(--text-dim); letter-spacing: 0.15em; margin-top: 0.15rem; }
+@keyframes timer-done-flash {
+  0%,100% { color: var(--accent); text-shadow: 0 0 16px var(--accent-glow); }
+  50%     { color: #e83929; text-shadow: 0 0 28px rgba(232,57,41,0.55); }
+}
+.timer-done-anim { animation: timer-done-flash 0.6s ease-in-out infinite; }
+
+/* =====================
    フッター
 ===================== */
 .site-footer {
@@ -1085,6 +1120,68 @@ body.lang-fi { font-family: var(--font-mono); }
 
       </div>
     </div>
+    <!-- AVANT-GARDE EXPERIMENTS -->
+    <div>
+      <p class="qa-heading">Avant-Garde Experiments</p>
+      <div class="qa-grid">
+
+        <!-- Base-29 -->
+        <button class="qa-btn" onclick="openTool('base29')">
+          <i class="qa-icon" style="font-style:normal;font-size:0.68rem;letter-spacing:-0.02em;color:var(--text-dim);">B₂₉</i>
+          <span class="qa-label">
+            <span class="qa-label-main">Base-29</span>
+            <span class="qa-label-sub">encode / decode</span>
+          </span>
+        </button>
+
+        <!-- タイマー -->
+        <button class="qa-btn" onclick="openTimer()">
+          <i class="qa-icon">⧗</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="タイマー" data-de="Timer" data-fi="Ajastin">タイマー</span>
+            <span class="qa-label-sub">countdown</span>
+          </span>
+        </button>
+
+        <!-- おみくじ -->
+        <button class="qa-btn" onclick="openTool('omikuji')">
+          <i class="qa-icon">♫</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="VIPおみくじ" data-de="VIP-Glückslos" data-fi="VIP-onnenlippu">VIPおみくじ</span>
+            <span class="qa-label-sub">fortune · VIP only</span>
+          </span>
+        </button>
+
+        <!-- 関数描画 -->
+        <button class="qa-btn" onclick="openTool('plotter')">
+          <i class="qa-icon">∿</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="関数描画" data-de="Funktionsplotter" data-fi="Funktiopiirturi">関数描画</span>
+            <span class="qa-label-sub">function plotter</span>
+          </span>
+        </button>
+
+        <!-- チャット -->
+        <button class="qa-btn" onclick="openTool('chat')">
+          <i class="qa-icon">⊟</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="チャット" data-de="Chat" data-fi="Chat">チャット</span>
+            <span class="qa-label-sub">kyosuke bot</span>
+          </span>
+        </button>
+
+        <!-- 難解言語研究室 -->
+        <button class="qa-btn" onclick="openTool('esoteric')">
+          <i class="qa-icon">Ψ</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="難解言語研究室" data-de="Esoterische Sprachen" data-fi="Esoteerinen lab">難解言語研究室</span>
+            <span class="qa-label-sub">brainfuck &amp; ook!</span>
+          </span>
+        </button>
+
+      </div>
+    </div>
+
   </aside>
 </div>
 
@@ -1240,6 +1337,108 @@ body.lang-fi { font-family: var(--font-mono); }
     </div>
   </div>
 
+
+  <!-- Base-29 -->
+  <div class="tool-panel" id="panel-base29">
+    <div class="tool-titlebar">
+      <span>Base-29 Encode / Decode</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <p style="font-size:0.6rem;color:var(--text-dim);letter-spacing:0.08em;margin-bottom:0.6rem;font-family:var(--font-mono);">Alphabet: a–z + ä ö ü (29文字)</p>
+      <label class="tool-label" id="b29Label">入力</label>
+      <textarea class="tool-input" id="b29Input" rows="3" placeholder="テキストまたはBase-29文字列を入力"></textarea>
+      <div class="tool-row" style="margin-top:0.6rem;">
+        <button class="tool-btn" onclick="doBase29('encode')" id="b29EncBtn">Encode →</button>
+        <button class="tool-btn" onclick="doBase29('decode')" id="b29DecBtn">← Decode</button>
+      </div>
+      <label class="tool-label" id="b29OutLabel">出力</label>
+      <div class="tool-output" id="b29Output">----</div>
+    </div>
+  </div>
+
+  <!-- タイマー -->
+  <div class="tool-panel" id="panel-timer">
+    <div class="tool-titlebar">
+      <span id="timerTitle">タイマー</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="timer-setup">
+        <div class="timer-col">
+          <input type="number" class="timer-digit-input" id="timerH" min="0" max="99" value="0">
+          <div class="timer-col-label" id="timerHLabel">時</div>
+        </div>
+        <span class="timer-sep">:</span>
+        <div class="timer-col">
+          <input type="number" class="timer-digit-input" id="timerM" min="0" max="59" value="5">
+          <div class="timer-col-label" id="timerMLabel">分</div>
+        </div>
+        <span class="timer-sep">:</span>
+        <div class="timer-col">
+          <input type="number" class="timer-digit-input" id="timerS" min="0" max="59" value="0">
+          <div class="timer-col-label" id="timerSLabel">秒</div>
+        </div>
+      </div>
+      <div id="timerDisplayWrap">
+        <div class="sw-display" id="timerDisplay">05:00</div>
+      </div>
+      <div class="sw-controls">
+        <button class="tool-btn" id="timerStartBtn" onclick="timerToggle()">スタート</button>
+        <button class="tool-btn" id="timerResetBtn" onclick="timerReset()">リセット</button>
+      </div>
+      <div id="timerDoneMsg" style="display:none;text-align:center;margin-top:0.8rem;font-size:0.82rem;letter-spacing:0.14em;font-family:var(--font-mono);"></div>
+    </div>
+  </div>
+
+  <!-- VIPおみくじ -->
+  <div class="tool-panel" id="panel-omikuji">
+    <div class="tool-titlebar">
+      <span id="wipTitle-omikuji">VIPおみくじ</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
+      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
+      <div id="wipMsg-omikuji" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    </div>
+  </div>
+
+  <!-- 関数描画 -->
+  <div class="tool-panel" id="panel-plotter">
+    <div class="tool-titlebar">
+      <span id="wipTitle-plotter">関数描画</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
+      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
+      <div id="wipMsg-plotter" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    </div>
+  </div>
+
+  <!-- チャット -->
+  <div class="tool-panel" id="panel-chat">
+    <div class="tool-titlebar">
+      <span id="wipTitle-chat">チャット</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
+      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
+      <div id="wipMsg-chat" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    </div>
+  </div>
+
+  <!-- 難解言語研究室 -->
+  <div class="tool-panel" id="panel-esoteric">
+    <div class="tool-titlebar">
+      <span id="wipTitle-esoteric">難解言語研究室</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
+      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
+      <div id="wipMsg-esoteric" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/daily.js"></script>
@@ -1314,9 +1513,56 @@ function applyLang(lang) {
   document.getElementById('b64EncBtn').textContent = b64EncMap[lang];
   document.getElementById('b64DecBtn').textContent = b64DecMap[lang];
 
+  /* Base-29ラベル */
+  const b29LabelMap  = { ja: '入力',    de: 'Eingabe', fi: 'Syöte'  };
+  const b29OutMap    = { ja: '出力',    de: 'Ausgabe',  fi: 'Tulos'  };
+  const b29EncMap    = { ja: 'Encode →', de: 'Kodieren →', fi: 'Koodaa →' };
+  const b29DecMap    = { ja: '← Decode', de: '← Dekodieren', fi: '← Dekoodaa' };
+  document.getElementById('b29Label').textContent    = b29LabelMap[lang];
+  document.getElementById('b29OutLabel').textContent = b29OutMap[lang];
+  document.getElementById('b29EncBtn').textContent   = b29EncMap[lang];
+  document.getElementById('b29DecBtn').textContent   = b29DecMap[lang];
+
   updateInfo();
   renderSysMsg();
   renderLog();
+  updateWipPanels(lang);
+}
+
+/* ============================================================
+   WIPパネル多言語切替
+============================================================ */
+const WIP_PANELS = {
+  omikuji: {
+    title: { ja: 'VIPおみくじ',      de: 'VIP-Glückslos',        fi: 'VIP-onnenlippu'    },
+    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+  },
+  plotter: {
+    title: { ja: '関数描画',          de: 'Funktionsplotter',     fi: 'Funktiopiirturi'   },
+    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+  },
+  chat: {
+    title: { ja: 'チャット',          de: 'Chat',                 fi: 'Chat'              },
+    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+  },
+  esoteric: {
+    title: { ja: '難解言語研究室',    de: 'Esoterische Sprachen', fi: 'Esoteerinen lab'   },
+    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+  },
+};
+
+function updateWipPanels(lang) {
+  for (const [key, data] of Object.entries(WIP_PANELS)) {
+    const titleEl = document.getElementById('wipTitle-' + key);
+    const msgEl   = document.getElementById('wipMsg-'   + key);
+    if (titleEl) titleEl.textContent = data.title[lang];
+    if (msgEl)   {
+      msgEl.textContent = data.msg[lang];
+      msgEl.style.fontFamily = lang === 'ja'
+        ? "'Noto Serif JP', serif"
+        : 'var(--font-mono)';
+    }
+  }
 }
 
 function setLang(lang) {
@@ -1876,6 +2122,151 @@ function showQuizResult(score) {
     prizeEl.classList.remove('visible');
   }
 }
+
+/* ============================================================
+   AVANT-GARDE — Base-29
+============================================================ */
+const B29 = [...'abcdefghijklmnopqrstuvwxyzäöü'];
+
+function b29encode(text) {
+  const bytes = new TextEncoder().encode(text);
+  if (!bytes.length) return '';
+  let leadZ = 0;
+  while (leadZ < bytes.length && bytes[leadZ] === 0) leadZ++;
+  let val = 0n;
+  for (const b of bytes) val = val * 256n + BigInt(b);
+  let s = '';
+  while (val > 0n) { s = B29[Number(val % 29n)] + s; val /= 29n; }
+  return B29[0].repeat(leadZ) + s;
+}
+
+function b29decode(str) {
+  str = str.trim();
+  if (!str) return '';
+  let leadZ = 0;
+  while (leadZ < str.length && str[leadZ] === B29[0]) leadZ++;
+  let val = 0n;
+  for (const ch of [...str]) {
+    const idx = B29.indexOf(ch);
+    if (idx < 0) throw new Error('Invalid character: "' + ch + '"');
+    val = val * 29n + BigInt(idx);
+  }
+  const bytes = [];
+  while (val > 0n) { bytes.unshift(Number(val % 256n)); val /= 256n; }
+  const arr = new Uint8Array([...new Array(leadZ).fill(0), ...bytes]);
+  return new TextDecoder().decode(arr);
+}
+
+function doBase29(mode) {
+  const input = document.getElementById('b29Input').value;
+  const out   = document.getElementById('b29Output');
+  try {
+    const result = mode === 'encode' ? b29encode(input) : b29decode(input);
+    out.textContent = result || '(empty)';
+    out.className   = 'tool-output';
+  } catch(e) {
+    const errMap = { ja: 'エラー: ' + e.message, de: 'Fehler: ' + e.message, fi: 'Virhe: ' + e.message };
+    out.textContent = errMap[currentLang];
+    out.className   = 'tool-output muted';
+  }
+}
+
+/* ============================================================
+   AVANT-GARDE — タイマー
+============================================================ */
+let timerRunning  = false;
+let timerEnd      = 0;
+let timerRemain   = 0;
+let timerInterval = null;
+
+function openTimer() {
+  openTool('timer');
+  const titles  = { ja: 'タイマー',  de: 'Timer',         fi: 'Ajastin'   };
+  const starts  = { ja: 'スタート',  de: 'Start',         fi: 'Käynnistä' };
+  const resets  = { ja: 'リセット',  de: 'Zurücksetzen',  fi: 'Nollaa'    };
+  const hL      = { ja: '時',        de: 'Std',           fi: 'h'         };
+  const mL      = { ja: '分',        de: 'Min',           fi: 'min'       };
+  const sL      = { ja: '秒',        de: 'Sek',           fi: 's'         };
+  document.getElementById('timerTitle').textContent    = titles[currentLang];
+  document.getElementById('timerStartBtn').textContent = starts[currentLang];
+  document.getElementById('timerResetBtn').textContent = resets[currentLang];
+  document.getElementById('timerHLabel').textContent   = hL[currentLang];
+  document.getElementById('timerMLabel').textContent   = mL[currentLang];
+  document.getElementById('timerSLabel').textContent   = sL[currentLang];
+  updateTimerDisplay();
+}
+
+function timerGetSetMs() {
+  const h = Math.max(0, parseInt(document.getElementById('timerH').value) || 0);
+  const m = Math.max(0, Math.min(59, parseInt(document.getElementById('timerM').value) || 0));
+  const s = Math.max(0, Math.min(59, parseInt(document.getElementById('timerS').value) || 0));
+  return (h * 3600 + m * 60 + s) * 1000;
+}
+
+function updateTimerDisplay() {
+  const ms = timerRunning ? Math.max(0, timerEnd - Date.now()) : timerRemain;
+  const totalSec = Math.ceil(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  document.getElementById('timerDisplay').textContent =
+    h > 0
+      ? String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
+      : String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function timerToggle() {
+  const starts = { ja: 'スタート', de: 'Start',  fi: 'Käynnistä' };
+  const pauses = { ja: 'ポーズ',   de: 'Pause',  fi: 'Tauko'     };
+  const btn    = document.getElementById('timerStartBtn');
+
+  if (!timerRunning) {
+    const ms = timerRemain || timerGetSetMs();
+    if (ms <= 0) return;
+    timerRemain  = ms;
+    timerEnd     = Date.now() + ms;
+    timerRunning = true;
+    document.getElementById('timerDoneMsg').style.display = 'none';
+    document.getElementById('timerDisplay').classList.remove('timer-done-anim');
+    btn.textContent = pauses[currentLang];
+
+    timerInterval = setInterval(() => {
+      const left = timerEnd - Date.now();
+      if (left <= 0) {
+        clearInterval(timerInterval); timerInterval = null;
+        timerRunning = false; timerRemain = 0;
+        document.getElementById('timerDisplay').textContent = '00:00';
+        document.getElementById('timerDisplay').classList.add('timer-done-anim');
+        const doneMsg = { ja: '⌛︎ 時間です！', de: '⌛︎ Zeit ist um!', fi: '⌛︎ Aika on kulunut!' };
+        const el = document.getElementById('timerDoneMsg');
+        el.textContent = doneMsg[currentLang];
+        el.style.color = '#e83929';
+        el.style.display = '';
+        btn.textContent = starts[currentLang];
+        return;
+      }
+      timerRemain = left;
+      updateTimerDisplay();
+    }, 250);
+  } else {
+    timerRemain  = Math.max(0, timerEnd - Date.now());
+    timerRunning = false;
+    clearInterval(timerInterval); timerInterval = null;
+    btn.textContent = starts[currentLang];
+  }
+}
+
+function timerReset() {
+  timerRunning = false;
+  clearInterval(timerInterval); timerInterval = null;
+  timerRemain = 0;
+  document.getElementById('timerDisplay').classList.remove('timer-done-anim');
+  document.getElementById('timerDoneMsg').style.display = 'none';
+  const starts = { ja: 'スタート', de: 'Start', fi: 'Käynnistä' };
+  document.getElementById('timerStartBtn').textContent = starts[currentLang];
+  updateTimerDisplay();
+}
+
 </script>
 </body>
 </html>
