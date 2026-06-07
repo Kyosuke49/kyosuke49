@@ -20,6 +20,7 @@
 ;;   各要素: (cons card-int face-up?)
 ;; *foundations*: vector of 4 ints — スーツ別のトップランク (0=空)
 ;; *stock*, *waste*: list of card-int — 先頭がトップ
+;; *history*: list of state snapshots (for undo)
 ;; ================================================================
 
 (define *stock*       '())
@@ -28,6 +29,7 @@
 (define *tableaux*    #f)
 (define *moves*       0)
 (define *won*         #f)
+(define *history*     '())
 
 ;; ================================================================
 ;; ユーティリティ
@@ -46,6 +48,39 @@
     (if (= i (vector-length v))
         (reverse acc)
         (loop (+ i 1) (cons (vector-ref v i) acc)))))
+
+(define (copy-vector v)
+  (let* ((len (vector-length v))
+         (new (make-vector len)))
+    (let loop ((i 0))
+      (if (= i len) new
+          (begin
+            (vector-set! new i (vector-ref v i))
+            (loop (+ i 1)))))))
+
+;; ================================================================
+;; アンドゥ
+;; ================================================================
+
+(define (save-state!)
+  (set! *history*
+    (cons (list *stock* *waste*
+                (copy-vector *foundations*)
+                (copy-vector *tableaux*)
+                *moves*)
+          *history*)))
+
+(define (undo!)
+  (when (not (null? *history*))
+    (let ((snap (car *history*)))
+      (set! *history*      (cdr *history*))
+      (set! *stock*        (list-ref snap 0))
+      (set! *waste*        (list-ref snap 1))
+      (set! *foundations*  (list-ref snap 2))
+      (set! *tableaux*     (list-ref snap 3))
+      (set! *moves*        (list-ref snap 4))
+      (set! *won*          #f)))
+  (state))
 
 ;; ================================================================
 ;; Fisher-Yates シャッフル
@@ -112,6 +147,7 @@
 (define (new-game!)
   (set! *moves* 0)
   (set! *won*   #f)
+  (set! *history* '())
   (set! *foundations* (make-vector 4 0))
   (set! *tableaux*    (make-vector 7 '()))
   (set! *waste* '())
@@ -151,10 +187,12 @@
   (cond
     ;; ストックにカードがある → ウェイストへ
     ((not (null? *stock*))
+     (save-state!)
      (set! *waste* (cons (car *stock*) *waste*))
      (set! *stock* (cdr *stock*)))
     ;; ストック空・ウェイストあり → ウェイストをリセット
     ((not (null? *waste*))
+     (save-state!)
      (set! *stock* (reverse *waste*))
      (set! *waste* '())))
   (state))
@@ -167,6 +205,7 @@
 (define (move-waste-to-tab! col)
   (when (and (not (null? *waste*))
              (can-to-tab? (car *waste*) col))
+    (save-state!)
     (vector-set! *tableaux* col
       (cons (cons (car *waste*) #t) (vector-ref *tableaux* col)))
     (set! *waste* (cdr *waste*))
@@ -177,6 +216,7 @@
 (define (move-waste-to-found!)
   (when (and (not (null? *waste*))
              (can-to-found? (car *waste*)))
+    (save-state!)
     (vector-set! *foundations*
       (card-suit (car *waste*))
       (card-rank (car *waste*)))
@@ -191,6 +231,7 @@
     (when (and (not (null? pile))
                (cdar pile)                    ; 表向き?
                (can-to-found? (caar pile)))
+      (save-state!)
       (vector-set! *foundations*
         (card-suit (caar pile))
         (card-rank (caar pile)))
@@ -209,6 +250,7 @@
     (let ((bottom (car (drop-n moved (- n 1)))))
       (when (and (cdr bottom)                 ; 底も表向き?
                  (can-to-tab? (car bottom) to))
+        (save-state!)
         (vector-set! *tableaux* from remaining)
         (vector-set! *tableaux* to
           (append moved (vector-ref *tableaux* to)))
@@ -219,7 +261,7 @@
 ;; ================================================================
 ;; 状態シリアライズ
 ;; (list won? moves stock-count waste-top-or-#f
-;;       foundations-list tableaux-list)
+;;       foundations-list tableaux-list can-undo?)
 ;; foundations-list: (suit0-rank suit1-rank suit2-rank suit3-rank)
 ;; tableaux-list: 7 列 × ((card faceup?) ...) 下から上の順
 ;; ================================================================
@@ -234,4 +276,5 @@
                (map (lambda (pair)
                       (list (car pair) (if (cdr pair) 1 0)))
                     (reverse col)))
-             (vec->list *tableaux*))))
+             (vec->list *tableaux*))
+        (if (null? *history*) #f #t)))
