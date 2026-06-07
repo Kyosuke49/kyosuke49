@@ -124,8 +124,6 @@
     /* 表向き */
     .card.front {
       background: var(--white);
-      display: flex;
-      flex-direction: column;
       padding: 2px 3px;
       cursor: pointer;
     }
@@ -136,18 +134,25 @@
       font-weight: bold;
       line-height: 1.15;
       letter-spacing: -0.01em;
+      position: absolute;
+      top: 2px;
+      left: 3px;
     }
     .c-suit {
       font-size: calc(var(--cw) * 0.27);
       line-height: 1;
-    }
-    /* 中央スーツ（大きなカードのみ） */
-    .c-mid {
-      font-size: calc(var(--cw) * 0.42);
       position: absolute;
-      bottom: 4px;
-      right: 4px;
-      opacity: 0.3;
+      top: 2px;
+      right: 3px;
+    }
+    /* 中央スーツ */
+    .c-mid {
+      font-size: calc(var(--cw) * 0.55);
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.75;
       line-height: 1;
     }
     /* 選択ハイライト */
@@ -271,6 +276,11 @@
           <span class="lang-block" data-lang="fi">Aika</span>
           <span class="stat-val" id="timerDisplay">—</span>
         </div>
+        <button class="new-btn font-geosans" id="undo-btn" onclick="undoMove()" disabled>
+          <span class="lang-block" data-lang="ja">元に戻す</span>
+          <span class="lang-block" data-lang="de">Rückgängig</span>
+          <span class="lang-block" data-lang="fi">Kumoa</span>
+        </button>
         <button class="new-btn font-geosans" onclick="startNewGame()">
           <span class="lang-block" data-lang="ja">新ゲーム</span>
           <span class="lang-block" data-lang="de">Neu</span>
@@ -452,6 +462,10 @@ function renderState(raw) {
   var wasteTop   = st[3]; // false or card-int
   var foundations = st[4];
   var tableaux   = st[5];
+  var canUndo    = st[6];
+
+  var undoBtn = document.getElementById('undo-btn');
+  if (undoBtn) undoBtn.disabled = !canUndo || won;
 
   gameWon = won;
   if (won) stopTimer();
@@ -732,6 +746,14 @@ function doTabMove(toCol) {
   }
   selected = null;
   interp.evaluate('(js-update! ' + call + ')', function() {});
+}
+
+// ================================================================
+// 元に戻す
+// ================================================================
+function undoMove() {
+  selected = null;
+  interp.evaluate('(js-update! (undo!))', function() {});
 }
 
 // ================================================================
