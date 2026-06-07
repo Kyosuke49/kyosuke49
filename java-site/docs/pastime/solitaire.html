@@ -42,9 +42,17 @@
       padding: 0.9rem 1.2rem;
       margin-bottom: 1.2rem;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .ctrl-btns {
+      display: flex;
+      justify-content: space-between;
+    }
+    .ctrl-stats {
+      display: flex;
       gap: 1.6rem;
-      flex-wrap: wrap;
+      align-items: baseline;
     }
     .stat-item {
       font-family: 'Geosans', sans-serif;
@@ -264,28 +272,32 @@
 
       <!-- コントロールパネル -->
       <div class="ctrl-panel">
-        <div class="stat-item">
-          <span class="lang-block" data-lang="ja">手数</span>
-          <span class="lang-block" data-lang="de">Züge</span>
-          <span class="lang-block" data-lang="fi">Siirrot</span>
-          <span class="stat-val" id="moveCount">—</span>
+        <div class="ctrl-btns">
+          <button class="new-btn font-geosans" onclick="startNewGame()">
+            <span class="lang-block" data-lang="ja">新ゲーム</span>
+            <span class="lang-block" data-lang="de">Neu</span>
+            <span class="lang-block" data-lang="fi">Uusi</span>
+          </button>
+          <button class="new-btn font-geosans" id="undo-btn" onclick="undoMove()" disabled>
+            <span class="lang-block" data-lang="ja">元に戻す</span>
+            <span class="lang-block" data-lang="de">Rückgängig</span>
+            <span class="lang-block" data-lang="fi">Kumoa</span>
+          </button>
         </div>
-        <div class="stat-item">
-          <span class="lang-block" data-lang="ja">タイム</span>
-          <span class="lang-block" data-lang="de">Zeit</span>
-          <span class="lang-block" data-lang="fi">Aika</span>
-          <span class="stat-val" id="timerDisplay">—</span>
+        <div class="ctrl-stats">
+          <div class="stat-item">
+            <span class="lang-block" data-lang="ja">手数</span>
+            <span class="lang-block" data-lang="de">Züge</span>
+            <span class="lang-block" data-lang="fi">Siirrot</span>
+            <span class="stat-val" id="moveCount">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="lang-block" data-lang="ja">タイム</span>
+            <span class="lang-block" data-lang="de">Zeit</span>
+            <span class="lang-block" data-lang="fi">Aika</span>
+            <span class="stat-val" id="timerDisplay">—</span>
+          </div>
         </div>
-        <button class="new-btn font-geosans" id="undo-btn" onclick="undoMove()" disabled>
-          <span class="lang-block" data-lang="ja">元に戻す</span>
-          <span class="lang-block" data-lang="de">Rückgängig</span>
-          <span class="lang-block" data-lang="fi">Kumoa</span>
-        </button>
-        <button class="new-btn font-geosans" onclick="startNewGame()">
-          <span class="lang-block" data-lang="ja">新ゲーム</span>
-          <span class="lang-block" data-lang="de">Neu</span>
-          <span class="lang-block" data-lang="fi">Uusi</span>
-        </button>
       </div>
 
       <!-- フィードバック -->
