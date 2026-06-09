@@ -256,7 +256,7 @@ var pageI18n = {
     back:     '← Pastimeへ',
   },
   de: {
-    title:    'Orakel',
+    title:    'Omikuji',
     subtitle: 'Los geht\'s!',
     loading:  'Lädt…',
     ready:    '',
@@ -270,7 +270,7 @@ var pageI18n = {
     back:     '← Zeitvertreib',
   },
   fi: {
-    title:    'Arpa',
+    title:    'Omikuji',
     subtitle: 'Aloitetaan!',
     loading:  'Ladataan…',
     ready:    '',
@@ -296,23 +296,29 @@ var fortunes = {
     { rank: '大凶',   desc: 'やばいよこれ',                     love: '刺されそう',             work: '石橋を叩きまくれ',         health: '血とか吐くかも',           lucky: '紫'   },
   ],
   de: [
-    { rank: 'Großes Glück',  desc: 'Das Schicksal ist auf deiner Seite. Wage alles.',   love: 'Du bist absolut unwiderstehlich',   work: 'Alles gelingt wie von selbst',        health: 'Du schaffst dreifachen Salto rückwärts',   lucky: 'Rot'   },
-    { rank: 'Gutes Glück',   desc: 'Läuft ganz gut, würde ich sagen.',                  love: 'Vielleicht gesteht jemand seine Gefühle', work: 'Dein Einsatz zahlt sich aus',    health: 'Du wirst wohl nicht krank',                lucky: 'Blau'  },
-    { rank: 'Kleines Glück', desc: 'Nicht schlecht.',                                    love: 'Du findest vielleicht neue Freunde',work: 'Nicht nachlassen, streng dich an',    health: 'Trink mal was Ordentliches',               lucky: 'Gelb'  },
-    { rank: 'Glück',         desc: 'Schätze das Gewöhnliche.',                           love: 'Aufrichtigkeit ist alles',          work: 'Beharrlichkeit zahlt sich aus',        health: 'Früh schlafen, früh aufstehen',            lucky: 'Grün'  },
-    { rank: 'Wenig Glück',   desc: 'Wirst du gerade etwas überheblich?',                love: 'Gespräche verlaufen etwas holprig', work: 'Keine Hast, bleib wie immer',          health: 'Vielleicht mit dem Rauchen aufhören?',    lucky: 'Weiß'  },
-    { rank: 'Pech',          desc: 'Zeit zum Durchhalten.',                              love: 'Hast du etwa fremdgeflirtet?',      work: 'Hör auf zu faulenzen',                 health: 'Mach mal einen Gesundheitscheck',          lucky: 'Grau'  },
-    { rank: 'Großes Pech',   desc: 'Das sieht nicht gut aus.',                          love: 'Jemand will dir übel mitspielen',   work: 'Sei äußerst vorsichtig',               health: 'Pass wirklich auf dich auf',               lucky: 'Lila'  },
-  ],
+    { rank: 'Großes Glück',  desc: 'Heute läuft alles zu deinen Gunsten. Probier ruhig etwas Neues aus',   love: 'Du bist heute erstaunlich beliebt',   work: 'Egal was du anfängst, es läuft gut.',        health: 'Sogar drei Saltos rückwärts wären drin.',   lucky: 'Rot'   },
+    { rank: 'Mittleres Glück',   desc: 'Im Großen und Ganzen sieht es gut aus',                  love: 'Vielleicht gesteht dir jemand seine Gefühle', work: 'Die meisten Anstrengungen zahlen sich aus',    health: 'Sieht nicht nach einer Erkältung aus',                lucky: 'Blau'  },
+    { rank: 'Kleines Glück', desc: 'Nicht schlecht.', love: 'Vielleicht findest du neue Freunde.', work: 'Nicht nachlässig werden.', health: 'Trink lieber mal ein ZONe.', lucky: 'Gelb' },
+    { rank: 'Glück', desc: 'Genieß einfach die normalen Dinge des Lebens.', love: 'Aufrichtigkeit zählt.', work: 'Geduld zahlt sich aus.', health: 'Früh ins Bett, früh wieder raus.', lucky: 'Grün' },
+    { rank: 'Spätes Glück', desc: 'Hebst du in letzter Zeit nicht etwas zu sehr ab?', love: 'Die Gespräche könnten etwas seltsam werden.', work: 'Keine Hektik, mach einfach wie immer weiter.', health: 'Vielleicht mal mit dem Rauchen aufhören?', lucky: 'Weiß' },
+    { rank: 'Pech', desc: 'Jetzt heißt es durchhalten.', love: 'Hast du vielleicht etwas ausgefressen?', work: 'Nicht faul werden.', health: 'Ein Gesundheitscheck wäre keine schlechte Idee.', lucky: 'Grau' },
+    { rank: 'Großes Pech', desc: 'Das sieht gar nicht gut aus.', love: 'Pass auf, dass niemand hinter dir her ist.', work: 'Prüf alles lieber dreimal.', health: 'Vielleicht hustest du heute Blut.', lucky: 'Lila' }
+],
   fi: [
-    { rank: 'Suuri onni',    desc: 'Kohtalo suosii sinua. Uskalla haastaa kaikki.',     love: 'Olet täysin vastustamaton',         work: 'Kaikki onnistuu kuin itsestään',       health: 'Teet kolmoissalton taaksepäin',            lucky: 'Punainen'  },
-    { rank: 'Hyvä onni',     desc: 'Menee aika hyvin.',                                 love: 'Joku saattaa tunnustaa tunteensa',  work: 'Vaivannäkösi palkitaan',               health: 'Et taida sairastua',                       lucky: 'Sininen'   },
-    { rank: 'Pieni onni',    desc: 'Ei huono.',                                          love: 'Saatat löytää uusia ystäviä',      work: 'Älä laiskottele, tee töitä',           health: 'Juo jotain kunnollista',                   lucky: 'Keltainen' },
-    { rank: 'Onni',          desc: 'Arvosta tavallista arkeasi.',                        love: 'Rehellisyys on tärkeää',           work: 'Sinnikkyys kannattaa',                 health: 'Nuku ajoissa, herää varhain',              lucky: 'Vihreä'    },
-    { rank: 'Vähän onnea',   desc: 'Oletko viime aikoina turhan ylpeä?',                love: 'Keskustelut takkuavat hieman',      work: 'Älä hosuu, ole oma itsesi',            health: 'Ehkä lopeta tupakointi?',                  lucky: 'Valkoinen' },
-    { rank: 'Epäonni',       desc: 'On aika jaksaa eteenpäin.',                          love: 'Oletko kenties pettänyt?',         work: 'Älä laiskottele töissä',               health: 'Käy lääkärissä',                           lucky: 'Harmaa'    },
-    { rank: 'Suuri epäonni', desc: 'Ei hyvältä näytä.',                                 love: 'Joku haluaa kostaa sinulle',       work: 'Ole erittäin varovainen',              health: 'Pidä itsestäsi hyvää huolta',              lucky: 'Violetti'  },
-  ]
+  { rank: 'Suuronni', desc: 'Tänään kannattaa kokeilla mitä tahansa.', love: 'Olet tavallista suositumpi.', work: 'Melkein kaikki onnistuu.', health: 'Kolmekin kuperkeikkaa menisi helposti.', lucky: 'Punainen' },
+
+  { rank: 'Hyvä onni', desc: 'Näyttää enimmäkseen hyvältä.', love: 'Joku saattaa tunnustaa tunteensa.', work: 'Useimmat ponnistelut palkitaan.', health: 'Et taida saada flunssaa.', lucky: 'Sininen' },
+
+  { rank: 'Pieni onni', desc: 'Ei hassumpaa.', love: 'Saatat saada uuden ystävän.', work: 'Älä laiskistu.', health: 'Juo vaikka yksi ZONe.', lucky: 'Keltainen' },
+
+  { rank: 'Onni', desc: 'Nauti tavallisista asioista.', love: 'Rehellisyys kannattaa.', work: 'Kärsivällisyys palkitaan.', health: 'Aikaisin nukkumaan, aikaisin ylös.', lucky: 'Vihreä' },
+
+  { rank: 'Vähäinen onni', desc: 'Et kai ole viime aikoina vähän liiankin itsevarma?', love: 'Keskustelut voivat olla hieman kiusallisia.', work: 'Ei kiirettä, etene omaan tahtiin.', health: 'Joko olisi aika lopettaa tupakointi?', lucky: 'Valkoinen' },
+
+  { rank: 'Huono onni', desc: 'Nyt pitää vain kestää.', love: 'Oletko ehkä sählännyt jotain?', work: 'Älä oikaise mutkia.', health: 'Terveystarkastus voisi olla paikallaan.', lucky: 'Harmaa' },
+
+  { rank: 'Erittäin huono onni', desc: 'Tämä ei näytä hyvältä.', love: 'Pidä varasi.', work: 'Tarkista kaikki moneen kertaan.', health: 'Saatat jopa yskiä verta.', lucky: 'Violetti' }
+]
 };
 
 /* =====================================================================
