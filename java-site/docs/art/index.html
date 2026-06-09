@@ -159,6 +159,18 @@
       color: var(--white);
       border-color: var(--black);
     }
+    .pagination-ellipsis {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      pointer-events: none;
+      letter-spacing: 0.06em;
+    }
   </style>
 </head>
 <body>
@@ -190,6 +202,28 @@ const ARTWORKS = [
     desc:   { ja: 'お風呂ガンジス川やんけ！', de:'Sie ist dafür bekannt, dass sie das Wasser in der Badewanne, in der sie täglich badet, überhaupt nicht wechselt.', fi:'Hän on tunnettu siitä, ettei vaihda lainkaan vettä kylpyammeessa, jossa hän kylpee päivittäin.'},
     medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
   },
+{
+  file: 'Zero.PNG',
+  date: '2026-06-08',
+  title: { ja: 'Arcaeaより、Zero光ちゃん', de: 'Hikari (Zero) aus Arcaea', fi: 'Zero Hikari (Arcaea)' },
+  desc: {
+    ja: '見た目かわいいのに使い道がないの悲しい',
+    de: 'Sie sieht niedlich aus, aber es ist traurig, dass sie kaum einen Nutzen hat.',
+    fi: 'Hän näyttää söpöltä, mutta on surullista, ettei hänestä ole juuri hyötyä.'
+  },
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'ZONe.heic',
+  date: '2024-01-01',
+  title: { ja: '2024ZONe', de: '2024ZONe', fi: '2024ZONe' },
+  desc: {
+    ja: '今はもう売られてないZONe',
+    de: 'Dieses ZONe wird inzwischen nicht mehr verkauft.',
+    fi: 'Tätä ZONea ei enää myydä.'
+  },
+  medium: { ja: 'HEIC', de: 'HEIC', fi: 'HEIC' }
+},
   {
     file: 'makina.jpg',
     date: '2025-07-13',
@@ -197,6 +231,83 @@ const ARTWORKS = [
     desc:   { ja: '冲永蒔那です。' , de:'Das ist Makina.', fi:'Hän on Makina.'},
     medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
   },
+{
+  file: 'Frac.JPG',
+  date: '2026-06-08',
+  title: { ja: 'Arcaeaより、Fracture光ちゃん', de: 'Hikari (Fracture) aus Arcaea', fi: 'Fracture Hikari (Arcaea)' },
+  desc: {
+    ja: 'Arcaea、ぜひやってみてね',
+    de: 'Probier Arcaea unbedingt mal aus.',
+    fi: 'Kokeile ihmeessä Arcaeaa.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Grandspell.PNG',
+  date: '2026-04-27',
+  title: { ja: 'Grandspell', de: 'Grandspell', fi: 'Grandspell' },
+  desc: {
+    ja: '時間かけた割にはクオリティがそうでもない',
+    de: 'Für die investierte Zeit ist die Qualität eher so mittel.',
+    fi: 'Laatu ei ole ihan sen työn määrän tasolla.'
+  },
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'Ilith.PNG',
+  date: '2026-05-11',
+  title: { ja: 'Arcaeaより、イリス(Ilith)ちゃん', de: 'Ilith aus Arcaea', fi: 'Ilith (Arcaea)' },
+  desc: {
+    ja: '夏バージョンのイリスかわいい',
+    de: 'Die Sommer-Version von Ilith ist süß.',
+    fi: 'Kesäversio Ilithistä on söpö.'
+  },
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'Jatschijo.PNG',
+  date: '2026-05-11',
+  title: { ja: '八千代くん', de: 'Yachiyo-kun', fi: 'Yachiyo-kun' },
+  desc: {
+    ja: '説明不要！',
+    de: 'Braucht keine Erklärung!',
+    fi: 'Ei kaipaa selityksiä!'
+  },
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'Tonkin.HEIC',
+  date: '2024-10-??',
+  title: { ja: '東京の夜景', de: 'Tokios Nachtansicht', fi: 'Tokion yömaisema' },
+  desc: {
+    ja: '修学旅行の自由行動でネットカフェに引き篭もった競介の悲しい記憶',
+    de: 'Eine traurige Erinnerung daran, wie Keisuke während der freien Zeit auf der Klassenfahrt lieber in einem Internetcafé saß.',
+    fi: 'Surullinen muisto siitä, kuinka Keisuke vietti luokkaretken vapaa-ajan nettikahvilassa.'
+  },
+  medium: { ja: 'HEIC', de: 'HEIC', fi: 'HEIC' }
+},
+{
+  file: 'Ichirin.JPG',
+  date: '2025-10-31',
+  title: { ja: '地味ハロウィン2025', de: 'Unauffälliges Halloween 2025', fi: 'Hillitty Halloween 2025' },
+  desc: {
+    ja: 'このためだけにキッチンの鍋を頭に被った時の競介の心情を30文字程度で述べよ。',
+    de: 'Beschreibe in etwa 30 Wörtern, was Keisuke dachte, als er nur für dieses Foto einen Kochtopf aus der Küche auf seinen Kopf setzte.',
+    fi: 'Kuvaile noin 30 sanalla, mitä Keisuke mahtoi ajatella laittaessaan keittiön kattilan päähänsä pelkästään tätä kuvaa varten.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Xmas.jpg',
+  date: '2025-12-24',
+  title: { ja: 'クリスマス', de: 'Weihnachten', fi: 'Joulu' },
+  desc: {
+    ja: 'クリぼっちじゃないアピールのために先輩とイルミネーションとか見に行った競介の思い出。',
+    de: 'Eine Erinnerung daran, wie Keisuke mit einem älteren Freund die Weihnachtsbeleuchtung anschauen ging, nur um zu beweisen, dass er Weihnachten nicht allein verbrachte.',
+    fi: 'Muisto siitä, kun Keisuke kävi vanhemman kaverinsa kanssa katsomassa jouluvaloja todistaakseen, ettei viettänyt joulua yksin.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
 {
     file: 'EDMOND.JPG',
     date: '2026-05-25',
@@ -209,6 +320,116 @@ const ARTWORKS = [
   date: '2026-05-18',
   title:  { ja: '前クソ8周年！', de: 'Edmond', fi: 'Edmond' },
   desc:   { ja: '最近はずっとⅣのアプデを待ってます。', de:'Das ist Edmond. Er ist ein Charakter aus einem Spiel, das ich mag. Du solltest Edmond auch mögen. ', fi:'Tämä on Edmond. Hän on hahmo pelistä, josta pidän. Sinunkin pitäisi pitää Edmondista.'},
+  medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
+},
+{
+  file: 'Ambitious.jpg',
+  date: '2024-10-?',
+  title: { ja: '草原', de: 'Grasland', fi: 'Ruohotasanko' },
+  desc: {
+    ja: '雄大な自然を見ながら私が描いたのは男の子同士がイチャイチャしてる絵でした。',
+    de: 'Die Natur ist schön.',
+    fi: 'Luonto on kaunis.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Mond.jpg',
+  date: '2025-09-08',
+  title: { ja: '下手くそ月食', de: 'Schlechte Mondfinsternis', fi: 'Kehno kuunpimennys' },
+  desc: {
+    ja: '月食の写真を撮ろうとしました。',
+    de: 'Ich habe versucht, ein Foto der Mondfinsternis zu machen.',
+    fi: 'Yritin ottaa kuvan kuunpimennyksestä.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Kitanai.jpg',
+  date: '2023-11-28',
+  title: { ja: '友達と見た下関のきたねえ海', de: 'Das schmutzige Meer von Shimonoseki', fi: 'Shimonosekin ruma meri' },
+  desc: {
+    ja: 'きたねえ。',
+    de: 'Schmutzig.',
+    fi: 'Ruma.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Fuckoka.jpg',
+  date: '2025-10-05',
+  title: { ja: '博多かどっかの夜景', de: 'Nachtansicht irgendwo in Hakata', fi: 'Yömaisema jostain Hakatasta' },
+  desc: {
+    ja: '博多ポートタワーとかいう福岡タワーのパチモンに行こうと思ったらナビの設定ミスったせいで本物の方に着いちゃったの。',
+    de: 'Eigentlich wollte ich zum Hakata Port Tower, dieser billigen Kopie des Fukuoka Towers. Wegen eines Fehlers im Navi bin ich aber beim echten gelandet.',
+    fi: 'Tarkoitus oli mennä Hakata Port Towerille, sille vähän Fukuoka Towerin halpiskopiolle. Navigaattorin mokan vuoksi päädyinkin oikealle tornille.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Hakatakana.jpg',
+  date: '2025-08-01',
+  title: { ja: '博多かどっかの写真', de: 'Foto irgendwo in Hakata', fi: 'Kuva jostain Hakatasta' },
+  desc: {
+    ja: 'いい写真でしょ。いつどこで撮ったのか忘れたけど。',
+    de: 'Schönes Foto, oder? Ich habe nur vergessen, wann und wo ich es aufgenommen habe.',
+    fi: 'Hieno kuva, eikö? En vain enää muista, missä tai milloin otin sen.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Dome.jpg',
+  date: '2024-10-?',
+  title: { ja: '野球ドーム', de: 'Baseball-Dome', fi: 'Baseball-stadion' },
+  desc: {
+    ja: '修学旅行で行ったの。',
+    de: 'War ich während der Klassenfahrt.',
+    fi: 'Kävin siellä luokkaretkellä.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Tembou.jpg',
+  date: '2023-11-28',
+  title: { ja: '友達と見たどこかの展望台からの景色', de: 'Aussicht von irgendeinem Turm, den ich mit Freunden besucht habe', fi: 'Näkymä joltakin näköalapaikalta, jossa kävin ystävien kanssa' },
+  desc: {
+    ja: '身分を詐称して高校生にも関わらず中学生料金で入りました。',
+    de: 'Obwohl ich noch Oberschüler war, gab ich mich als Mittelschüler aus und kam mit dem günstigeren Ticket hinein.',
+    fi: 'Vaikka olin lukiolainen, esitin yläkoululaista saadakseni halvemman lipun.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Oisi.jpg',
+  date: '2025-08-17',
+  title: { ja: '競介ランチ', de: 'Keisuke-Mittagessen', fi: 'Keisuken lounas' },
+  desc: {
+    ja: '伝統的な日本の昼食',
+    de: 'Traditionelles japanisches Mittagessen.',
+    fi: 'Perinteinen japanilainen lounas.'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Hakatakamo.jpg',
+  date: '2025-10-05',
+  title: { ja: '博多かどっかの神社', de: 'Ein Schrein irgendwo in Hakata', fi: 'Jokin pyhäkkö jostain Hakatasta' },
+  desc: {
+    ja: 'どこの何かは忘れたけど良い神社でしょ。',
+    de: 'Ich habe vergessen, was genau das war, aber ein guter Schrein ist es doch, oder?',
+    fi: 'En muista mikä tai missä tämä oli, mutta hyvä pyhäkkö se on, eikö vain?'
+  },
+  medium: { ja: 'JPG', de: 'JPG', fi: 'JPG' }
+},
+{
+  file: 'Leethee.png',
+  date: '2026-05-18',
+  title: { ja: 'レーテー', de: 'Lethe', fi: 'Lethe' },
+  desc: {
+    ja: 'レーテー。',
+    de: 'Lethe.',
+    fi: 'Lethe.'
+  },
   medium: { ja: 'PNG', de: 'PNG', fi: 'PNG' }
 },
 {
@@ -329,13 +550,24 @@ function renderAll() {
 function renderPagination(id, totalPages) {
   const el = document.getElementById(id);
   if (totalPages <= 1) { el.innerHTML = ''; return; }
+
   const prevDisabled = currentPage <= 1;
   const nextDisabled = currentPage >= totalPages;
-  let nums = '';
-  for (let i = 1; i <= totalPages; i++) {
-    nums += `<button class="pagination-num${i === currentPage ? ' active' : ''}"
-      onclick="goPage(${i})">${i}</button>`;
+
+  const WINDOW = 5;
+  let winStart = Math.max(1, currentPage - Math.floor(WINDOW / 2));
+  let winEnd   = winStart + WINDOW - 1;
+  if (winEnd > totalPages) {
+    winEnd   = totalPages;
+    winStart = Math.max(1, winEnd - WINDOW + 1);
   }
+
+  let nums = '';
+  for (let p = winStart; p <= winEnd; p++) {
+    nums += `<button class="pagination-num${p === currentPage ? ' active' : ''}"
+      onclick="goPage(${p})">${p}</button>`;
+  }
+
   el.innerHTML =
     `<button class="pagination-btn" ${prevDisabled ? 'disabled' : ''}
       onclick="goPage(${currentPage - 1})">${ui('prev')}</button>` +
