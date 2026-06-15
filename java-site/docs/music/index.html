@@ -19,13 +19,15 @@
       border: 1px solid var(--border);
       background: var(--white);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ── メディアエリア（音声: ジャケット、動画: video要素） ── */
     .player-media {
       background: #111;
       line-height: 0;
-      position: relative;
+      order: 1;
     }
     .player-media-inner {
       width: 100%;
@@ -58,7 +60,9 @@
     }
     .player-video {
       width: 100%;
+      height: 100%;
       display: block;
+      object-fit: contain;
     }
 
     /* ── コントロールバー ── */
@@ -69,6 +73,7 @@
       gap: 0.65rem;
       padding: 0.55rem 0.9rem;
       border-top: 1px solid #1e1e1e;
+      order: 2;
     }
     .player-play-btn {
       background: none;
@@ -140,6 +145,7 @@
 
     /* ── トラック情報 ── */
     .track-info {
+      order: 3;
       padding: 1rem 1.2rem 1.2rem;
     }
     .track-info-header {
@@ -397,9 +403,11 @@ function buildCard(track) {
   if (isVideo) {
     mediaHTML =
       '<div class="player-media">' +
-        '<video class="player-video" preload="metadata" playsinline>' +
-          '<source src="' + esc(track.file) + '" type="' + esc(getMime(track.file)) + '">' +
-        '</video>' +
+        '<div class="player-media-inner">' +
+          '<video class="player-video" preload="metadata" playsinline>' +
+            '<source src="' + esc(track.file) + '" type="' + esc(getMime(track.file)) + '">' +
+          '</video>' +
+        '</div>' +
       '</div>';
   } else {
     var inner = track.jacket
@@ -519,6 +527,27 @@ function setupPlayers() {
     seekWrap.addEventListener('touchmove', function(e) {
       seekToX(e.touches[0].clientX);
     }, { passive: true });
+
+    /* ── イースターエッグ: Abend ジャケット 10タップで画像切替 ── */
+    var jacket = card.querySelector('.player-jacket');
+    if (jacket && /^Abend\.JPG$/i.test(jacket.getAttribute('src'))) {
+      var eggCount = 0;
+      var eggDone  = false;
+      jacket.style.cursor     = 'pointer';
+      jacket.style.transition = 'opacity 0.5s ease';
+      jacket.addEventListener('click', function() {
+        if (eggDone) return;
+        eggCount++;
+        if (eggCount >= 10) {
+          eggDone = true;
+          jacket.style.opacity = '0';
+          setTimeout(function() {
+            jacket.setAttribute('src', 'Abend.PNG');
+            jacket.style.opacity = '1';
+          }, 500);
+        }
+      });
+    }
   });
 }
 
