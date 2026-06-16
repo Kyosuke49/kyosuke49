@@ -234,6 +234,11 @@
     }
     .pagination-num:hover { color: var(--fg); border-color: var(--border); }
     .pagination-num.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* ── スマホ自動ズーム防止 ── */
+    @media screen and (max-width: 768px) {
+      #quiz-input { font-size: 16px; } /* iOS: 16px未満でフォーカス時ズームが発生するため */
+    }
   </style>
 </head>
 <body>
@@ -717,10 +722,14 @@ renderAll();
     document.getElementById('quiz-input').value = '';
     showInput(true);
     overlay.classList.add('open');
+    document.body.style.overflow = 'hidden'; /* 背後スクロール防止 */
     setTimeout(function() { document.getElementById('quiz-input').focus(); }, 50);
   };
 
-  function closeQuiz() { overlay.classList.remove('open'); }
+  function closeQuiz() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = ''; /* スクロール復元 */
+  }
 
   function wrongAnswer() {
     document.getElementById('quiz-question').textContent = qq('wrong');
