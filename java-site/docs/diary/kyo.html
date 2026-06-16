@@ -1175,7 +1175,7 @@ body.lang-fi { font-family: var(--font-mono); }
           <i class="qa-icon">Ψ</i>
           <span class="qa-label">
             <span class="qa-label-main" data-ja="難解言語研究室" data-de="Esoterische Sprachen" data-fi="Esoteerinen lab">難解言語研究室</span>
-            <span class="qa-label-sub">brainfuck &amp; ook!</span>
+            <span class="qa-label-sub">Let's Pxem!</span>
           </span>
         </button>
 
@@ -1427,15 +1427,95 @@ body.lang-fi { font-family: var(--font-mono); }
     </div>
   </div>
 
-  <!-- 難解言語研究室 -->
-  <div class="tool-panel" id="panel-esoteric">
+  <!-- 難解言語研究室 — Pxem -->
+  <div class="tool-panel" id="panel-esoteric" style="max-width:560px;">
     <div class="tool-titlebar">
       <span id="wipTitle-esoteric">難解言語研究室</span>
       <button class="tool-close" onclick="closeTool()">✕</button>
     </div>
-    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
-      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
-      <div id="wipMsg-esoteric" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    <div class="tool-body">
+
+      <!-- 説明 -->
+      <p id="pxemDesc" style="font-size:0.65rem;color:var(--text-dim);letter-spacing:0.06em;line-height:1.7;margin-bottom:1rem;font-family:var(--font-mono);border-left:1px solid var(--border-hard);padding-left:0.7rem;">
+        スタックベースの難解言語 <strong style="color:var(--text);">Pxem</strong>。
+        <strong style="color:var(--text);">ファイル名（拡張子込み）</strong>がコード本体。
+        コマンド直前の非コマンド文字列は<strong style="color:var(--text);">逆順</strong>にまとめてプッシュされる。
+        ファイルの中身は <code style="color:var(--accent);">.e</code> で呼ばれるサブルーチン。
+      </p>
+
+      <!-- ファイル名 -->
+      <label class="tool-label">
+        <span id="pxemNameLabel">File Name</span>
+        <span id="pxemNameSub" style="color:var(--text-dim);font-size:0.55rem;">（拡張子込みのファイル名 = ソースコード）</span>
+      </label>
+      <input type="text" class="tool-input" id="pxemName"
+        placeholder="例: Hello, world!.pxe"
+        style="margin-bottom:0.5rem;"
+        onkeydown="if(event.key==='Enter')pxemRun()">
+
+      <!-- ファイル本体 -->
+      <label class="tool-label">
+        <span id="pxemBodyLabel">File Body</span>
+        <span id="pxemBodySub" style="color:var(--text-dim);font-size:0.55rem;">（.e コマンドで呼ばれるサブルーチン / 省略可）</span>
+      </label>
+      <textarea class="tool-input" id="pxemBody" rows="2"
+        placeholder="（省略可）"
+        style="margin-bottom:0.5rem;resize:vertical;"></textarea>
+
+      <!-- 標準入力 -->
+      <label class="tool-label">
+        <span id="pxemStdinLabel">Standard Input</span>
+        <span id="pxemStdinSub" style="color:var(--text-dim);font-size:0.55rem;">（.i コマンドで読む / 省略可）</span>
+      </label>
+      <textarea class="tool-input" id="pxemStdin" rows="2"
+        placeholder="（省略可）"
+        style="margin-bottom:0.8rem;resize:vertical;"></textarea>
+
+      <!-- 実行・クリア -->
+      <div class="tool-row" style="margin-bottom:0;">
+        <button class="tool-btn" id="pxemRunBtn" onclick="pxemRun()"
+          style="flex:1;text-align:center;letter-spacing:0.15em;">▶ 実行</button>
+        <button class="tool-btn" id="pxemClearBtn" onclick="pxemClear()"
+          style="color:var(--text-dim);">クリア</button>
+      </div>
+
+      <!-- 出力 -->
+      <div style="margin-top:0.7rem;">
+        <div style="font-size:0.55rem;letter-spacing:0.2em;color:var(--accent-mid);text-transform:uppercase;margin-bottom:0.3rem;display:flex;justify-content:space-between;align-items:center;">
+          <span id="pxemOutputLabel">Output</span>
+          <span id="pxemStatus" style="color:var(--text-dim);font-family:var(--font-mono);font-size:0.6rem;"></span>
+        </div>
+        <div class="tool-output muted" id="pxemOutput"
+          style="min-height:4rem;white-space:pre-wrap;word-break:break-all;">----</div>
+      </div>
+
+      <!-- コマンド一覧 -->
+      <details style="margin-top:0.8rem;">
+        <summary id="pxemCmdSummary" style="font-size:0.58rem;letter-spacing:0.18em;color:var(--text-dim);text-transform:uppercase;cursor:pointer;user-select:none;font-family:var(--font-mono);">
+          ▸ コマンド一覧
+        </summary>
+        <div style="margin-top:0.5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:0.25rem 1.2rem;font-size:0.62rem;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;">
+          <span><code style="color:var(--accent);">.p</code>  <span id="pxemCmdP">全pop→文字として出力</span></span>
+          <span><code style="color:var(--accent);">.n</code>  <span id="pxemCmdN">pop→数値として出力</span></span>
+          <span><code style="color:var(--accent);">.c</code>  <span id="pxemCmdC">トップを複製</span></span>
+          <span><code style="color:var(--accent);">.m</code>  <span id="pxemCmdM">pop→一時レジスタへ</span></span>
+          <span><code style="color:var(--accent);">.t</code>  <span id="pxemCmdT">一時レジスタをpush</span></span>
+          <span><code style="color:var(--accent);">.s</code>  <span id="pxemCmdS">上位2つを入れ替え</span></span>
+          <span><code style="color:var(--accent);">.+</code>  <span id="pxemCmdAdd">和 (a+b)</span></span>
+          <span><code style="color:var(--accent);">.-</code>  <span id="pxemCmdSub">差 (|a−b|)</span></span>
+          <span><code style="color:var(--accent);">.!</code>  <span id="pxemCmdMul">積 (a×b)</span></span>
+          <span><code style="color:var(--accent);">.$</code>  <span id="pxemCmdDiv">商 (大÷小)</span></span>
+          <span><code style="color:var(--accent);">.%</code>  <span id="pxemCmdMod">余り (大 mod 小)</span></span>
+          <span><code style="color:var(--accent);">.r</code>  <span id="pxemCmdR">乱数 [0, a)</span></span>
+          <span><code style="color:var(--accent);">.i</code>  <span id="pxemCmdI">stdin 1文字読む</span></span>
+          <span><code style="color:var(--accent);">.e</code>  <span id="pxemCmdE">ボディをサブルーチン呼び出し</span></span>
+          <span><code style="color:var(--accent);">.d</code>  <span id="pxemCmdD">プログラム終了</span></span>
+          <span><code style="color:var(--accent);">.w .x .y .z</code>  <span id="pxemCmdLoop">ループ開始</span></span>
+          <span><code style="color:var(--accent);">.a</code>  <span id="pxemCmdA">ループ終端</span></span>
+          <span><span style="color:var(--text);">*</span>  <span id="pxemCmdOther">次コマンド前に逆順push</span></span>
+        </div>
+      </details>
+
     </div>
   </div>
 
@@ -1523,6 +1603,64 @@ function applyLang(lang) {
   document.getElementById('b29EncBtn').textContent   = b29EncMap[lang];
   document.getElementById('b29DecBtn').textContent   = b29DecMap[lang];
 
+  /* Pxem ラベル */
+  const pxemDescMap = {
+    ja: 'スタックベースの難解言語 <strong style="color:var(--text);">Pxem</strong>。<strong style="color:var(--text);">ファイル名（拡張子込み）</strong>がコード本体。コマンド直前の非コマンド文字列は<strong style="color:var(--text);">逆順</strong>にまとめてプッシュされる。ファイルの中身は <code style="color:var(--accent);">.e</code> で呼ばれるサブルーチン。',
+    de: 'Die stapelbasierte esoterische Sprache <strong style="color:var(--text);">Pxem</strong>. Der <strong style="color:var(--text);">Dateiname (inkl. Erweiterung)</strong> ist der Quellcode. Nicht-Befehlszeichen vor einem Befehl werden <strong style="color:var(--text);">in umgekehrter Reihenfolge</strong> gepusht. Der Dateiinhalt ist ein Unterprogramm, aufrufbar mit <code style="color:var(--accent);">.e</code>.',
+    fi: 'Pinopohjainen esoteerinen kieli <strong style="color:var(--text);">Pxem</strong>. <strong style="color:var(--text);">Tiedostonimi (pääte mukaan)</strong> on lähdekoodi. Komennoissa edeltävät merkit pushataan <strong style="color:var(--text);">käänteisessä järjestyksessä</strong>. Tiedoston sisältö on aliohjelma, jota kutsutaan komennolla <code style="color:var(--accent);">.e</code>.',
+  };
+  const pxemNameLabelMap = { ja: 'File Name',       de: 'Dateiname',             fi: 'Tiedostonimi'         };
+  const pxemNameSubMap   = { ja: '（拡張子込みのファイル名 = ソースコード）', de: '(Dateiname inkl. Erweiterung = Quellcode)', fi: '(Tiedostonimi pääte mukaan = lähdekoodi)' };
+  const pxemNamePhMap    = { ja: '例: Hello, world!.pxe', de: 'Bsp.: Hello, world!.pxe', fi: 'Esim.: Hello, world!.pxe' };
+  const pxemBodyLabelMap = { ja: 'File Body',        de: 'Dateiinhalt',           fi: 'Tiedoston sisältö'    };
+  const pxemBodySubMap   = { ja: '（.e コマンドで呼ばれるサブルーチン / 省略可）', de: '(.e-Befehl ruft Unterprogramm / optional)', fi: '(.e-komento kutsuu aliohjelmaa / valinnainen)' };
+  const pxemOptPhMap     = { ja: '（省略可）',         de: '(optional)',             fi: '(valinnainen)'        };
+  const pxemStdinLabelMap= { ja: 'Standard Input',   de: 'Standardeingabe',       fi: 'Vakiosyöte'           };
+  const pxemStdinSubMap  = { ja: '（.i コマンドで読む / 省略可）', de: '(.i-Befehl liest daraus / optional)', fi: '(.i-komento lukee tästä / valinnainen)' };
+  const pxemRunMap       = { ja: '▶ 実行',            de: '▶ Ausführen',           fi: '▶ Suorita'            };
+  const pxemClearMap     = { ja: 'クリア',            de: 'Löschen',               fi: 'Tyhjennä'             };
+  const pxemOutLabelMap  = { ja: 'Output',            de: 'Ausgabe',               fi: 'Tulos'                };
+  const pxemCmdSumMap    = { ja: '▸ コマンド一覧',   de: '▸ Befehlsübersicht',    fi: '▸ Komentoluettelo'    };
+  const pxemCmdMap = {
+    P:     { ja: '全pop→文字として出力',         de: 'alle pop → Zeichen ausgeben',      fi: 'kaikki pop → tulosta merkkinä'    },
+    N:     { ja: 'pop→数値として出力',           de: 'pop → Zahl ausgeben',              fi: 'pop → tulosta numerona'           },
+    C:     { ja: 'トップを複製',                de: 'Spitze duplizieren',               fi: 'kopioi pinon huippu'              },
+    M:     { ja: 'pop→一時レジスタへ',          de: 'pop → Temp-Register',              fi: 'pop → väliaikaisrekisteriin'      },
+    T:     { ja: '一時レジスタをpush',          de: 'Temp-Register pushen',             fi: 'push temp-rekisteri'              },
+    S:     { ja: '上位2つを入れ替え',           de: 'obere 2 tauschen',                 fi: 'vaihda kaksi ylintä'              },
+    Add:   { ja: '和 (a+b)',                    de: 'Summe (a+b)',                       fi: 'summa (a+b)'                      },
+    Sub:   { ja: '差 (|a−b|)',                  de: 'Differenz (|a−b|)',                 fi: 'erotus (|a−b|)'                   },
+    Mul:   { ja: '積 (a×b)',                    de: 'Produkt (a×b)',                     fi: 'tulo (a×b)'                       },
+    Div:   { ja: '商 (大÷小)',                  de: 'Quotient (max÷min)',                fi: 'osamäärä (max÷min)'               },
+    Mod:   { ja: '余り (大 mod 小)',             de: 'Rest (max mod min)',                fi: 'jakojäännös (max mod min)'        },
+    R:     { ja: '乱数 [0, a)',                 de: 'Zufallszahl [0, a)',                fi: 'satunnaisluku [0, a)'             },
+    I:     { ja: 'stdin 1文字読む',             de: 'stdin: 1 Zeichen lesen',           fi: 'lue 1 merkki stdinistä'           },
+    E:     { ja: 'ボディをサブルーチン呼び出し', de: 'Unterprogramm aufrufen',           fi: 'kutsu aliohjelma'                 },
+    D:     { ja: 'プログラム終了',              de: 'Programm beenden',                 fi: 'lopeta ohjelma'                   },
+    Loop:  { ja: 'ループ開始',                 de: 'Schleife starten',                 fi: 'aloita silmukka'                  },
+    A:     { ja: 'ループ終端',                 de: 'Schleife beenden',                 fi: 'lopeta silmukka'                  },
+    Other: { ja: '次コマンド前に逆順push',      de: 'vor Befehl umgekehrt pushen',      fi: 'push käänteisessä ennen komentoa' },
+  };
+
+  document.getElementById('pxemDesc').innerHTML        = pxemDescMap[lang];
+  document.getElementById('pxemNameLabel').textContent = pxemNameLabelMap[lang];
+  document.getElementById('pxemNameSub').textContent   = pxemNameSubMap[lang];
+  document.getElementById('pxemName').placeholder      = pxemNamePhMap[lang];
+  document.getElementById('pxemBodyLabel').textContent = pxemBodyLabelMap[lang];
+  document.getElementById('pxemBodySub').textContent   = pxemBodySubMap[lang];
+  document.getElementById('pxemBody').placeholder      = pxemOptPhMap[lang];
+  document.getElementById('pxemStdinLabel').textContent= pxemStdinLabelMap[lang];
+  document.getElementById('pxemStdinSub').textContent  = pxemStdinSubMap[lang];
+  document.getElementById('pxemStdin').placeholder     = pxemOptPhMap[lang];
+  document.getElementById('pxemRunBtn').textContent    = pxemRunMap[lang];
+  document.getElementById('pxemClearBtn').textContent  = pxemClearMap[lang];
+  document.getElementById('pxemOutputLabel').textContent = pxemOutLabelMap[lang];
+  document.getElementById('pxemCmdSummary').textContent= pxemCmdSumMap[lang];
+  for (const [key, translations] of Object.entries(pxemCmdMap)) {
+    const el = document.getElementById('pxemCmd' + key);
+    if (el) el.textContent = translations[lang];
+  }
+
   updateInfo();
   renderSysMsg();
   renderLog();
@@ -1546,9 +1684,9 @@ const WIP_PANELS = {
     msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
   },
   esoteric: {
-    title: { ja: '難解言語研究室',    de: 'Esoterische Sprachen', fi: 'Esoteerinen lab'   },
-    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+    title: { ja: '難解言語研究室',    de: 'Esoterische Sprachen', fi: 'Esoteerinen laboratorio' },
   },
+
 };
 
 function updateWipPanels(lang) {
@@ -2268,5 +2406,7 @@ function timerReset() {
 }
 
 </script>
+<script src="pxem.wasm-runtime.js"></script>
+<script src="pxem-wasm-bridge.js"></script>
 </body>
 </html>
