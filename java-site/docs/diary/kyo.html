@@ -1426,15 +1426,12 @@ body.lang-fi { font-family: var(--font-mono); }
   </div>
 
   <!-- 関数描画 -->
-  <div class="tool-panel" id="panel-plotter">
+  <div class="tool-panel" id="panel-plotter" style="max-width:600px;">
     <div class="tool-titlebar">
       <span id="wipTitle-plotter">関数描画</span>
       <button class="tool-close" onclick="closeTool()">✕</button>
     </div>
-    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
-      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
-      <div id="wipMsg-plotter" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
-    </div>
+    <div class="tool-body" style="padding:0;"></div>
   </div>
 
   <!-- チャット -->
@@ -1687,6 +1684,9 @@ function applyLang(lang) {
   renderSysMsg();
   renderLog();
   updateWipPanels(lang);
+  if (window._plotterInited && typeof plotterSetLang === 'function') {
+    plotterSetLang(lang);
+  }
 }
 
 /* ============================================================
@@ -1695,10 +1695,6 @@ function applyLang(lang) {
 const WIP_PANELS = {
   omikuji: {
     title: { ja: 'VIPおみくじ',      de: 'VIP-Glückslos',        fi: 'VIP-onnenlippu'    },
-    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
-  },
-  plotter: {
-    title: { ja: '関数描画',          de: 'Funktionsplotter',     fi: 'Funktiopiirturi'   },
     msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
   },
   chat: {
@@ -1805,12 +1801,22 @@ function openTool(id) {
   document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('visible'));
   const panel = document.getElementById('panel-' + id);
   if (!panel) return;
+
+  if (id === 'plotter') {
+    if (!window._plotterInited) {
+      window._plotterInited = true;
+      initPlotter(currentLang);
+    } else {
+      plotterSetLang(currentLang);
+    }
+  }
+
   panel.classList.add('visible');
   currentPanel = id;
 
   overlay.style.display = 'flex';
   requestAnimationFrame(() => overlay.classList.add('active'));
-  document.body.style.overflow = 'hidden'; // ← 追加：背後スクロール防止
+  document.body.style.overflow = 'hidden';
 
   if (id === 'timezone') startTzClock();
   else stopTzClock();
@@ -2432,5 +2438,7 @@ function timerReset() {
 </script>
 <script src="pxem-java.js"></script>
 <script src="pxem-bridge.js"></script>
+<script src="plotter-nim.js"></script>
+<script src="plotter-bridge.js"></script>
 </body>
 </html>
