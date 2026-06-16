@@ -1811,6 +1811,7 @@ function openTool(id) {
 
   overlay.style.display = 'flex';
   requestAnimationFrame(() => overlay.classList.add('active'));
+  document.body.style.overflow = 'hidden'; // ← 追加：背後スクロール防止
 
   if (id === 'timezone') startTzClock();
   else stopTzClock();
@@ -1818,6 +1819,7 @@ function openTool(id) {
 
 function closeTool() {
   overlay.classList.remove('active');
+  document.body.style.overflow = '';      // ← 追加：スクロール復元
   stopTzClock();
   setTimeout(() => {
     overlay.style.display = 'none';
