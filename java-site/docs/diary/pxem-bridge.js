@@ -74,5 +74,12 @@
     window.pxemRun   = pxemRun;
     window.pxemClear = pxemClear;
 
-    console.log('[Pxem] Java bridge loaded. Waiting for pxem-java.js to initialize...');
+    // pxem-java.js は window.main を登録するだけで自動実行しない。
+    // ここで呼び出すことで Java の main() が走り、window.pxemJavaRun が設定される。
+    if (typeof window.main === 'function') {
+        window.main([]);
+        console.log('[Pxem] Java runtime initialized. pxemJavaRun:', typeof window.pxemJavaRun);
+    } else {
+        console.error('[Pxem] window.main が見つかりません。pxem-java.js より前に読み込んでください。');
+    }
 })();
