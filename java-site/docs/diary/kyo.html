@@ -938,6 +938,29 @@ body.lang-fi { font-family: var(--font-mono); }
   line-height: 1.85; font-family: var(--font-mono);
   text-align: left;
 }
+/* ── スマホ自動ズーム防止 ─────────────────────────── */
+@media screen and (max-width: 768px) {
+  .tool-input {
+    font-size: 16px; /* iOS: 16px未満でフォーカス時ズームが発生するため */
+  }
+  .timer-digit-input {
+    font-size: 16px;
+  }
+}
+/* ── ツールパネル スクロール修正 ──────────────────── */
+.tool-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+.tool-panel.visible {
+  display: flex;
+}
+.tool-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS慣性スクロール */
+  overscroll-behavior: contain;      /* 背後への伝播を遮断 */
+}
 </style>
 </head>
 
