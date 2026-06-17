@@ -1,802 +1,2444 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>独り言 — 偽造切手</title>
-  <link rel="stylesheet" href="../style.css">
-  <style>
-    /* ── エントリー一覧 ── */
-    .diary-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-      margin: 1rem 0 2rem;
-    }
+<script>
+  (function() {
+    var EXPECTED = '7065edc8eea8f72bd8ae24f033554330dbfcd197dc21b8256821043480ce532b';
+    var t = new URLSearchParams(window.location.search).get('t');
+    if (t !== EXPECTED) { window.location.replace('../diary/'); }
+  })();
+  </script>
+  
+<meta charset="UTF-8">
+<title>おかえりなさい</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* ── カード ── */
-    .diary-card {
-      border: 1px solid var(--border);
-      background: var(--white);
-      padding: 1.6rem 1.8rem;
-    }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Space+Grotesk:wght@300;400;500;700&family=IM+Fell+English:ital@0;1&family=Fira+Code:wght@300;400;500&display=swap">
 
-    /* カード上部：日付+タイトル、言語ボタン */
-    .diary-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.8rem;
-      margin-bottom: 0.75rem;
-    }
-    .diary-date-title { flex: 1; min-width: 0; }
+<style>
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Regular.ttf')   format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Light.ttf')      format('truetype'); font-weight: 300; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-ExtraLight.ttf') format('truetype'); font-weight: 200; }
+@font-face { font-family: 'Kazesawa'; src: url('java-site/docs/fonts/Kazesawa-Bold.ttf')       format('truetype'); font-weight: 700; }
+@font-face { font-family: 'BreitkopfFraktur'; src: url('java-site/docs/fonts/BreitkopfFraktur.ttf') format('truetype'); }
+@font-face { font-family: 'ImpactCustom';     src: url('java-site/docs/fonts/impact.ttf')          format('truetype'); }
+@font-face { font-family: 'Geosans';          src: url('java-site/docs/fonts/GeosansLight.ttf')    format('truetype'); }
+@font-face { font-family: 'Geosans';          src: url('java-site/docs/fonts/GeosansLight-Oblique.ttf') format('truetype'); font-style: oblique; }
 
-    .diary-entry-date {
-      display: block;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.16em;
-      color: var(--muted);
-      margin-bottom: 0.3rem;
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .diary-entry-title {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 400;
-      font-size: 1.05rem;
-      letter-spacing: 0.06em;
-      color: var(--fg);
-      margin: 0;
-      line-height: 1.5;
-    }
+:root {
+  --font-ja:    'Noto Serif JP', 'Kazesawa', serif;
+  --font-de:    'Space Grotesk', 'Geosans', sans-serif;
+  --font-fi:    'IM Fell English', serif;
+  --font-mono:  'Fira Code', 'Courier New', monospace;
+  --bg:         #060810;
+  --bg-surface: #090c14;
+  --bg-panel:   #070a12;
+  --text:       #b8c8e0;
+  --text-dim:   #4a5a70;
+  --text-bright:#ddeeff;
+  --accent:     #00c8f0;
+  --accent-dim: rgba(0,200,240,0.12);
+  --accent-glow:rgba(0,200,240,0.28);
+  --accent-mid: rgba(0,200,240,0.4);
+  --gold:       #c8a84a;
+  --gold-dim:   rgba(200,168,74,0.2);
+  --border:     rgba(0,200,240,0.1);
+  --border-hard:rgba(0,200,240,0.2);
+  --transition: 250ms ease;
+}
 
-    /* ── 本文 ── */
-    .diary-entry-body {
-      margin-bottom: 0.9rem;
-    }
-    .entry-body-text {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.95rem;
-      color: var(--fg);
-      line-height: 1.9;
-      margin: 0;
-    }
+html { scroll-behavior: smooth; }
 
-    /* ── タグ ── */
-    .diary-tags {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-    }
-    .diary-tag {
-      display: inline-block;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.62rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 0.18rem 0.55rem;
-    }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+body.lang-de { font-family: var(--font-mono); }
+body.lang-fi { font-family: var(--font-mono); }
 
-    /* ── エントリー内言語切替ボタン ── */
-    .entry-lang-btns {
-      display: flex;
-      gap: 0.22rem;
-      flex-shrink: 0;
-      align-self: flex-start;
-      margin-top: 0.1rem;
-    }
-    .entry-lang-btn {
-      background: none;
-      border: 1px solid #ddd;
-      color: #ccc;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: lowercase;
-      padding: 0.15rem 0.42rem;
-      cursor: pointer;
-      transition: border-color 0.12s, color 0.12s;
-      line-height: 1.4;
-    }
-    .entry-lang-btn:hover {
-      border-color: #999;
-      color: #555;
-    }
-    .entry-lang-btn.active {
-      border-color: var(--black);
-      color: var(--black);
-    }
+::selection { background: var(--accent); color: #000; }
 
-    /* ── スクロールアニメーション本文 ── */
-    .entry-body-scroll {
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .entry-body-scroll .entry-body-text {
-      display: inline-block;
-      animation: entryBodyScroll 7s linear infinite;
-    }
-    @keyframes entryBodyScroll {
-      0%   { transform: translateX(110%); }
-      100% { transform: translateX(-110%); }
-    }
+/* =====================
+   キーフレーム
+===================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUpDelayed {
+  0%,40% { opacity: 0; transform: translateY(10px); }
+  100%   { opacity: 1; transform: translateY(0); }
+}
+@keyframes grid-drift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+@keyframes scan-pass {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+@keyframes glow-pulse {
+  0%,100% { opacity: 0.4; }
+  50%     { opacity: 0.9; }
+}
+@keyframes cursor-blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0; }
+}
+@keyframes data-flow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 0% 100%; }
+}
+@keyframes badge-glow {
+  0%,100% { box-shadow: 0 0 6px var(--gold-dim), inset 0 0 6px var(--gold-dim); }
+  50%     { box-shadow: 0 0 14px rgba(200,168,74,0.4), inset 0 0 10px rgba(200,168,74,0.15); }
+}
+@keyframes tool-open {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-    /* ── クイズモーダル ── */
-    #quiz-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 9000;
-      align-items: center;
-      justify-content: center;
-    }
-    #quiz-overlay.open { display: flex; }
-    #quiz-dialog {
-      background: var(--white);
-      border: 1px solid var(--border);
-      padding: 2rem 2.2rem;
-      width: min(88vw, 400px);
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-    }
-    #quiz-question {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-size: 0.95rem;
-      line-height: 1.85;
-      color: var(--fg);
-      margin: 0;
-      letter-spacing: 0.04em;
-    }
-    #quiz-input {
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-size: 0.9rem;
-      border: none;
-      border-bottom: 1px solid var(--border);
-      padding: 0.4rem 0;
-      outline: none;
-      width: 100%;
-      background: transparent;
-      color: var(--fg);
-      transition: border-color 0.12s;
-    }
-    #quiz-input:focus { border-color: var(--fg); }
-    #quiz-dialog-btns { display: flex; justify-content: flex-end; }
-    #quiz-submit {
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.1em;
-      border: 1px solid var(--border);
-      background: none;
-      padding: 0.38rem 1.1rem;
-      cursor: pointer;
-      color: var(--fg);
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-    #quiz-submit:hover {
-      background: var(--black);
-      color: var(--white);
-      border-color: var(--black);
-    }
+.anim-title    { animation: fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+.anim-subtitle { animation: fadeInUpDelayed 1.1s cubic-bezier(0.16,1,0.3,1) forwards; }
 
-    /* ── エントリーなし ── */
-    .diary-empty {
-      text-align: center;
-      padding: 4rem 0;
-      color: var(--muted);
-      font-family: 'Kazesawa', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
-    }
+/* =====================
+   ヘッダー
+===================== */
+.site-header {
+  background: var(--bg-panel);
+  color: var(--text-bright);
+  padding: 4.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-hard);
+}
 
-    /* ── ページネーション ── */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      padding: 1rem 0 1.8rem;
-    }
-    .pagination-btn {
-      background: none;
-      border: 1px solid var(--border);
-      padding: 0.38rem 1rem;
-      cursor: pointer;
-      color: var(--fg);
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.1em;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-    }
-    .pagination-btn:hover:not(:disabled) {
-      background: var(--black);
-      color: var(--white);
-      border-color: var(--black);
-    }
-    .pagination-btn:disabled { opacity: 0.28; cursor: default; }
-    .pagination-nums { display: flex; gap: 0.3rem; }
-    .pagination-num {
-      background: none;
-      border: 1px solid transparent;
-      width: 2rem; height: 2rem;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      font-family: 'Geosans', sans-serif;
-      font-size: 0.8rem;
-      color: var(--muted);
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-    .pagination-num:hover { color: var(--fg); border-color: var(--border); }
-    .pagination-num.active { background: var(--black); color: var(--white); border-color: var(--black); }
+/* 動くグリッド */
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: grid-drift 12s linear infinite;
+  pointer-events: none;
+}
 
-    /* ── スマホ自動ズーム防止 ── */
-    @media screen and (max-width: 768px) {
-      #quiz-input { font-size: 16px; } /* iOS: 16px未満でフォーカス時ズームが発生するため */
-    }
-  </style>
+/* スキャンライン */
+.site-header::after {
+  content: '';
+  position: absolute; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(transparent, rgba(0,200,240,0.035) 50%, transparent);
+  animation: scan-pass 8s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header-accent-line {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 30%, var(--accent) 70%, transparent 100%);
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+.header-inner { position: relative; z-index: 1; }
+
+/* クリアランスバッジ */
+.clearance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(200,168,74,0.4);
+  padding: 0.2rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.8rem;
+  animation: badge-glow 4s ease-in-out infinite;
+}
+.clearance-badge::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+}
+
+.site-title {
+  display: none;
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  letter-spacing: 0.14em;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--text-bright);
+  text-shadow:
+    0 0 30px rgba(0,200,240,0.4),
+    0 0 70px rgba(0,200,240,0.15);
+}
+.site-title[data-lang="ja"] { font-family: 'Kazesawa', 'Noto Serif JP', sans-serif; }
+.site-title[data-lang="de"] { font-family: 'BreitkopfFraktur', sans-serif; letter-spacing: 0.08em; }
+.site-title[data-lang="fi"] { font-family: 'ImpactCustom', sans-serif; letter-spacing: 0.04em; }
+
+.site-subtitle {
+  display: none;
+  margin-top: 1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  opacity: 0.35;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+/* =====================
+   レイアウト
+===================== */
+.layout {
+  flex: 1;
+  max-width: 1200px; width: 100%;
+  margin: 0 auto;
+  padding: 3.5rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 3.5rem;
+}
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+/* =====================
+   言語切替
+===================== */
+.lang-switch {
+  display: flex; flex-wrap: nowrap; overflow-x: auto;
+  gap: 0.5rem; margin-bottom: 2.5rem;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.lang-switch::-webkit-scrollbar { display: none; }
+
+.lang-btn {
+  padding: 0.4rem 1.2rem;
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  border: 1px solid var(--border-hard);
+  background: transparent; color: var(--accent-mid);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              border-color var(--transition), box-shadow var(--transition);
+  font-family: var(--font-mono);
+  white-space: nowrap; flex-shrink: 0;
+}
+.lang-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  color: var(--accent);
+}
+.lang-btn.active {
+  background: var(--accent);
+  color: #000; border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* =====================
+   本文エリア
+===================== */
+.lang-block { display: none; }
+.lang-block.visible { display: block; }
+.content-text { opacity: 1; transition: opacity var(--transition); }
+.content-text.fading { opacity: 0; }
+
+/* ターミナル風ブロック */
+.terminal-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-mid);
+  padding: 1.5rem 1.8rem;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.terminal-block::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -1px; left: 1.2rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--bg-surface);
+  padding: 0 0.4rem;
+  line-height: 0;
+  top: 0; transform: translateY(-50%);
+}
+.terminal-block p {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--text);
+  font-weight: 300;
+}
+
+/* アクセスタグ */
+.access-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: rgba(0,200,240,0.25);
+  letter-spacing: 0.12em;
+  margin-top: 1.2rem;
+}
+.access-tag::before { content: '❯ '; color: var(--accent-mid); }
+
+/* メタ情報行 */
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.meta-pill {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-hard);
+  padding: 0.2rem 0.6rem;
+  color: var(--text-dim);
+}
+.meta-pill.active { border-color: rgba(200,168,74,0.35); color: var(--gold); }
+
+/* =====================
+   クイックアクセスパネル
+===================== */
+.quick-access { }
+
+.qa-heading {
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent-mid);
+  font-family: var(--font-mono);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.qa-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* トップへ戻るボタン：幅いっぱい */
+.qa-btn-top {
+  grid-column: 1 / -1;
+}
+
+.qa-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color var(--transition), color var(--transition),
+              background var(--transition), box-shadow var(--transition);
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.qa-btn::before {
+  content: '';
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.qa-btn:hover {
+  border-color: var(--border-hard);
+  color: var(--text-bright);
+  background: rgba(0,200,240,0.04);
+  box-shadow: 0 0 12px rgba(0,200,240,0.06);
+}
+.qa-btn:hover::before { opacity: 1; }
+.qa-btn:hover .qa-icon { color: var(--accent); }
+
+.qa-btn-top.qa-btn {
+  border-color: var(--border-hard);
+  color: var(--text);
+}
+.qa-btn-top.qa-btn:hover {
+  border-color: rgba(200,168,74,0.4);
+  color: var(--gold);
+  box-shadow: 0 0 12px var(--gold-dim);
+}
+.qa-btn-top.qa-btn:hover::before { background: var(--gold); opacity: 1; }
+
+.qa-icon {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: color var(--transition);
+  flex-shrink: 0;
+  font-style: normal;
+}
+.qa-label { display: flex; flex-direction: column; gap: 0.1rem; }
+.qa-label-main { font-size: 0.7rem; }
+.qa-label-sub  { font-size: 0.55rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+/* =====================
+   サイドバー
+===================== */
+.sidebar { display: flex; flex-direction: column; gap: 2rem; }
+
+/* =====================
+   情報ウィンドウ
+===================== */
+.info-window {
+  background: var(--bg-panel);
+  color: var(--text);
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-hard);
+  box-shadow:
+    0 0 0 1px rgba(0,200,240,0.06),
+    0 24px 60px rgba(0,0,0,0.6),
+    inset 0 0 60px rgba(0,200,240,0.015);
+}
+
+/* ウィンドウタイトルバー */
+.info-titlebar {
+  background: rgba(0,200,240,0.05);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-mid);
+}
+.info-titlebar-dots { display: flex; gap: 0.35rem; }
+.info-titlebar-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-dim); opacity: 0.4;
+}
+.info-titlebar-dot:first-child { background: #e83929; opacity: 0.7; }
+
+.info-body { padding: 0 1.2rem; }
+
+/* トップグロー */
+.info-window::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: glow-pulse 5s ease-in-out infinite;
+}
+
+.info-row { padding: 0.85rem 0; border-bottom: 1px solid rgba(0,200,240,0.06); }
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+  font-size: 0.58rem;
+  color: var(--accent-mid);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.info-status { display: flex; justify-content: space-between; align-items: center; }
+.status-label { font-size: 0.58rem; color: var(--accent-mid); letter-spacing: 0.2em; text-transform: uppercase; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.65rem; letter-spacing: 0.12em;
+  color: var(--gold);
+  border: 1px solid rgba(200,168,74,0.35);
+  padding: 0.1rem 0.5rem;
+}
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 5px var(--gold);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.info-datetime {
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+.info-datetime::after {
+  content: '_';
+  animation: cursor-blink 1s step-end infinite;
+  color: var(--accent);
+}
+
+.info-jd { color: var(--text-dim); letter-spacing: 0.08em; }
+
+/* システムメッセージ */
+.system-message {
+  color: var(--text-dim);
+  white-space: pre-line;
+  border-left: 1px solid var(--border-hard);
+  padding-left: 0.75rem;
+  line-height: 1.7;
+  font-size: 0.72rem;
+}
+.system-message .sm-key {
+  color: var(--accent-mid);
+}
+
+/* フラグメンツ（暗号文っぽいログ） */
+.log-area {
+  line-height: 1.75;
+  font-size: 0.72rem;
+}
+.log-line { display: block; color: var(--text-dim); }
+.log-line.current { color: var(--text); }
+.log-line .log-ts { color: rgba(0,200,240,0.3); margin-right: 0.5em; }
+.log-line .log-tag { color: var(--accent-mid); margin-right: 0.4em; }
+.log-nav {
+  margin-top: 0.6rem;
+  display: flex; gap: 0.5rem; align-items: center;
+}
+.log-nav-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-dim); font-family: var(--font-mono);
+  font-size: 0.6rem; padding: 0.2rem 0.5rem;
+  cursor: pointer; transition: border-color var(--transition), color var(--transition);
+  letter-spacing: 0.1em;
+}
+.log-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.log-counter { font-size: 0.58rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+/* =====================
+   ツールウィンドウ（フローティングパネル）
+===================== */
+#tool-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 8000;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+#tool-overlay.active {
+  display: flex;
+  background: rgba(0,0,0,0.7);
+}
+
+.tool-panel {
+  display: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hard);
+  box-shadow: 0 0 0 1px rgba(0,200,240,0.08), 0 40px 100px rgba(0,0,0,0.8);
+  width: 90%;
+  max-width: 460px;
+  position: relative;
+  animation: tool-open 0.18s ease forwards;
+}
+.tool-panel.visible { display: block; }
+.tool-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.tool-titlebar {
+  background: rgba(0,200,240,0.04);
+  border-bottom: 1px solid var(--border);
+  padding: 0.55rem 1.2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-mid);
+}
+.tool-close {
+  background: none; border: none; color: var(--text-dim);
+  font-family: var(--font-mono); font-size: 0.75rem;
+  cursor: pointer; padding: 0 0.2rem; line-height: 1;
+  transition: color var(--transition);
+}
+.tool-close:hover { color: #e83929; }
+
+.tool-body { padding: 1.5rem 1.4rem; }
+
+/* 共通インプット */
+.tool-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  transition: border-color var(--transition);
+  resize: vertical;
+}
+.tool-input:focus { border-color: var(--accent-mid); }
+
+.tool-btn {
+  background: transparent;
+  border: 1px solid var(--border-hard);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.12em;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+.tool-btn:hover {
+  background: var(--accent-dim);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.tool-output {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-mid);
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  word-break: break-all;
+  min-height: 2.5rem;
+  margin-top: 0.8rem;
+  white-space: pre-wrap;
+}
+.tool-output.muted { color: var(--text-dim); }
+
+.tool-row {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  margin-bottom: 0.6rem; flex-wrap: wrap;
+}
+.tool-label {
+  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 0.3rem; display: block;
+}
+
+/* 計算機キーパッド */
+.calc-display {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-mid);
+  padding: 0.7rem 1rem;
+  text-align: right;
+  font-size: 1.4rem;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  min-height: 3rem;
+  margin-bottom: 0.8rem;
+  word-break: break-all;
+}
+.calc-expr {
+  font-size: 0.65rem; color: var(--text-dim);
+  text-align: right; min-height: 1em; margin-bottom: 0.3rem;
+}
+.calc-pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+.calc-key {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.65rem 0;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  text-align: center;
+}
+.calc-key:hover { background: rgba(0,200,240,0.06); border-color: var(--border-hard); }
+.calc-key:active { background: rgba(0,200,240,0.12); }
+.calc-key.op   { color: var(--accent); }
+.calc-key.eq   { background: var(--accent); color: #000; border-color: var(--accent); }
+.calc-key.eq:hover { box-shadow: 0 0 12px var(--accent-glow); }
+.calc-key.clr  { color: #e8795a; }
+
+/* 時計パネル */
+.tz-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.tz-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 0.75rem 0.9rem;
+}
+.tz-name  { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.3rem; }
+.tz-time  { font-size: 1rem; color: var(--accent); letter-spacing: 0.05em; }
+.tz-date  { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.15rem; }
+
+/* =====================
+   タイマー
+===================== */
+.timer-setup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.7rem;
+}
+.timer-col { text-align: center; }
+.timer-digit-input {
+  width: 3.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  text-align: center;
+  padding: 0.4rem 0.2rem;
+  outline: none;
+  -moz-appearance: textfield;
+  display: block;
+}
+.timer-digit-input::-webkit-outer-spin-button,
+.timer-digit-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.timer-digit-input:focus { border-color: var(--accent-mid); }
+.timer-sep { color: var(--accent); font-size: 1.4rem; font-family: var(--font-mono); padding-top: 0; }
+.timer-col-label { font-size: 0.52rem; color: var(--text-dim); letter-spacing: 0.15em; margin-top: 0.15rem; }
+@keyframes timer-done-flash {
+  0%,100% { color: var(--accent); text-shadow: 0 0 16px var(--accent-glow); }
+  50%     { color: #e83929; text-shadow: 0 0 28px rgba(232,57,41,0.55); }
+}
+.timer-done-anim { animation: timer-done-flash 0.6s ease-in-out infinite; }
+
+/* =====================
+   フッター
+===================== */
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 1.8rem 2rem;
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; flex-wrap: wrap;
+}
+.footer-copy {
+  font-size: 0.65rem; color: var(--text-dim);
+  letter-spacing: 0.06em; font-family: var(--font-mono);
+}
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a {
+  font-size: 0.65rem; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.15em;
+  text-decoration: none; transition: color var(--transition);
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* =====================
+   ストップウォッチ
+===================== */
+.sw-display {
+  font-size: 3rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-align: center;
+  padding: 1.2rem 0 1.4rem;
+  text-shadow: 0 0 16px var(--accent-glow);
+  font-family: var(--font-mono);
+}
+.sw-controls {
+  display: flex; gap: 0.5rem; justify-content: center;
+}
+.sw-controls .tool-btn { flex: 1; text-align: center; }
+
+/* =====================
+   競介クイズ
+===================== */
+#panel-quiz { max-width: 560px; }
+
+.quiz-subtitle {
+  font-size: 0.62rem; color: var(--text-dim);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 1.2rem; font-family: var(--font-mono);
+}
+.quiz-meta {
+  display: flex; align-items: center; gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.quiz-q-num {
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-mid); white-space: nowrap; flex-shrink: 0;
+}
+.quiz-prog-wrap {
+  flex: 1; height: 2px; background: var(--border);
+}
+.quiz-prog-fill {
+  height: 100%; background: var(--accent);
+  transition: width 0.35s ease;
+}
+.quiz-question {
+  font-size: 0.9rem; line-height: 1.65;
+  color: var(--text-bright);
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+}
+.quiz-hint {
+  font-size: 0.62rem; color: var(--accent-mid);
+  letter-spacing: 0.1em; margin-bottom: 1rem; min-height: 1em;
+}
+.quiz-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+.quiz-choice {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.35;
+  transition: border-color var(--transition), color var(--transition),
+              background var(--transition), box-shadow var(--transition);
+}
+.quiz-choice:hover {
+  border-color: var(--border-hard);
+  color: var(--text);
+  background: rgba(0,200,240,0.04);
+}
+.quiz-choice.selected {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.quiz-choice.selected::before { content: '❯ '; }
+.quiz-next-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-hard);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem; letter-spacing: 0.15em;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition),
+              opacity var(--transition);
+}
+.quiz-next-btn:not(:disabled):hover {
+  background: var(--accent-dim);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.quiz-next-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+.quiz-tabulating {
+  text-align: center; padding: 3.5rem 0;
+}
+.quiz-tab-label {
+  font-size: 1rem; letter-spacing: 0.25em;
+  color: var(--accent);
+  text-shadow: 0 0 12px var(--accent-glow);
+  margin-bottom: 1.4rem;
+  font-family: var(--font-mono);
+}
+.quiz-tab-dots {
+  display: flex; gap: 0.5rem; justify-content: center;
+}
+.quiz-tab-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-mid);
+  animation: glow-pulse 0.8s ease-in-out infinite;
+}
+.quiz-tab-dots span:nth-child(2) { animation-delay: 0.25s; }
+.quiz-tab-dots span:nth-child(3) { animation-delay: 0.5s; }
+
+.quiz-result { text-align: center; padding: 0.3rem 0; }
+.result-label {
+  font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--accent-mid); margin-bottom: 1rem; font-family: var(--font-mono);
+}
+.result-score-val {
+  font-size: 4rem; font-family: var(--font-mono);
+  color: var(--accent); line-height: 1;
+  text-shadow: 0 0 24px var(--accent-glow);
+  margin-bottom: 0.2rem;
+}
+.result-score-max {
+  font-size: 0.68rem; color: var(--text-dim);
+  letter-spacing: 0.1em; margin-bottom: 1.5rem;
+}
+.result-heading-text {
+  font-size: 1.05rem; color: var(--text-bright);
+  margin-bottom: 0.8rem; line-height: 1.5;
+  font-family: var(--font-ja);
+}
+.result-prize {
+  display: none;
+  margin: 0.9rem 0 1rem;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  border: 1px solid rgba(200,168,74,0.35);
+  padding: 0.5rem 0.9rem;
+  text-align: left;
+  animation: badge-glow 3s ease-in-out infinite;
+}
+.result-prize a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity var(--transition);
+}
+.result-prize a:hover { opacity: 0.75; }
+.result-prize.visible { display: block; }
+
+.result-desc-text {
+  font-size: 0.78rem; color: var(--text);
+  line-height: 1.85; font-family: var(--font-mono);
+  text-align: left;
+}
+/* ── スマホ自動ズーム防止 ─────────────────────────── */
+@media screen and (max-width: 768px) {
+  .tool-input {
+    font-size: 16px; /* iOS: 16px未満でフォーカス時ズームが発生するため */
+  }
+  .timer-digit-input {
+    font-size: 16px;
+  }
+}
+/* ── ツールパネル スクロール修正 ──────────────────── */
+.tool-panel {
+  flex-direction: column;
+  max-height: 85vh;
+}
+.tool-panel.visible {
+  display: flex;
+}
+.tool-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS慣性スクロール */
+  overscroll-behavior: contain;      /* 背後への伝播を遮断 */
+}
+</style>
 </head>
-<body>
-  <div id="shared-header"></div>
 
-  <div class="container">
-    <main class="sub-main">
-      <h1 class="page-title font-kazesawa" id="diary-page-title">独り言</h1>
+<body class="lang-ja">
 
-      <div id="pagination-top" class="pagination"></div>
-      <div id="diary-list"     class="diary-list"></div>
-      <div id="pagination-bot" class="pagination"></div>
-    </main>
-    <div id="shared-footer"></div>
+<!-- ヘッダー -->
+<header class="site-header">
+  <div class="header-accent-line"></div>
+  <div class="header-inner">
+    <div class="clearance-badge" id="clearanceBadge">CLEARANCE · LAYER_1 · AUTHORIZED</div>
+    <h1 class="site-title anim-title" data-lang="ja">偽造切手</h1>
+    <h1 class="site-title anim-title" data-lang="de">LOS 49</h1>
+    <h1 class="site-title anim-title" data-lang="fi">ERÄ 49</h1>
+    <p class="site-subtitle anim-subtitle" data-lang="ja">作品・文章・音楽</p>
+    <p class="site-subtitle anim-subtitle" data-lang="de">Werke · Texte · Musik</p>
+    <p class="site-subtitle anim-subtitle" data-lang="fi">Teoksia · Tekstejä · Musiikkia</p>
+  </div>
+</header>
+
+<!-- メイン -->
+<div class="layout">
+  <main class="content">
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('de')">Deutsch</button>
+      <button class="lang-btn" onclick="setLang('fi')">Suomi</button>
+    </div>
+
+    <div class="content-text" id="contentText">
+      <div class="lang-block visible" data-lang="ja">
+        <div class="terminal-block" data-label="TRANSMISSION">
+          <p>ここに辿り着いたということは、<br>君は競介ととっても仲良しだってこと！</p>
+        </div>
+        <p class="access-tag">access_granted :: layer_1 :: node_kyo</p>
+        <div class="meta-row">
+          <span class="meta-pill active">VIP</span>
+          <span class="meta-pill">VERIFIED</span>
+          <span class="meta-pill">ENCRYPTED</span>
+        </div>
+      </div>
+      <div class="lang-block" data-lang="de">
+        <div class="terminal-block" data-label="TRANSMISSION">
+          <p>Wenn du diese Seite gefunden hast,<br>sind wir wohl ziemlich eng befreundet!</p>
+        </div>
+        <p class="access-tag">access_granted :: layer_1 :: node_kyo</p>
+        <div class="meta-row">
+          <span class="meta-pill active">VIP</span>
+          <span class="meta-pill">VERIFIED</span>
+          <span class="meta-pill">ENCRYPTED</span>
+        </div>
+      </div>
+      <div class="lang-block" data-lang="fi">
+        <div class="terminal-block" data-label="TRANSMISSION">
+          <p>Jos löysit tämän sivun,<br>olemme varmaan todella läheisiä ystäviä!</p>
+        </div>
+        <p class="access-tag">access_granted :: layer_1 :: node_kyo</p>
+        <div class="meta-row">
+          <span class="meta-pill active">VIP</span>
+          <span class="meta-pill">VERIFIED</span>
+          <span class="meta-pill">ENCRYPTED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイックアクセス -->
+    <div class="quick-access" style="margin-top:3rem;">
+      <p class="qa-heading">Quick Access</p>
+      <div class="qa-grid">
+        <!-- トップへ -->
+        <a href="https://kyosuke49.github.io/kyosuke49/index.html" class="qa-btn qa-btn-top" target="_blank" rel="noopener">
+          <i class="qa-icon">↩</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="トップページへ戻る" data-de="Zurück zur Startseite" data-fi="Takaisin etusivulle">トップページへ戻る</span>
+            <span class="qa-label-sub">index.html</span>
+          </span>
+        </a>
+
+        <!-- 計算機 -->
+        <button class="qa-btn" onclick="openTool('calc')">
+          <i class="qa-icon">⊞</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="計算機" data-de="Taschenrechner" data-fi="Laskin">計算機</span>
+            <span class="qa-label-sub">calculator</span>
+          </span>
+        </button>
+
+        <!-- 文字数カウント -->
+        <button class="qa-btn" onclick="openTool('charcount')">
+          <i class="qa-icon">≡</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="文字数カウント" data-de="Zeichenzähler" data-fi="Merkkimäärä">文字数カウント</span>
+            <span class="qa-label-sub">char counter</span>
+          </span>
+        </button>
+
+        <!-- Base64 -->
+        <button class="qa-btn" onclick="openTool('base64')">
+          <i class="qa-icon">⇌</i>
+          <span class="qa-label">
+            <span class="qa-label-main">Base64</span>
+            <span class="qa-label-sub">encode / decode</span>
+          </span>
+        </button>
+
+        <!-- タイムゾーン -->
+        <button class="qa-btn" onclick="openTool('timezone')">
+          <i class="qa-icon">◷</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="世界時計" data-de="Weltzeituhr" data-fi="Maailmankello">世界時計</span>
+            <span class="qa-label-sub">world clock</span>
+          </span>
+        </button>
+
+        <!-- ストップウォッチ -->
+        <button class="qa-btn" onclick="openStopwatch()">
+          <i class="qa-icon">⊙</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="ストップウォッチ" data-de="Stoppuhr" data-fi="Sekuntikello">ストップウォッチ</span>
+            <span class="qa-label-sub">stopwatch</span>
+          </span>
+        </button>
+
+        <!-- 競介クイズ -->
+        <button class="qa-btn" onclick="openQuiz()">
+          <i class="qa-icon">？</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="競介クイズ" data-de="Kyosuke-Quiz" data-fi="Kyosuken tietovisa">競介クイズ</span>
+            <span class="qa-label-sub" data-ja="君は競介の何を知っているのか" data-de="Was weißt du über Kyosuke?" data-fi="Mitä tiedät Kyosukesta?">君は競介の何を知っているのか</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="info-window">
+      <div class="info-titlebar">
+        <div class="info-titlebar-dots">
+          <div class="info-titlebar-dot"></div>
+          <div class="info-titlebar-dot"></div>
+          <div class="info-titlebar-dot"></div>
+        </div>
+        <span>SYS_MONITOR · v2.1</span>
+        <span></span>
+      </div>
+      <div class="info-body">
+
+        <div class="info-row">
+          <div class="info-status">
+            <span class="status-label">STATUS</span>
+            <span class="status-badge">CLASSIFIED</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">DATE_TIME [LOCAL]</div>
+          <div class="info-datetime" id="infoDatetime">----</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">JULIAN_DATE</div>
+          <div class="info-jd" id="infoJulian">----</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">SYSTEM_MESSAGE</div>
+          <div class="system-message" id="infoDaily"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label"><span>PERSONAL_LOG</span></div>
+          <div class="log-area" id="logArea"></div>
+          <div class="log-nav">
+            <button class="log-nav-btn" onclick="prevLog()">◂ prev</button>
+            <button class="log-nav-btn" onclick="nextLog()">next ▸</button>
+            <span class="log-counter" id="logCounter"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- AVANT-GARDE EXPERIMENTS -->
+    <div>
+      <p class="qa-heading">Avant-Garde Experiments</p>
+      <div class="qa-grid">
+
+        <!-- Base-29 -->
+        <button class="qa-btn" onclick="openTool('base29')">
+          <i class="qa-icon" style="font-style:normal;font-size:0.68rem;letter-spacing:-0.02em;color:var(--text-dim);">B₂₉</i>
+          <span class="qa-label">
+            <span class="qa-label-main">Base-29</span>
+            <span class="qa-label-sub">encode / decode</span>
+          </span>
+        </button>
+
+        <!-- タイマー -->
+        <button class="qa-btn" onclick="openTimer()">
+          <i class="qa-icon">⧗</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="タイマー" data-de="Timer" data-fi="Ajastin">タイマー</span>
+            <span class="qa-label-sub">countdown</span>
+          </span>
+        </button>
+
+        <!-- おみくじ -->
+        <button class="qa-btn" onclick="openTool('omikuji')">
+          <i class="qa-icon">♫</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="VIPおみくじ" data-de="VIP-Glückslos" data-fi="VIP-onnenlippu">VIPおみくじ</span>
+            <span class="qa-label-sub">fortune · VIP only</span>
+          </span>
+        </button>
+
+        <!-- 関数描画 -->
+        <button class="qa-btn" onclick="openTool('plotter')">
+          <i class="qa-icon">∿</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="関数描画" data-de="Funktionsplotter" data-fi="Funktiopiirturi">関数描画</span>
+            <span class="qa-label-sub">function plotter</span>
+          </span>
+        </button>
+
+        <!-- チャット -->
+        <button class="qa-btn" onclick="openTool('chat')">
+          <i class="qa-icon">⊟</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="チャット" data-de="Chat" data-fi="Chat">チャット</span>
+            <span class="qa-label-sub">kyosuke bot</span>
+          </span>
+        </button>
+
+        <!-- 難解言語研究室 -->
+        <button class="qa-btn" onclick="openTool('esoteric')">
+          <i class="qa-icon">Ψ</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="難解言語研究室" data-de="Esoterische Sprachen" data-fi="Esoteerinen lab">難解言語研究室</span>
+            <span class="qa-label-sub">Let's Pxem!</span>
+          </span>
+        </button>
+
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- フッター -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-copy">© 2025 Pfötchengebendeningen — 偽造切手 / LOS 49 / ERÄ 49</p>
+    <div class="footer-links">
+      <a href="https://x.com/ningaesst?s=21" target="_blank" rel="noopener">X / Twitter</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ツールオーバーレイ -->
+<div id="tool-overlay">
+
+  <!-- 計算機 -->
+  <div class="tool-panel" id="panel-calc">
+    <div class="tool-titlebar">
+      <span>Calculator</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="calc-expr" id="calcExpr"></div>
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-pad">
+        <button class="calc-key clr" onclick="calcClear()">C</button>
+        <button class="calc-key op"  onclick="calcSign()">±</button>
+        <button class="calc-key op"  onclick="calcPercent()">%</button>
+        <button class="calc-key op"  onclick="calcOp('/')">÷</button>
+        <button class="calc-key"     onclick="calcNum('7')">7</button>
+        <button class="calc-key"     onclick="calcNum('8')">8</button>
+        <button class="calc-key"     onclick="calcNum('9')">9</button>
+        <button class="calc-key op"  onclick="calcOp('*')">×</button>
+        <button class="calc-key"     onclick="calcNum('4')">4</button>
+        <button class="calc-key"     onclick="calcNum('5')">5</button>
+        <button class="calc-key"     onclick="calcNum('6')">6</button>
+        <button class="calc-key op"  onclick="calcOp('-')">−</button>
+        <button class="calc-key"     onclick="calcNum('1')">1</button>
+        <button class="calc-key"     onclick="calcNum('2')">2</button>
+        <button class="calc-key"     onclick="calcNum('3')">3</button>
+        <button class="calc-key op"  onclick="calcOp('+')">+</button>
+        <button class="calc-key"     onclick="calcNum('0')" style="grid-column:span 2">0</button>
+        <button class="calc-key"     onclick="calcDot()">.</button>
+        <button class="calc-key eq"  onclick="calcEquals()">=</button>
+      </div>
+    </div>
   </div>
 
-<script src="../shared-nav.js"></script>
+  <!-- 文字数カウント -->
+  <div class="tool-panel" id="panel-charcount">
+    <div class="tool-titlebar">
+      <span>Char Counter</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <label class="tool-label" id="ccLabel">テキストを入力</label>
+      <textarea class="tool-input" id="ccInput" rows="5" oninput="updateCharCount()" placeholder="ここに入力..."></textarea>
+      <div class="tool-output muted" id="ccOutput">----</div>
+    </div>
+  </div>
+
+  <!-- Base64 -->
+  <div class="tool-panel" id="panel-base64">
+    <div class="tool-titlebar">
+      <span>Base64 Encode / Decode</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <label class="tool-label" id="b64Label">入力</label>
+      <textarea class="tool-input" id="b64Input" rows="3" placeholder="テキストまたはBase64文字列を入力"></textarea>
+      <div class="tool-row" style="margin-top:0.6rem;">
+        <button class="tool-btn" onclick="doBase64('encode')" id="b64EncBtn">Encode →</button>
+        <button class="tool-btn" onclick="doBase64('decode')" id="b64DecBtn">← Decode</button>
+      </div>
+      <label class="tool-label" id="b64OutLabel">出力</label>
+      <div class="tool-output" id="b64Output">----</div>
+    </div>
+  </div>
+
+  <!-- 世界時計 -->
+  <div class="tool-panel" id="panel-timezone">
+    <div class="tool-titlebar">
+      <span>World Clock</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="tz-grid" id="tzGrid"></div>
+    </div>
+  </div>
+
+  <!-- ストップウォッチ -->
+  <div class="tool-panel" id="panel-stopwatch">
+    <div class="tool-titlebar">
+      <span id="swTitle">ストップウォッチ</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="sw-display" id="swDisplay">00:00.00</div>
+      <div class="sw-controls">
+        <button class="tool-btn" id="swStartBtn" onclick="swToggle()">スタート</button>
+        <button class="tool-btn" id="swResetBtn" onclick="swReset()">リセット</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 競介クイズ -->
+  <div class="tool-panel" id="panel-quiz">
+    <div class="tool-titlebar">
+      <span id="quizPanelTitle">競介クイズ</span>
+      <button class="tool-close" onclick="closeQuiz()">✕</button>
+    </div>
+    <div class="tool-body">
+
+      <!-- 問題ビュー -->
+      <div id="quizViewQuestion">
+        <p class="quiz-subtitle" id="quizSubtitle">君は競介の何を知っているのか</p>
+        <div class="quiz-meta">
+          <span class="quiz-q-num" id="quizQNum">問 1 / 8</span>
+          <div class="quiz-prog-wrap">
+            <div class="quiz-prog-fill" id="quizProgFill" style="width:0%"></div>
+          </div>
+        </div>
+        <p class="quiz-question" id="quizQuestion"></p>
+        <p class="quiz-hint" id="quizHint"></p>
+        <div class="quiz-choices" id="quizChoices"></div>
+        <button class="quiz-next-btn" id="quizNextBtn" onclick="quizNext()" disabled>次へ →</button>
+      </div>
+
+      <!-- 集計中ビュー -->
+      <div id="quizViewTabulating" style="display:none">
+        <div class="quiz-tabulating">
+          <p class="quiz-tab-label" id="quizTabText">集計中…</p>
+          <div class="quiz-tab-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 結果ビュー -->
+      <div id="quizViewResult" style="display:none">
+        <div class="quiz-result">
+          <p class="result-label" id="quizResultLabel">結果は…</p>
+          <div class="result-score-val" id="quizScoreVal">0</div>
+          <div class="result-score-max" id="quizScoreMax">/ 8 問正解</div>
+          <div class="result-heading-text" id="quizResultHeading"></div>
+          <div class="result-prize" id="quizResultPrize"></div>
+          <div class="result-desc-text" id="quizResultDesc"></div>
+          <button class="tool-btn" id="quizCloseBtn" onclick="closeQuiz()" style="width:100%;margin-top:1.5rem;letter-spacing:0.15em">閉じる</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Base-29 -->
+  <div class="tool-panel" id="panel-base29">
+    <div class="tool-titlebar">
+      <span>Base-29 Encode / Decode</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <p style="font-size:0.6rem;color:var(--text-dim);letter-spacing:0.08em;margin-bottom:0.6rem;font-family:var(--font-mono);">Alphabet: a–z + ä ö ü (29文字)</p>
+      <label class="tool-label" id="b29Label">入力</label>
+      <textarea class="tool-input" id="b29Input" rows="3" placeholder="テキストまたはBase-29文字列を入力"></textarea>
+      <div class="tool-row" style="margin-top:0.6rem;">
+        <button class="tool-btn" onclick="doBase29('encode')" id="b29EncBtn">Encode →</button>
+        <button class="tool-btn" onclick="doBase29('decode')" id="b29DecBtn">← Decode</button>
+      </div>
+      <label class="tool-label" id="b29OutLabel">出力</label>
+      <div class="tool-output" id="b29Output">----</div>
+    </div>
+  </div>
+
+  <!-- タイマー -->
+  <div class="tool-panel" id="panel-timer">
+    <div class="tool-titlebar">
+      <span id="timerTitle">タイマー</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+      <div class="timer-setup">
+        <div class="timer-col">
+          <input type="number" class="timer-digit-input" id="timerH" min="0" max="99" value="0">
+          <div class="timer-col-label" id="timerHLabel">時</div>
+        </div>
+        <span class="timer-sep">:</span>
+        <div class="timer-col">
+          <input type="number" class="timer-digit-input" id="timerM" min="0" max="59" value="5">
+          <div class="timer-col-label" id="timerMLabel">分</div>
+        </div>
+        <span class="timer-sep">:</span>
+        <div class="timer-col">
+          <input type="number" class="timer-digit-input" id="timerS" min="0" max="59" value="0">
+          <div class="timer-col-label" id="timerSLabel">秒</div>
+        </div>
+      </div>
+      <div id="timerDisplayWrap">
+        <div class="sw-display" id="timerDisplay">05:00</div>
+      </div>
+      <div class="sw-controls">
+        <button class="tool-btn" id="timerStartBtn" onclick="timerToggle()">スタート</button>
+        <button class="tool-btn" id="timerResetBtn" onclick="timerReset()">リセット</button>
+      </div>
+      <div id="timerDoneMsg" style="display:none;text-align:center;margin-top:0.8rem;font-size:0.82rem;letter-spacing:0.14em;font-family:var(--font-mono);"></div>
+    </div>
+  </div>
+
+  <!-- VIPおみくじ -->
+  <div class="tool-panel" id="panel-omikuji">
+    <div class="tool-titlebar">
+      <span id="wipTitle-omikuji">VIPおみくじ</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
+      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
+      <div id="wipMsg-omikuji" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    </div>
+  </div>
+
+  <!-- 関数描画 -->
+  <div class="tool-panel" id="panel-plotter" style="max-width:600px;">
+    <div class="tool-titlebar">
+      <span id="wipTitle-plotter">関数描画</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="padding:0;"></div>
+  </div>
+
+  <!-- チャット -->
+  <div class="tool-panel" id="panel-chat">
+    <div class="tool-titlebar">
+      <span id="wipTitle-chat">チャット</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
+      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
+      <div id="wipMsg-chat" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    </div>
+  </div>
+
+  <!-- 難解言語研究室 — Pxem -->
+  <div class="tool-panel" id="panel-esoteric" style="max-width:560px;">
+    <div class="tool-titlebar">
+      <span id="wipTitle-esoteric">難解言語研究室</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+
+      <!-- 説明 -->
+      <p id="pxemDesc" style="font-size:0.65rem;color:var(--text-dim);letter-spacing:0.06em;line-height:1.7;margin-bottom:1rem;font-family:var(--font-mono);border-left:1px solid var(--border-hard);padding-left:0.7rem;">
+        スタックベースの難解言語 <strong style="color:var(--text);">Pxem</strong>。
+        <strong style="color:var(--text);">ファイル名（拡張子込み）</strong>がコード本体。
+        コマンド直前の非コマンド文字列は<strong style="color:var(--text);">逆順</strong>にまとめてプッシュされる。
+        ファイルの中身は <code style="color:var(--accent);">.e</code> で呼ばれるサブルーチン。
+      </p>
+
+      <!-- ファイル名 -->
+      <label class="tool-label">
+        <span id="pxemNameLabel">File Name</span>
+        <span id="pxemNameSub" style="color:var(--text-dim);font-size:0.55rem;">（拡張子込みのファイル名 = ソースコード）</span>
+      </label>
+      <input type="text" class="tool-input" id="pxemName"
+        placeholder="例: Hello, world!.pxe"
+        style="margin-bottom:0.5rem;"
+        onkeydown="if(event.key==='Enter')pxemRun()">
+
+      <!-- ファイル本体 -->
+      <label class="tool-label">
+        <span id="pxemBodyLabel">File Body</span>
+        <span id="pxemBodySub" style="color:var(--text-dim);font-size:0.55rem;">（.e コマンドで呼ばれるサブルーチン / 省略可）</span>
+      </label>
+      <textarea class="tool-input" id="pxemBody" rows="2"
+        placeholder="（省略可）"
+        style="margin-bottom:0.5rem;resize:vertical;"></textarea>
+
+      <!-- 標準入力 -->
+      <label class="tool-label">
+        <span id="pxemStdinLabel">Standard Input</span>
+        <span id="pxemStdinSub" style="color:var(--text-dim);font-size:0.55rem;">（.i コマンドで読む / 省略可）</span>
+      </label>
+      <textarea class="tool-input" id="pxemStdin" rows="2"
+        placeholder="（省略可）"
+        style="margin-bottom:0.8rem;resize:vertical;"></textarea>
+
+      <!-- 実行・クリア -->
+      <div class="tool-row" style="margin-bottom:0;">
+        <button class="tool-btn" id="pxemRunBtn" onclick="pxemRun()"
+          style="flex:1;text-align:center;letter-spacing:0.15em;">▶ 実行</button>
+        <button class="tool-btn" id="pxemClearBtn" onclick="pxemClear()"
+          style="color:var(--text-dim);">クリア</button>
+      </div>
+
+      <!-- 出力 -->
+      <div style="margin-top:0.7rem;">
+        <div style="font-size:0.55rem;letter-spacing:0.2em;color:var(--accent-mid);text-transform:uppercase;margin-bottom:0.3rem;display:flex;justify-content:space-between;align-items:center;">
+          <span id="pxemOutputLabel">Output</span>
+          <span id="pxemStatus" style="color:var(--text-dim);font-family:var(--font-mono);font-size:0.6rem;"></span>
+        </div>
+        <div class="tool-output muted" id="pxemOutput"
+          style="min-height:4rem;white-space:pre-wrap;word-break:break-all;">----</div>
+      </div>
+
+      <!-- コマンド一覧 -->
+      <details style="margin-top:0.8rem;">
+        <summary id="pxemCmdSummary" style="font-size:0.58rem;letter-spacing:0.18em;color:var(--text-dim);text-transform:uppercase;cursor:pointer;user-select:none;font-family:var(--font-mono);">
+          ▸ コマンド一覧
+        </summary>
+        <div style="margin-top:0.5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:0.25rem 1.2rem;font-size:0.62rem;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;">
+          <span><code style="color:var(--accent);">.p</code>  <span id="pxemCmdP">全pop→文字として出力</span></span>
+          <span><code style="color:var(--accent);">.n</code>  <span id="pxemCmdN">pop→数値として出力</span></span>
+          <span><code style="color:var(--accent);">.c</code>  <span id="pxemCmdC">トップを複製</span></span>
+          <span><code style="color:var(--accent);">.m</code>  <span id="pxemCmdM">pop→一時レジスタへ</span></span>
+          <span><code style="color:var(--accent);">.t</code>  <span id="pxemCmdT">一時レジスタをpush</span></span>
+          <span><code style="color:var(--accent);">.s</code>  <span id="pxemCmdS">上位2つを入れ替え</span></span>
+          <span><code style="color:var(--accent);">.+</code>  <span id="pxemCmdAdd">和 (a+b)</span></span>
+          <span><code style="color:var(--accent);">.-</code>  <span id="pxemCmdSub">差 (|a−b|)</span></span>
+          <span><code style="color:var(--accent);">.!</code>  <span id="pxemCmdMul">積 (a×b)</span></span>
+          <span><code style="color:var(--accent);">.$</code>  <span id="pxemCmdDiv">商 (大÷小)</span></span>
+          <span><code style="color:var(--accent);">.%</code>  <span id="pxemCmdMod">余り (大 mod 小)</span></span>
+          <span><code style="color:var(--accent);">.r</code>  <span id="pxemCmdR">乱数 [0, a)</span></span>
+          <span><code style="color:var(--accent);">.i</code>  <span id="pxemCmdI">stdin 1文字読む</span></span>
+          <span><code style="color:var(--accent);">.e</code>  <span id="pxemCmdE">ボディをサブルーチン呼び出し</span></span>
+          <span><code style="color:var(--accent);">.d</code>  <span id="pxemCmdD">プログラム終了</span></span>
+          <span><code style="color:var(--accent);">.w .x .y .z</code>  <span id="pxemCmdLoop">ループ開始</span></span>
+          <span><code style="color:var(--accent);">.a</code>  <span id="pxemCmdA">ループ終端</span></span>
+          <span><span style="color:var(--text);">*</span>  <span id="pxemCmdOther">次コマンド前に逆順push</span></span>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="js/daily.js"></script>
 <script>
-/* ====================================================
-   エントリーデータ
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   新しい独り言を追加するときは配列の先頭に追記してください。
-
-   【基本形（日本語のみ）】
-   {
-     date:  'YYYY-MM-DD',
-     title: { ja: 'タイトル' },
-     body:  { ja: '本文' },
-     tags:  [{ ja: 'タグ', de: 'Tag', fi: 'Tag' }]
-   }
-
-   【翻訳版も用意する場合（エントリー内に言語切替ボタンが現れる）】
-   {
-     date:  'YYYY-MM-DD',
-     title: { ja: 'タイトル', de: 'Titel' },
-     body:  { ja: '日本語本文', de: 'Deutscher Text' },
-     tags:  [...]
-   }
-
-   翻訳がない言語はキーを省略するだけでOKです。
-   body に 2 言語以上あるエントリーのみ、カード内にボタンが表示されます。
-==================================================== */
-var ENTRIES = [
-  {
-    date:  '2026-01-06',
-    title: { ja: '他言語・フォント追加' },
-    body:  { ja: 'ドイツ語版をクレント体にしてみました。すごく読みづらいですね。' },
-    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
-  },
-  {
-    date:  '2026-01-05',
-    title: { ja: '更新' },
-    body:  { ja: 'それらしくなり始めたみたいやね' },
-    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
-  },
-  {
-    date:  '2025-12-31',
-    title: { ja: '作った' },
-    body:  { ja: '2025のうちに作っといた方がいいことあるかなって' },
-    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
-  },
-  {
-    date:  '2026-05-22',
-    title: { ja: '公開範囲を拡大！' },
-    body:  { ja: '一部のネッ友たちに公開してみました。みんなのアドバイスを待ってるよ！', de:'Ich habe die Seite ein paar Freunden gezeigt. Bin gespannt auf eure Vorschläge!', fi:'Julkaisin sivuston jo muutamille nettikavereille. Odotan teidän kommenttejanne!' },
-    tags:  [{ ja: 'お知らせ', de: 'Mitteilung', fi: 'Ilmoitus' }]
-  },
-  {
-    date:  '2026-05-21',
-    title: { ja: '☆大改革☆' },
-    body:  { ja: '本当はこれまでもちょくちょく更新してたんですよ？独り言ページに記述し忘れてただけで…' },
-    tags:  [{ ja: 'サイト更新', de: 'Siteupdate', fi: 'Sivupäivitys' }]
-  },
-  {
-    date:  '2026-05-22',
-    title: { ja: '幻リプのガチャで大爆死した' },
-    body:  { ja: '全部が全部意味のある独り言だと思うなよ。' },
-    tags:  [{ ja: '雑談', de: 'Gelaber', fi: 'Höpinää' }]
-  },
-  {
-    date:  '2026-05-23',
-    title: { ja: 'なにこれ！楽しい！(2)' },
-    body:  { ja: 'ここの文字動かせるやんけ！' },
-    animate: 'scroll',
-    tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
-  },
-  {
-    date:  '2026-05-23',
-    title: { ja: '何これ！楽しい！' },
-    body:  { ja: 'ここの文タップしてみ？' },
-    tap:   { ja: 'へへ！びっくりした？' },
-    tags:  [{ ja: '技術', de: 'Technik', fi: 'Tekniikka' }]
-  },
-  {
-    date:  '2026-05-24',
-    title: { ja: 'いつもの独り言だと思うじゃん？', de: 'Du denkst, das ist ein normaler Eintrag?', fi: 'Luuletko tämän olevan tavallinen merkintä?' },
-    body:  { ja: 'あなたはだあれ？', de: 'Wer bist du?', fi: 'Kuka olet?' },
-    quiz:  true,
-    tags:  [{ ja: '？', de: '？', fi: '？' }]
-  },
-  {
-    date:  '2026-05-25',
-    title: { ja: 'スペシャルサンクスを追加' },
-    body:  { ja: 'ありがとう！！みんな、ありがとう！！' },
-    tags:  [{ ja: '感謝！', de: 'DANKE!', fi: 'KIITOS!' }]
-  }
+/* ============================================================
+   定数・データ
+============================================================ */
+const LOG_ENTRIES = [
+  { ts: '2025-5-24', tag: 'LOG',  text: 'Welcome!！' },
 ];
 
-/* ====================================================
-   UI文字列（ページレベルのみ・エントリー本文には影響しない）
-==================================================== */
-var UI = {
-  ja: { pageTitle: '独り言',      prev: '← 前へ',       next: '次へ →',    empty: '独り言はまだありません' },
-  de: { pageTitle: 'Aufzeichnung', prev: '← Zurück',    next: 'Weiter →',   empty: 'Noch keine Einträge' },
-  fi: { pageTitle: 'Päiväkirja',   prev: '← Edellinen', next: 'Seuraava →', empty: 'Ei merkintöjä vielä' }
+const SYS_MESSAGES = {
+  ja: '認証済み\n第一階層クリアランス\nnode_kyo :: online',
+  de: 'Authentifiziert\nFreigabe Ebene 1\nnode_kyo :: online',
+  fi: 'Todennettu\nTaso 1 käyttöoikeus\nnode_kyo :: online',
 };
 
-/* ====================================================
-   設定
-==================================================== */
-var PER_PAGE = 4;
+const WORLD_CLOCKS = [
+  { label: 'Tokyo', tz: 'Asia/Tokyo' },
+  { label: 'Berlin', tz: 'Europe/Berlin' },
+  { label: 'Helsinki', tz: 'Europe/Helsinki' },
+  { label: 'New York', tz: 'America/New_York' },
+  { label: 'London', tz: 'Europe/London' },
+  { label: 'Los Angeles', tz: 'America/Los_Angeles' },
+];
 
-/* 日付降順ソート */
-ENTRIES.sort(function(a, b) { return b.date.localeCompare(a.date); });
+const TIME_ZONES = { ja: 'Asia/Tokyo', de: 'Europe/Berlin', fi: 'Europe/Helsinki' };
 
-/* ====================================================
+/* ============================================================
    状態
-==================================================== */
-var lang        = localStorage.getItem('lang') || 'ja';
-var currentPage = 1;
-var entryLangs  = {};
-var tapRevealed = {};
+============================================================ */
+let currentLang  = localStorage.getItem('lang') || 'ja';
+let logIdx       = 0;
+let tzInterval   = null;
+let currentPanel = null;
 
-/* ====================================================
-   ユーティリティ
-==================================================== */
-function t(obj) {
-  if (!obj) return '';
-  return obj[lang] || obj['ja'] || '';
-}
-function ui(key) {
-  return ((UI[lang] || UI['ja'])[key]) || '';
-}
-function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-    .replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function formatDate(iso) {
-  var p = iso.split('-');
-  if (lang === 'de' || lang === 'fi') return parseInt(p[2]) + '.' + parseInt(p[1]) + '.' + p[0];
-  return p[0] + '.' + p[1] + '.' + p[2];
-}
-function getPageFromHash() {
-  var m = location.hash.match(/^#p(\d+)$/);
-  return m ? Math.max(1, parseInt(m[1])) : 1;
-}
-function setPageHash(n) {
-  history.pushState(null, '', n > 1 ? '#p' + n : location.pathname + location.search);
-}
+/* ============================================================
+   言語切替
+============================================================ */
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.body.className = 'lang-' + lang;
 
-/* ====================================================
-   カードHTML生成
-==================================================== */
-function buildCard(entry, absIdx) {
-  var bodyLangs  = Object.keys(entry.body || {});
-  var titleLangs = Object.keys(entry.title || {});
-  var entryLang  = entryLangs[absIdx] || bodyLangs[0] || 'ja';
-
-  var titleHTML = titleLangs.map(function(l) {
-    var hidden = l !== entryLang ? ' style="display:none"' : '';
-    return '<span class="entry-title-text" data-lang="' + l + '"' + hidden + '>' +
-      esc(entry.title[l]) + '</span>';
-  }).join('');
-
-  var isTapEntry    = !!entry.tap;
-  var isQuizEntry   = !!entry.quiz;
-  var isTapRevealed = isTapEntry && !!tapRevealed[absIdx];
-  var bodyHTML = bodyLangs.map(function(l) {
-    var hidden = l !== entryLang ? ' style="display:none"' : '';
-    if (isQuizEntry) {
-      var qs = l !== entryLang
-        ? ' style="display:none;cursor:pointer;"'
-        : ' style="cursor:pointer;"';
-      return '<p class="entry-body-text" data-lang="' + l + '"' + qs +
-        ' onclick="openQuiz()">' + esc(entry.body[l] || '').replace(/\n/g, '<br>') + '</p>';
-    }
-    var text = isTapRevealed
-      ? esc(entry.tap[l] || entry.tap['ja'] || '').replace(/\n/g, '<br>')
-      : esc(entry.body[l] || '').replace(/\n/g, '<br>');
-    var tapAttr = (isTapEntry && !isTapRevealed)
-      ? ' onclick="revealTap(' + absIdx + ')" style="cursor:pointer;' +
-        (l !== entryLang ? 'display:none;' : '') + '"'
-      : hidden;
-    if (isTapEntry && !isTapRevealed) {
-      return '<p class="entry-body-text" data-lang="' + l + '"' + tapAttr + '>' + text + '</p>';
-    }
-    return '<p class="entry-body-text" data-lang="' + l + '"' + hidden + '>' + text + '</p>';
-  }).join('');
-
-  var langBtnsHTML = '';
-  if (bodyLangs.length > 1) {
-    langBtnsHTML = '<div class="entry-lang-btns">' +
-      bodyLangs.map(function(l) {
-        var active = l === entryLang ? ' active' : '';
-        return '<button class="entry-lang-btn' + active + '" data-lang="' + l + '" ' +
-          'onclick="switchEntryLang(' + absIdx + ',\'' + l + '\')">' + esc(l) + '</button>';
-      }).join('') +
-      '</div>';
-  }
-
-  var tagsHTML = '';
-  if (entry.tags && entry.tags.length) {
-    tagsHTML = '<div class="diary-tags">' +
-      entry.tags.map(function(tag) {
-        return '<span class="diary-tag">' + esc(t(tag)) + '</span>';
-      }).join('') +
-      '</div>';
-  }
-
-  return (
-    '<div class="diary-card" data-entry-idx="' + absIdx + '">' +
-      '<div class="diary-card-top">' +
-        '<div class="diary-date-title">' +
-          '<time class="diary-entry-date" datetime="' + esc(entry.date) + '">' + esc(formatDate(entry.date)) + '</time>' +
-          '<h2 class="diary-entry-title">' + titleHTML + '</h2>' +
-        '</div>' +
-        langBtnsHTML +
-      '</div>' +
-      '<div class="diary-entry-body' + (entry.animate === 'scroll' ? ' entry-body-scroll' : '') + '">' + bodyHTML + '</div>' +
-      tagsHTML +
-    '</div>'
-  );
-}
-
-/* ====================================================
-   タップ仕掛けの発動
-==================================================== */
-function revealTap(absIdx) {
-  tapRevealed[absIdx] = true;
-  var card = document.querySelector('[data-entry-idx="' + absIdx + '"]');
-  if (!card) return;
-  var entry = ENTRIES[absIdx];
-  if (!entry || !entry.tap) return;
-  card.querySelectorAll('.entry-body-text').forEach(function(p) {
-    var l = p.getAttribute('data-lang');
-    var tapText = esc(entry.tap[l] || entry.tap['ja'] || '').replace(/\n/g, '<br>');
-    p.innerHTML  = tapText;
-    p.style.cursor          = '';
-    p.style.textDecoration  = '';
-    p.style.textUnderlineOffset = '';
-    p.onclick = null;
+  document.querySelectorAll('.site-title').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
   });
-}
-
-/* ====================================================
-   エントリー内言語切替
-==================================================== */
-function switchEntryLang(absIdx, newLang) {
-  entryLangs[absIdx] = newLang;
-  var card = document.querySelector('[data-entry-idx="' + absIdx + '"]');
-  if (!card) return;
-
-  card.querySelectorAll('.entry-title-text[data-lang], .entry-body-text[data-lang]').forEach(function(el) {
-    el.style.display = el.getAttribute('data-lang') === newLang ? '' : 'none';
+  document.querySelectorAll('.site-subtitle').forEach(el => {
+    el.style.display = el.dataset.lang === lang ? 'block' : 'none';
+  });
+  document.querySelectorAll('.lang-block').forEach(el => {
+    el.classList.toggle('visible', el.dataset.lang === lang);
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
   });
 
-  card.querySelectorAll('.entry-lang-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === newLang);
+  /* Quick Access ラベル多言語 */
+  document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+    el.textContent = el.dataset[lang];
   });
-}
 
-/* ====================================================
-   ページネーション
-==================================================== */
-function renderPagination(id, totalPages) {
-  var el = document.getElementById(id);
-  if (totalPages <= 1) { el.innerHTML = ''; return; }
-  var nums = '';
-  for (var i = 1; i <= totalPages; i++) {
-    nums += '<button class="pagination-num' + (i === currentPage ? ' active' : '') +
-      '" onclick="goPage(' + i + ')">' + i + '</button>';
-  }
-  el.innerHTML =
-    '<button class="pagination-btn"' + (currentPage <= 1 ? ' disabled' : '') +
-    ' onclick="goPage(' + (currentPage - 1) + ')">' + ui('prev') + '</button>' +
-    '<div class="pagination-nums">' + nums + '</div>' +
-    '<button class="pagination-btn"' + (currentPage >= totalPages ? ' disabled' : '') +
-    ' onclick="goPage(' + (currentPage + 1) + ')">' + ui('next') + '</button>';
-}
+  /* CCラベル */
+  const ccLabelMap = { ja: 'テキストを入力', de: 'Text eingeben', fi: 'Syötä teksti' };
+  const b64LabelMap = { ja: '入力', de: 'Eingabe', fi: 'Syöte' };
+  const b64OutMap = { ja: '出力', de: 'Ausgabe', fi: 'Tulos' };
+  const b64EncMap = { ja: 'Encode →', de: 'Kodieren →', fi: 'Koodaa →' };
+  const b64DecMap = { ja: '← Decode', de: '← Dekodieren', fi: '← Dekoodaa' };
+  document.getElementById('ccLabel').textContent   = ccLabelMap[lang];
+  document.getElementById('b64Label').textContent  = b64LabelMap[lang];
+  document.getElementById('b64OutLabel').textContent = b64OutMap[lang];
+  document.getElementById('b64EncBtn').textContent = b64EncMap[lang];
+  document.getElementById('b64DecBtn').textContent = b64DecMap[lang];
 
-/* ====================================================
-   メイン描画
-==================================================== */
-function renderAll() {
-  document.getElementById('diary-page-title').textContent = ui('pageTitle');
-  document.title = ui('pageTitle') + ' — 偽造切手';
+  /* Base-29ラベル */
+  const b29LabelMap  = { ja: '入力',    de: 'Eingabe', fi: 'Syöte'  };
+  const b29OutMap    = { ja: '出力',    de: 'Ausgabe',  fi: 'Tulos'  };
+  const b29EncMap    = { ja: 'Encode →', de: 'Kodieren →', fi: 'Koodaa →' };
+  const b29DecMap    = { ja: '← Decode', de: '← Dekodieren', fi: '← Dekoodaa' };
+  document.getElementById('b29Label').textContent    = b29LabelMap[lang];
+  document.getElementById('b29OutLabel').textContent = b29OutMap[lang];
+  document.getElementById('b29EncBtn').textContent   = b29EncMap[lang];
+  document.getElementById('b29DecBtn').textContent   = b29DecMap[lang];
 
-  var total      = ENTRIES.length;
-  var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-  currentPage    = Math.min(currentPage, totalPages);
-
-  var start = (currentPage - 1) * PER_PAGE;
-  var items = ENTRIES.slice(start, start + PER_PAGE);
-
-  var listEl = document.getElementById('diary-list');
-  listEl.innerHTML = items.length === 0
-    ? '<p class="diary-empty">' + ui('empty') + '</p>'
-    : items.map(function(entry, i) {
-        return buildCard(entry, start + i);
-      }).join('');
-
-  renderPagination('pagination-top', totalPages);
-  renderPagination('pagination-bot', totalPages);
-}
-
-function goPage(n) {
-  currentPage = n;
-  setPageHash(n);
-  renderAll();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ====================================================
-   言語切替フック
-==================================================== */
-(function() {
-  var _orig = window.setLang;
-  window.setLang = function(l) {
-    lang = l;
-    if (_orig) _orig(l);
-    renderAll();
+  /* Pxem ラベル */
+  const pxemDescMap = {
+    ja: '<strong style="color:var(--text);">Pxem</strong>とは、2008年に<strong style="color:var(--text);">ぬこ</strong>氏(2026年現在では<strong style="color:var(--text);">nk.</strong>名義)によって開発されたジョーク向け難解プログラミング言語で、こちらはReplitの力をふんだんに借りながら作られたその非公式実装のような何かです。詳しいことはなんかWikipediaとか見といてください(丸投げ)',
+    de: '<strong style="color:var(--text);">Pxem</strong> ist eine scherzhafte esoterische Programmiersprache, die 2008 von <strong style="color:var(--text);">Nuko</strong> (Stand 2026 unter dem Namen <strong style="color:var(--text);">nk.</strong> bekannt) entwickelt wurde. Dies hier ist so etwas wie eine inoffizielle Implementierung davon, die mit reichlich Hilfe von Replit entstanden ist. Für weitere Details schau einfach bei Wikipedia nach. (Komplette Weitergabe der Verantwortung.)',
+    fi: '<strong style="color:var(--text);">Pxem</strong> on vuonna 2008 <strong style="color:var(--text);">Nuko</strong>-nimisen henkilön (vuonna 2026 nimellä <strong style="color:var(--text);">nk.</strong> tunnettu) kehittämä humoristinen esoteerinen ohjelmointikieli. Tämä on siitä tehty epävirallinen toteutus, jonka rakentamisessa on hyödynnetty Replitiä varsin runsaasti. Lisätietoja löytyy esimerkiksi Wikipediasta. (Vastuu siirretty onnistuneesti.)',
   };
-})();
+  const pxemNameLabelMap = { ja: 'File Name',       de: 'Dateiname',             fi: 'Tiedostonimi'         };
+  const pxemNameSubMap   = { ja: '（拡張子込みのファイル名 = ソースコード）', de: '(Dateiname inkl. Erweiterung = Quellcode)', fi: '(Tiedostonimi pääte mukaan = lähdekoodi)' };
+  const pxemNamePhMap    = { ja: '例: Hello, world!.pxe', de: 'Bsp.: Hello, world!.pxe', fi: 'Esim.: Hello, world!.pxe' };
+  const pxemBodyLabelMap = { ja: 'File Body',        de: 'Dateiinhalt',           fi: 'Tiedoston sisältö'    };
+  const pxemBodySubMap   = { ja: '（.e コマンドで呼ばれるサブルーチン / 省略可）', de: '(.e-Befehl ruft Unterprogramm / optional)', fi: '(.e-komento kutsuu aliohjelmaa / valinnainen)' };
+  const pxemOptPhMap     = { ja: '（省略可）',         de: '(optional)',             fi: '(valinnainen)'        };
+  const pxemStdinLabelMap= { ja: 'Standard Input',   de: 'Standardeingabe',       fi: 'Vakiosyöte'           };
+  const pxemStdinSubMap  = { ja: '（.i コマンドで読む / 省略可）', de: '(.i-Befehl liest daraus / optional)', fi: '(.i-komento lukee tästä / valinnainen)' };
+  const pxemRunMap       = { ja: '▶ 実行',            de: '▶ Ausführen',           fi: '▶ Suorita'            };
+  const pxemClearMap     = { ja: 'クリア',            de: 'Löschen',               fi: 'Tyhjennä'             };
+  const pxemOutLabelMap  = { ja: 'Output',            de: 'Ausgabe',               fi: 'Tulos'                };
+  const pxemCmdSumMap    = { ja: '▸ コマンド一覧',   de: '▸ Befehlsübersicht',    fi: '▸ Komentoluettelo'    };
+  const pxemCmdMap = {
+    P:     { ja: '全pop→文字として出力',         de: 'alle pop → Zeichen ausgeben',      fi: 'kaikki pop → tulosta merkkinä'    },
+    N:     { ja: 'pop→数値として出力',           de: 'pop → Zahl ausgeben',              fi: 'pop → tulosta numerona'           },
+    C:     { ja: 'トップを複製',                de: 'Spitze duplizieren',               fi: 'kopioi pinon huippu'              },
+    M:     { ja: 'pop→一時レジスタへ',          de: 'pop → Temp-Register',              fi: 'pop → väliaikaisrekisteriin'      },
+    T:     { ja: '一時レジスタをpush',          de: 'Temp-Register pushen',             fi: 'push temp-rekisteri'              },
+    S:     { ja: '上位2つを入れ替え',           de: 'obere 2 tauschen',                 fi: 'vaihda kaksi ylintä'              },
+    Add:   { ja: '和 (a+b)',                    de: 'Summe (a+b)',                       fi: 'summa (a+b)'                      },
+    Sub:   { ja: '差 (|a−b|)',                  de: 'Differenz (|a−b|)',                 fi: 'erotus (|a−b|)'                   },
+    Mul:   { ja: '積 (a×b)',                    de: 'Produkt (a×b)',                     fi: 'tulo (a×b)'                       },
+    Div:   { ja: '商 (大÷小)',                  de: 'Quotient (max÷min)',                fi: 'osamäärä (max÷min)'               },
+    Mod:   { ja: '余り (大 mod 小)',             de: 'Rest (max mod min)',                fi: 'jakojäännös (max mod min)'        },
+    R:     { ja: '乱数 [0, a)',                 de: 'Zufallszahl [0, a)',                fi: 'satunnaisluku [0, a)'             },
+    I:     { ja: 'stdin 1文字読む',             de: 'stdin: 1 Zeichen lesen',           fi: 'lue 1 merkki stdinistä'           },
+    E:     { ja: 'ボディをサブルーチン呼び出し', de: 'Unterprogramm aufrufen',           fi: 'kutsu aliohjelma'                 },
+    D:     { ja: 'プログラム終了',              de: 'Programm beenden',                 fi: 'lopeta ohjelma'                   },
+    Loop:  { ja: 'ループ開始',                 de: 'Schleife starten',                 fi: 'aloita silmukka'                  },
+    A:     { ja: 'ループ終端',                 de: 'Schleife beenden',                 fi: 'lopeta silmukka'                  },
+    Other: { ja: '次コマンド前に逆順push',      de: 'vor Befehl umgekehrt pushen',      fi: 'push käänteisessä ennen komentoa' },
+  };
 
-/* ====================================================
-   ハッシュ変化
-==================================================== */
-window.addEventListener('hashchange', function() {
-  currentPage = getPageFromHash();
-  renderAll();
+  document.getElementById('pxemDesc').innerHTML        = pxemDescMap[lang];
+  document.getElementById('pxemNameLabel').textContent = pxemNameLabelMap[lang];
+  document.getElementById('pxemNameSub').textContent   = pxemNameSubMap[lang];
+  document.getElementById('pxemName').placeholder      = pxemNamePhMap[lang];
+  document.getElementById('pxemBodyLabel').textContent = pxemBodyLabelMap[lang];
+  document.getElementById('pxemBodySub').textContent   = pxemBodySubMap[lang];
+  document.getElementById('pxemBody').placeholder      = pxemOptPhMap[lang];
+  document.getElementById('pxemStdinLabel').textContent= pxemStdinLabelMap[lang];
+  document.getElementById('pxemStdinSub').textContent  = pxemStdinSubMap[lang];
+  document.getElementById('pxemStdin').placeholder     = pxemOptPhMap[lang];
+  document.getElementById('pxemRunBtn').textContent    = pxemRunMap[lang];
+  document.getElementById('pxemClearBtn').textContent  = pxemClearMap[lang];
+  document.getElementById('pxemOutputLabel').textContent = pxemOutLabelMap[lang];
+  document.getElementById('pxemCmdSummary').textContent= pxemCmdSumMap[lang];
+  for (const [key, translations] of Object.entries(pxemCmdMap)) {
+    const el = document.getElementById('pxemCmd' + key);
+    if (el) el.textContent = translations[lang];
+  }
+
+  updateInfo();
+  renderSysMsg();
+  renderLog();
+  updateWipPanels(lang);
+  if (window._plotterInited && typeof plotterSetLang === 'function') {
+    plotterSetLang(lang);
+  }
+}
+
+/* ============================================================
+   WIPパネル多言語切替
+============================================================ */
+const WIP_PANELS = {
+  omikuji: {
+    title: { ja: 'VIPおみくじ',      de: 'VIP-Glückslos',        fi: 'VIP-onnenlippu'    },
+    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+  },
+  chat: {
+    title: { ja: 'チャット',          de: 'Chat',                 fi: 'Chat'              },
+    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
+  },
+  esoteric: {
+    title: { ja: '難解言語研究室',    de: 'Esoterische Sprachen', fi: 'Esoteerinen laboratorio' },
+  },
+
+};
+
+function updateWipPanels(lang) {
+  for (const [key, data] of Object.entries(WIP_PANELS)) {
+    const titleEl = document.getElementById('wipTitle-' + key);
+    const msgEl   = document.getElementById('wipMsg-'   + key);
+    if (titleEl) titleEl.textContent = data.title[lang];
+    if (msgEl)   {
+      msgEl.textContent = data.msg[lang];
+      msgEl.style.fontFamily = lang === 'ja'
+        ? "'Noto Serif JP', serif"
+        : 'var(--font-mono)';
+    }
+  }
+}
+
+function setLang(lang) {
+  if (lang === currentLang) return;
+  const ct = document.getElementById('contentText');
+  ct.classList.add('fading');
+  setTimeout(() => { applyLang(lang); ct.classList.remove('fading'); }, 250);
+}
+
+function langLabel(lang) {
+  return { ja: '日本語', de: 'Deutsch', fi: 'Suomi' }[lang];
+}
+
+/* ============================================================
+   時刻
+============================================================ */
+function julianDate(d) { return d / 86400000 + 2440587.5; }
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function getDatetimeStr(tz) {
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat('sv', {
+    timeZone: tz,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+  const p = {};
+  fmt.formatToParts(now).forEach(x => { p[x.type] = x.value; });
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+function updateInfo() {
+  document.getElementById('infoDatetime').textContent = getDatetimeStr(TIME_ZONES[currentLang]);
+  document.getElementById('infoJulian').textContent   = julianDate(Date.now()).toFixed(5);
+}
+
+/* ============================================================
+   システムメッセージ
+============================================================ */
+function renderSysMsg() {
+  document.getElementById('infoDaily').textContent = SYS_MESSAGES[currentLang];
+}
+
+/* ============================================================
+   パーソナルログ
+============================================================ */
+function renderLog() {
+  const area = document.getElementById('logArea');
+  const total = LOG_ENTRIES.length;
+  const prev  = (logIdx - 1 + total) % total;
+  const cur   = logIdx;
+
+  const make = (entry, isCurrent) => {
+    const s = document.createElement('span');
+    s.className = 'log-line' + (isCurrent ? ' current' : '');
+    s.innerHTML =
+      `<span class="log-ts">[${entry.ts}]</span>` +
+      `<span class="log-tag">${entry.tag}</span>` +
+      entry.text;
+    return s;
+  };
+
+  area.innerHTML = '';
+  area.appendChild(make(LOG_ENTRIES[prev], false));
+  area.appendChild(make(LOG_ENTRIES[cur],  true));
+
+  document.getElementById('logCounter').textContent =
+    `${String(cur + 1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+}
+
+function nextLog() { logIdx = (logIdx + 1) % LOG_ENTRIES.length; renderLog(); }
+function prevLog() { logIdx = (logIdx - 1 + LOG_ENTRIES.length) % LOG_ENTRIES.length; renderLog(); }
+
+/* ============================================================
+   ツールパネル開閉
+============================================================ */
+const overlay = document.getElementById('tool-overlay');
+
+function openTool(id) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('visible'));
+  const panel = document.getElementById('panel-' + id);
+  if (!panel) return;
+
+  if (id === 'plotter') {
+    if (!window._plotterInited) {
+      window._plotterInited = true;
+      initPlotter(currentLang);
+    } else {
+      plotterSetLang(currentLang);
+    }
+  }
+
+  panel.classList.add('visible');
+  currentPanel = id;
+
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('active'));
+  document.body.style.overflow = 'hidden';
+
+  if (id === 'timezone') startTzClock();
+  else stopTzClock();
+}
+
+function closeTool() {
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';      // ← 追加：スクロール復元
+  stopTzClock();
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('visible'));
+    currentPanel = null;
+  }, 200);
+}
+
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) closeTool();
 });
 
-/* ====================================================
-   初期表示
-==================================================== */
-currentPage = getPageFromHash();
-renderAll();
+/* ============================================================
+   計算機
+============================================================ */
+let calcExpr    = '';
+let calcCurrent = '0';
+let calcOp_     = null;
+let calcPrev    = null;
+let calcNewNum  = true;
 
-/* ====================================================
-   クイズモーダル
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ここから下にはクイズの答えが書いてあります。
-　　ソースコード見て答え知ろうと思ったあなたは賢いですね。
-　　簡単に答えが分かったらなんか面白くないなと思ったので一応答えはハッシュ化してありますが、どうにか頑張ったら多分答えは分かると思います。
-　　というかそんなことしなくてもどこのページに飛ぶかは分かるとは思いますが、暇つぶしと思って付き合ってくださると嬉しいです。
-==================================================== */
-(function() {
-  /* DOM注入 */
-  var overlay = document.createElement('div');
-  overlay.id = 'quiz-overlay';
-  overlay.innerHTML =
-    '<div id="quiz-dialog">' +
-      '<p id="quiz-question"></p>' +
-      '<input id="quiz-input" type="text" autocomplete="off" spellcheck="false">' +
-      '<div id="quiz-dialog-btns"><button id="quiz-submit">→</button></div>' +
-    '</div>';
-  document.body.appendChild(overlay);
+function calcDisplay() {
+  document.getElementById('calcDisplay').textContent = calcCurrent;
+  document.getElementById('calcExpr').textContent    = calcExpr;
+}
 
-  var quizStep = 0;
-  var quizPath = null;
-  var H = {
-    step1: [
-      '543e33c48b3c23d3b3ef151358533bc206fa0225ba66b89933a795451f016479'
-    ],
-    step2: [
-      '6e0b1be2a81bcbe9d08ccf03dfd28cfdc4bad37ee6bf4fc7e3131415a58855ff',
-      '5741143da164ff7dac2e63a31912a0b922059a557c26d2a3c8c6f5b3804e1193',
-      '66b0fbb12e4d8f2baf6c325839fa06365b5d7edcdafa36f59440de323751848c',
-      '3daf3064e699483c225d155b22bbb7ee5c3675cf5d120a3e35cc4ce28c6e987d'
-    ],
-    step3_oedipa: [
-      '6a9be37c64fdd0a4191b8f52ae39cfb2e893904989c48614639278f407615663',
-      '2213ef363d675360b9cd892959dae3c849db68087ebd60908e9aad72664bfef0',
-      'dec701935bde39d7d60439ebe78e5c89d978f1cbe6558191b423226913da5f32',
-      '7731113c180782fccac6877a9357493d997a0f19203b7d91c89c22f9a81fa595'
-    ],
-    step3_tonio: [
-      '3ce7429acfbe25067e35e5a0fc227c30ffe62ededbce326d119264d62fd45cd0'
-    ],
-    step4_oedipa: [
-      'e81de341385623daaad3511d196c1808f2cb1d3b7ac2d6bece0151b2596775b5',
-      'a558fdc8b8f3cc014e70922ac011b7150399b6023b9124c569b5c35dfe6919a8',
-      '09ce3b1f10913394ebab89dfaeb0c622abd48632a662e99be0c915caac61dad6',
-      '631e198109d7db211427843efb4c0fe5023942bfbeee492fdd772fe669d158db'
-    ],
-    step4_tonio: [
-      '1ab27950901e74c7426a06b5e894dea503546865cb82223087ca8016200835ea',
-      '0e71fddbdb1d8565ca66a671fedd458a6ccad6307dccceb68de3bfbfb5ffe8e1'
-    ],
-    step5: 'e99ecd955e7648433b86bfeeec9a235cfbe5caae601589b778b7369f56d00a49'
+function calcNum(n) {
+  if (calcNewNum) { calcCurrent = n === '.' ? '0.' : n; calcNewNum = false; }
+  else {
+    if (n === '.' && calcCurrent.includes('.')) return;
+    calcCurrent = calcCurrent === '0' && n !== '.' ? n : calcCurrent + n;
+  }
+  calcDisplay();
+}
+
+function calcDot() { calcNum('.'); }
+
+function calcOp(op) {
+  calcPrev   = parseFloat(calcCurrent);
+  calcOp_    = op;
+  calcExpr   = calcCurrent + ' ' + ({'+':'+','-':'−','*':'×','/':'÷'}[op]);
+  calcNewNum = true;
+  calcDisplay();
+}
+
+function calcEquals() {
+  if (calcOp_ === null) return;
+  const a = calcPrev, b = parseFloat(calcCurrent);
+  let result;
+  if (calcOp_ === '+') result = a + b;
+  else if (calcOp_ === '-') result = a - b;
+  else if (calcOp_ === '*') result = a * b;
+  else if (calcOp_ === '/') result = b === 0 ? 'ERR' : a / b;
+  calcExpr   = `${a} ${({'+':'+','-':'−','*':'×','/':'÷'}[calcOp_])} ${b} =`;
+  calcCurrent = result === 'ERR' ? 'ERR' : String(parseFloat(result.toFixed(10)));
+  calcOp_    = null;
+  calcPrev   = null;
+  calcNewNum = true;
+  calcDisplay();
+}
+
+function calcClear() {
+  calcCurrent = '0'; calcExpr = ''; calcOp_ = null; calcPrev = null; calcNewNum = true;
+  calcDisplay();
+}
+function calcSign()    { calcCurrent = String(-parseFloat(calcCurrent)); calcDisplay(); }
+function calcPercent() { calcCurrent = String(parseFloat(calcCurrent) / 100); calcDisplay(); }
+
+/* ============================================================
+   文字数カウント
+============================================================ */
+function updateCharCount() {
+  const text = document.getElementById('ccInput').value;
+  const chars     = text.length;
+  const noSpace   = text.replace(/\s/g,'').length;
+  const words     = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  const lines     = text === '' ? 0 : text.split('\n').length;
+  const byteCount = new TextEncoder().encode(text).length;
+
+  const labelMap = {
+    ja: `文字数: ${chars}  （空白除く: ${noSpace}）\n単語数: ${words}  行数: ${lines}\nバイト数: ${byteCount}`,
+    de: `Zeichen: ${chars}  (ohne Leerzeichen: ${noSpace})\nWörter: ${words}  Zeilen: ${lines}\nBytes: ${byteCount}`,
+    fi: `Merkit: ${chars}  (ilman välilyöntejä: ${noSpace})\nSanat: ${words}  Rivit: ${lines}\nTavut: ${byteCount}`,
   };
+  const out = document.getElementById('ccOutput');
+  out.className = 'tool-output' + (chars === 0 ? ' muted' : '');
+  out.textContent = chars === 0 ? '----' : labelMap[currentLang];
+}
 
-  var ENCODED_URLS = {
-    oedipa:  '5a4858185c4d5c5d',
-    tonio: '455059571a51455c5b'
-  };
-
-  var QS = {
-    ja: {
-      q1:    '競介の好きな飲み物は？',
-      q2:    '競介の好きな銘柄は？',
-      q3:    '競介の好きな作家は？',
-      q3a:   'その作家の作品で競介が一番好きなものは？',
-      q3b:   '…その作家の作品で競介が一番好きなものは？',
-      q4:    '魔法の番号を入力してね',
-      wrong: '残念…'
-    },
-    de: {
-      q1:    'Was trinkt Kyōsuke am liebsten?',
-      q2:    'Welche Marke mag Kyōsuke am liebsten?',
-      q3:    'Wer ist Kyōsukes Lieblingsautor?',
-      q3a:   'Welches Werk dieses Autors mag Kyōsuke am meisten?',
-      q3b:   '…Welches Werk dieses Autors mag Kyōsuke am meisten?',
-      q4:    'Gib die magische Zahl ein',
-      wrong: 'Schade…'
-    },
-    fi: {
-      q1:    'Mikä on Kyōsuken suosijuoma?',
-      q2:    'Mikä on Kyōsuken suosimerkki?',
-      q3:    'Kuka on Kyōsuken suosikirjailija?',
-      q3a:   'Mikä on Kyōsuken suositeos tältä kirjailijalta?',
-      q3b:   '…Mikä on Kyōsuken suositeos tältä kirjailijalta?',
-      q4:    'Syötä taikanluku',
-      wrong: 'Harmi…'
+/* ============================================================
+   Base64
+============================================================ */
+function doBase64(mode) {
+  const input = document.getElementById('b64Input').value;
+  const out   = document.getElementById('b64Output');
+  try {
+    if (mode === 'encode') {
+      out.textContent = btoa(unescape(encodeURIComponent(input)));
+      out.className   = 'tool-output';
+    } else {
+      out.textContent = decodeURIComponent(escape(atob(input)));
+      out.className   = 'tool-output';
     }
-  };
+  } catch {
+    const errMap = { ja: 'デコードエラー', de: 'Dekodierungsfehler', fi: 'Dekoodausvirhe' };
+    out.textContent = errMap[currentLang];
+    out.className   = 'tool-output muted';
+  }
+}
 
-  function qq(key) { return ((QS[lang] || QS['ja'])[key]) || ''; }
+/* ============================================================
+   世界時計
+============================================================ */
+function renderTzGrid() {
+  const grid = document.getElementById('tzGrid');
+  grid.innerHTML = '';
+  WORLD_CLOCKS.forEach(({ label, tz }) => {
+    const now = new Date();
+    const fmt = new Intl.DateTimeFormat('sv', {
+      timeZone: tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+    });
+    const dateFmt = new Intl.DateTimeFormat('sv', {
+      timeZone: tz, month:'2-digit', day:'2-digit'
+    });
+    grid.innerHTML += `
+      <div class="tz-card">
+        <div class="tz-name">${label}</div>
+        <div class="tz-time">${fmt.format(now)}</div>
+        <div class="tz-date">${dateFmt.format(now)}</div>
+      </div>`;
+  });
+}
 
-  /* 全角英数→半角、小文字化、連続スペース圧縮 */
-  function norm(s) {
-    return s.trim()
-      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); })
-      .toLowerCase()
-      .replace(/\s+/g, ' ');
+function startTzClock() { renderTzGrid(); tzInterval = setInterval(renderTzGrid, 1000); }
+function stopTzClock()  { if (tzInterval) { clearInterval(tzInterval); tzInterval = null; } }
+
+/* ============================================================
+   初期化
+============================================================ */
+function init() {
+  applyLang(currentLang);
+  calcDisplay();
+}
+
+init();
+setInterval(updateInfo, 1000);
+
+/* ============================================================
+   ストップウォッチ
+============================================================ */
+let swRunning  = false;
+let swStart    = 0;
+let swElapsed  = 0;
+let swInterval = null;
+
+function openStopwatch() {
+  openTool('stopwatch');
+  const titles  = { ja: 'ストップウォッチ', de: 'Stoppuhr', fi: 'Sekuntikello' };
+  const starts  = { ja: swRunning ? 'ストップ' : 'スタート', de: swRunning ? 'Stopp' : 'Start', fi: swRunning ? 'Pysäytä' : 'Käynnistä' };
+  const resets  = { ja: 'リセット', de: 'Zurücksetzen', fi: 'Nollaa' };
+  document.getElementById('swTitle').textContent    = titles[currentLang];
+  document.getElementById('swStartBtn').textContent = starts[currentLang];
+  document.getElementById('swResetBtn').textContent = resets[currentLang];
+  updateSwDisplay();
+}
+
+function updateSwDisplay() {
+  const ms     = swElapsed + (swRunning ? Date.now() - swStart : 0);
+  const mins   = Math.floor(ms / 60000);
+  const secs   = Math.floor((ms % 60000) / 1000);
+  const cs     = Math.floor((ms % 1000) / 10);
+  document.getElementById('swDisplay').textContent =
+    String(mins).padStart(2,'0') + ':' +
+    String(secs).padStart(2,'0') + '.' +
+    String(cs).padStart(2,'0');
+}
+
+function swToggle() {
+  const starts = { ja: 'スタート', de: 'Start',  fi: 'Käynnistä' };
+  const stops  = { ja: 'ストップ', de: 'Stopp',  fi: 'Pysäytä'   };
+  const btn    = document.getElementById('swStartBtn');
+  if (!swRunning) {
+    swStart    = Date.now();
+    swRunning  = true;
+    swInterval = setInterval(updateSwDisplay, 50);
+    btn.textContent = stops[currentLang];
+  } else {
+    swElapsed += Date.now() - swStart;
+    swRunning  = false;
+    clearInterval(swInterval); swInterval = null;
+    updateSwDisplay();
+    btn.textContent = starts[currentLang];
+  }
+}
+
+function swReset() {
+  swRunning = false;
+  clearInterval(swInterval); swInterval = null;
+  swElapsed = 0; swStart = 0;
+  const starts = { ja: 'スタート', de: 'Start', fi: 'Käynnistä' };
+  document.getElementById('swStartBtn').textContent = starts[currentLang];
+  updateSwDisplay();
+}
+
+/* ============================================================
+   競介クイズ — データ
+============================================================ */
+const Q_MAXSEL = [1, 1, 2, 1, 2, 2, 1, 6]; /* 問ごとの最大選択数 */
+const Q_SALT   = 'kyo_quiz_v1_';
+const Q_HASHES = [
+  '2b8df8114731d70d7b411a60b03a14ea63d36c0a916d6e9b49bd956242494a86',
+  '2b8df8114731d70d7b411a60b03a14ea63d36c0a916d6e9b49bd956242494a86',
+  '5d6fc12dc30eafe03abb03282130c06dc7f3f7d4746d9b580db819f0a37f3ace',
+  '2b8df8114731d70d7b411a60b03a14ea63d36c0a916d6e9b49bd956242494a86',
+  'cdc5d590a40808b0f2f9b5d2bc6552d53fce623dd35020599863f995f74a30a0',
+  '292096dbfc39a68af38c002e56e93526c75e73128d10eafd1cfb2d267165a4a3',
+  'fcd536a30bb50680924dea7ec857944921b8c4d74276d3e08a9af8780adf7d57',
+  '8d3cf55940168f92e6e6d2929aeca870c2947a58ef2e12f484add4523bb57aca',
+];
+
+const Q_DATA = {
+  ja: {
+    panelTitle: '競介クイズ',
+    subtitle:   '君は競介の何を知っているのか',
+    nextBtn:    '次へ →',
+    finishBtn:  '結果を見る',
+    tabText:    '集計中…',
+    resultLabel:'結果は…',
+    closeBtn:   '閉じる',
+    qLabel:     '問', of: '/',
+    scoreUnit:  '問正解',
+    questions: [
+      { q: '競介の一番好きなZONeの味は？',      multi: false, hint: '',
+        choices: ['NORMAL','WHITE SODA','5772K','ZERO','POWER MORNING','BLACK PUNCH'] },
+      { q: '競介の一番好きな数字は？',           multi: false, hint: '',
+        choices: ['7','17','29','1001','1729','114514'] },
+      { q: '競介の好きな国を二つ選べ',           multi: true,  hint: '（2つ選べ）',
+        choices: ['台湾','ドイツ','カナダ','イギリス','フィンランド','フィリピン'] },
+      { q: '競介の好きな数学の分野は？',         multi: false, hint: '',
+        choices: ['解析学','球面幾何学','和分差分学','双曲幾何学','統計学','トポロジー'] },
+      { q: '競介の好きな漫画家を2人選べ',        multi: true,  hint: '（2つ選べ）',
+        choices: ['紀伊カンナ','水炊き','秋★枝','水野英多','氏家ト全','中村明日美子'] },
+      { q: '競介の好きな食べ物を２つ選んでね',   multi: true,  hint: '（2つ選べ）',
+        choices: ['サルミアッキ','鰹節','パセリ','ミンティア','バター','あたりめ'] },
+      { q: '競介の好きな犬種は？',               multi: false, hint: '',
+        choices: ['チワワ','毒チワワ','柴犬','ボルゾイ','毒チワワ','毒チワワ'] },
+      { q: '競介のやっているゲームを全て選べ',   multi: true,  hint: '（全て選べ）',
+        choices: ['Arcaea','東方ロストワード','東方幻想エクリプス','オンゲキ','Lanota','World Box'] },
+    ],
+    results: [
+      { min:0, max:2, heading:'これはひどい！', desc:'つーかどうやってここまで来たんだよお前' },
+      { min:3, max:5, heading:'あらあら…', desc:'俺たちもっと仲良くなれそうだね！' },
+      { min:6, max:7, heading:'すごいね！', desc:'俺たち、完全に友達！' },
+      { min:8, max:8, heading:'満点！！', desc:'ここまで来ると逆にキモいかも！' },
+    ],
+  },
+  de: {
+    panelTitle: 'Kyosuke-Quiz',
+    subtitle:   'Was weißt du über Kyosuke?',
+    nextBtn:    'Weiter →',
+    finishBtn:  'Ergebnis ansehen',
+    tabText:    'Auswertung…',
+    resultLabel:'Das Ergebnis ist…',
+    closeBtn:   'Schließen',
+    qLabel:     'Frage', of: '/',
+    scoreUnit:  'richtig',
+    questions: [
+      { q: 'Was ist Kyosukes liebster ZONe-Geschmack?',      multi: false, hint: '',
+        choices: ['NORMAL','WHITE SODA','5772K','ZERO','POWER MORNING','BLACK PUNCH'] },
+      { q: 'Was ist Kyosukes Lieblingszahl?',                multi: false, hint: '',
+        choices: ['7','17','29','1001','1729','114514'] },
+      { q: 'Wähle Kyosukes zwei Lieblingsländer',            multi: true,  hint: '(Wähle 2)',
+        choices: ['Taiwan','Deutschland','Kanada','Vereinigtes Königreich','Finnland','Philippinen'] },
+      { q: 'Was ist Kyosukes Lieblingsgebiet der Mathematik?', multi: false, hint: '',
+        choices: ['Analysis','Sphärische Geometrie','Differenzenrechnung','Hyperbolische Geometrie','Statistik','Topologie'] },
+      { q: 'Wähle Kyosukes 2 Lieblingsmangaka',              multi: true,  hint: '(Wähle 2)',
+        choices: ['紀伊カンナ','水炊き','秋★枝','水野英多','氏家ト全','中村明日美子'] },
+      { q: 'Wähle Kyosukes 2 Lieblingsessen',                multi: true,  hint: '(Wähle 2)',
+        choices: ['Salmiakki','Katsuobushi','Petersilie','Mintia','Butter','Getrockneter Tintenfisch'] },
+      { q: 'Was ist Kyosukes Lieblingsrasse?',               multi: false, hint: '',
+        choices: ['Chihuahua','Gift-Chihuahua','Shiba Inu','Barsoi','Gift-Chihuahua','Gift-Chihuahua'] },
+      { q: 'Wähle alle Spiele, die Kyosuke spielt',          multi: true,  hint: '(Alle auswählen)',
+        choices: ['Arcaea','東方ロストワード','東方幻想エクリプス','オンゲキ','Lanota','World Box'] },
+    ],
+    results: [
+      { min:0, max:2, heading:'Das ist ja furchtbar!', desc:'Mal ehrlich, wie bist du überhaupt auf diese Seite gekommen?' },
+      { min:3, max:5, heading:'Na, na...', desc:'Ich glaube, wir könnten noch gute Freunde werden!' },
+      { min:6, max:7, heading:'Beeindruckend!', desc:'Wir sind praktisch schon Freunde!' },
+      { min:8, max:8, heading:'Volle Punktzahl!!', desc:'Auf diesem Niveau wirds fast schon unheimlich!' },
+    ],
+  },
+  fi: {
+    panelTitle: 'Kyosuken tietovisa',
+    subtitle:   'Mitä tiedät Kyosukesta?',
+    nextBtn:    'Seuraava →',
+    finishBtn:  'Katso tulos',
+    tabText:    'Lasketaan…',
+    resultLabel:'Tulos on…',
+    closeBtn:   'Sulje',
+    qLabel:     'Kysymys', of: '/',
+    scoreUnit:  'oikein',
+    questions: [
+      { q: 'Mikä on Kyosuken suosikki ZONe-maku?',        multi: false, hint: '',
+        choices: ['NORMAL','WHITE SODA','5772K','ZERO','POWER MORNING','BLACK PUNCH'] },
+      { q: 'Mikä on Kyosuken lempiluku?',                  multi: false, hint: '',
+        choices: ['7','17','29','1001','1729','114514'] },
+      { q: 'Valitse kaksi Kyosuken suosikkimaata',         multi: true,  hint: '(Valitse 2)',
+        choices: ['Taiwan','Saksa','Kanada','Yhdistynyt kuningaskunta','Suomi','Filippiinit'] },
+      { q: 'Mikä on Kyosuken suosikki matematiikan ala?',  multi: false, hint: '',
+        choices: ['Analyysi','Pallogeometria','Differenssilasku','Hyperbolinen geometria','Tilastotiede','Topologia'] },
+      { q: 'Valitse 2 Kyosuken suosikkimangakaa',          multi: true,  hint: '(Valitse 2)',
+        choices: ['紀伊カンナ','水炊き','秋★枝','水野英多','氏家ト全','中村明日美子'] },
+      { q: 'Valitse 2 Kyosuken suosikkiruokaa',            multi: true,  hint: '(Valitse 2)',
+        choices: ['Salmiakki','Katsuobushi','Persilja','Mintia','Voi','Kuivattu mustekala'] },
+      { q: 'Mikä on Kyosuken suosikkikoirarotu?',          multi: false, hint: '',
+        choices: ['Chihuahua','Myrkky-chihuahua','Shiba Inu','Borzoi','Myrkky-chihuahua','Myrkky-chihuahua'] },
+      { q: 'Valitse kaikki Kyosuken pelaamat pelit',       multi: true,  hint: '(Valitse kaikki)',
+        choices: ['Arcaea','東方ロストワード','東方幻想エクリプス','オンゲキ','Lanota','World Box'] },
+    ],
+    results: [
+      { min:0, max:2, heading:'Tämä on kamalaa!', desc:'Miten ihmeessä edes päädyit tälle sivulle?' },
+      { min:3, max:5, heading:'No jopas...', desc:'Meistä voisi vielä tulla hyviä ystäviä!' },
+      { min:6, max:7, heading:'Hienoa!', desc:'Me olemme jo käytännössä ystäviä!' },
+      { min:8, max:8, heading:'Täydet pisteet!!', desc:'Tässä vaiheessa se alkaa jo olla vähän karmivaa!' },
+    ],
+  },
+};
+
+/* ============================================================
+   競介クイズ — ロジック
+============================================================ */
+let quizIdx        = 0;
+let quizSelections = [];
+
+async function sha256hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function openQuiz() {
+  quizIdx        = 0;
+  quizSelections = Array.from({ length: 8 }, () => new Set());
+  renderQuizQuestion();
+  document.getElementById('quizViewQuestion').style.display   = '';
+  document.getElementById('quizViewTabulating').style.display = 'none';
+  document.getElementById('quizViewResult').style.display     = 'none';
+  openTool('quiz');
+}
+
+function closeQuiz() { closeTool(); }
+
+function renderQuizQuestion() {
+  const lang  = Q_DATA[currentLang];
+  const q     = lang.questions[quizIdx];
+  const total = lang.questions.length;
+
+  document.getElementById('quizPanelTitle').textContent = lang.panelTitle;
+  document.getElementById('quizSubtitle').textContent   = lang.subtitle;
+  document.getElementById('quizQNum').textContent =
+    `${lang.qLabel} ${quizIdx + 1} ${lang.of} ${total}`;
+  document.getElementById('quizProgFill').style.width   = (quizIdx / total * 100) + '%';
+  document.getElementById('quizQuestion').textContent   = q.q;
+  document.getElementById('quizHint').textContent       = q.hint || '';
+
+  const choicesEl = document.getElementById('quizChoices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className   = 'quiz-choice' + (quizSelections[quizIdx].has(i) ? ' selected' : '');
+    btn.textContent = choice;
+    btn.onclick     = () => toggleQuizChoice(i, q.multi);
+    choicesEl.appendChild(btn);
+  });
+
+  const nextBtn       = document.getElementById('quizNextBtn');
+  nextBtn.textContent = (quizIdx === total - 1) ? lang.finishBtn : lang.nextBtn;
+  nextBtn.disabled    = quizSelections[quizIdx].size === 0;
+}
+
+function toggleQuizChoice(idx, multi) {
+  const sel    = quizSelections[quizIdx];
+  const maxSel = Q_MAXSEL[quizIdx];
+
+  if (sel.has(idx)) {
+    sel.delete(idx);
+  } else if (!multi) {
+    sel.clear();
+    sel.add(idx);
+  } else if (sel.size < maxSel) {
+    sel.add(idx);
+  }
+  /* maxSel 以上はこれ以上選択できない (何もしない) */
+
+  document.querySelectorAll('.quiz-choice').forEach((btn, i) => {
+    btn.classList.toggle('selected', sel.has(i));
+  });
+  document.getElementById('quizNextBtn').disabled = sel.size === 0;
+}
+
+async function quizNext() {
+  const lang  = Q_DATA[currentLang];
+  const total = lang.questions.length;
+
+  if (quizIdx < total - 1) {
+    quizIdx++;
+    renderQuizQuestion();
+    return;
   }
 
-  /* Web Crypto API でSHA-256ハッシュを計算（16進数文字列で返す） */
-  async function sha256hex(s) {
-    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-    return Array.from(new Uint8Array(buf))
-      .map(function(b) { return b.toString(16).padStart(2, '0'); })
-      .join('');
+  /* 最終問 → 集計 */
+  document.getElementById('quizViewQuestion').style.display   = 'none';
+  document.getElementById('quizViewTabulating').style.display = '';
+  document.getElementById('quizTabText').textContent          = lang.tabText;
+
+  /* 2秒演出 */
+  await new Promise(r => setTimeout(r, 2200));
+
+  /* 採点 (ハッシュで照合) */
+  let score = 0;
+  await Promise.all(quizSelections.map(async (sel, i) => {
+    const key  = [...sel].sort((a, b) => a - b).join(',');
+    const hash = await sha256hex(Q_SALT + key);
+    if (hash === Q_HASHES[i]) score++;
+  }));
+
+  showQuizResult(score);
+}
+
+function showQuizResult(score) {
+  const lang = Q_DATA[currentLang];
+  const tier = lang.results.find(r => score >= r.min && score <= r.max);
+
+  document.getElementById('quizViewTabulating').style.display = 'none';
+  document.getElementById('quizViewResult').style.display     = '';
+
+  document.getElementById('quizProgFill').style.width         = '100%';
+  document.getElementById('quizResultLabel').textContent      = lang.resultLabel;
+  document.getElementById('quizScoreVal').textContent         = score;
+  document.getElementById('quizScoreMax').textContent         = `/ ${lang.questions.length} ${lang.scoreUnit}`;
+  document.getElementById('quizResultHeading').textContent    = tier ? tier.heading : '';
+  document.getElementById('quizResultDesc').textContent       = tier ? tier.desc    : '';
+  document.getElementById('quizCloseBtn').textContent         = lang.closeBtn;
+
+  /* 全問正解時のみ景品を表示 */
+  const prizeEl = document.getElementById('quizResultPrize');
+  if (score === lang.questions.length) {
+    const prizeLabel = { ja: '景品：', de: 'Preis: ', fi: 'Palkinto: ' }[currentLang];
+    const contactLabel = { ja: '競介の連絡先', de: 'Kyosukes Kontakt', fi: 'Kyosuken yhteystieto' }[currentLang];
+    /* 鍵 = 全問の正解選択インデックスをジョイン（ソース非掲載）
+       正解した人の quizSelections からのみ復元可能               */
+    const prizeKey = quizSelections.map(sel =>
+      [...sel].sort((a, b) => a - b).join(',')
+    ).join('|');
+    const PRIZE_ENC = '5a08460c43161c535615434f5b0e5402551b1c2648567f6166564f';
+    const encBytes  = PRIZE_ENC.match(/.{2}/g).map(h => parseInt(h, 16));
+    const prizeUrl  = encBytes.map((b, i) =>
+      String.fromCharCode(b ^ prizeKey.charCodeAt(i % prizeKey.length))
+    ).join('');
+    prizeEl.innerHTML = prizeLabel + `<a href="${prizeUrl}" target="_blank" rel="noopener">${contactLabel}</a>`;
+    prizeEl.classList.add('visible');
+  } else {
+    prizeEl.innerHTML = '';
+    prizeEl.classList.remove('visible');
   }
+}
 
-  /* ハッシュ一覧のいずれかと一致するか確認 */
-  async function hashMatches(val, hashes) {
-    var h = await sha256hex(val);
-    var list = Array.isArray(hashes) ? hashes : [hashes];
-    return list.indexOf(h) !== -1;
+/* ============================================================
+   AVANT-GARDE — Base-29
+============================================================ */
+const B29 = [...'abcdefghijklmnopqrstuvwxyzäöü'];
+
+function b29encode(text) {
+  const bytes = new TextEncoder().encode(text);
+  if (!bytes.length) return '';
+  let leadZ = 0;
+  while (leadZ < bytes.length && bytes[leadZ] === 0) leadZ++;
+  let val = 0n;
+  for (const b of bytes) val = val * 256n + BigInt(b);
+  let s = '';
+  while (val > 0n) { s = B29[Number(val % 29n)] + s; val /= 29n; }
+  return B29[0].repeat(leadZ) + s;
+}
+
+function b29decode(str) {
+  str = str.trim();
+  if (!str) return '';
+  let leadZ = 0;
+  while (leadZ < str.length && str[leadZ] === B29[0]) leadZ++;
+  let val = 0n;
+  for (const ch of [...str]) {
+    const idx = B29.indexOf(ch);
+    if (idx < 0) throw new Error('Invalid character: "' + ch + '"');
+    val = val * 29n + BigInt(idx);
   }
+  const bytes = [];
+  while (val > 0n) { bytes.unshift(Number(val % 256n)); val /= 256n; }
+  const arr = new Uint8Array([...new Array(leadZ).fill(0), ...bytes]);
+  return new TextDecoder().decode(arr);
+}
 
-  /* XORデコード：hex文字列をキー文字列でXOR復号してURLを得る */
-  function xorDecode(hex, key) {
-    var keyBytes = Array.from(new TextEncoder().encode(key));
-    var bytes    = hex.match(/.{2}/g).map(function(h) { return parseInt(h, 16); });
-    return new TextDecoder().decode(
-      new Uint8Array(bytes.map(function(b, i) { return b ^ keyBytes[i % keyBytes.length]; }))
-    );
+function doBase29(mode) {
+  const input = document.getElementById('b29Input').value;
+  const out   = document.getElementById('b29Output');
+  try {
+    const result = mode === 'encode' ? b29encode(input) : b29decode(input);
+    out.textContent = result || '(empty)';
+    out.className   = 'tool-output';
+  } catch(e) {
+    const errMap = { ja: 'エラー: ' + e.message, de: 'Fehler: ' + e.message, fi: 'Virhe: ' + e.message };
+    out.textContent = errMap[currentLang];
+    out.className   = 'tool-output muted';
   }
+}
 
-  function showInput(v) {
-    document.getElementById('quiz-input').style.display       = v ? '' : 'none';
-    document.getElementById('quiz-dialog-btns').style.display = v ? '' : 'none';
-  }
+/* ============================================================
+   AVANT-GARDE — タイマー
+============================================================ */
+let timerRunning  = false;
+let timerEnd      = 0;
+let timerRemain   = 0;
+let timerInterval = null;
 
-  window.openQuiz = function() {
-    quizStep = 1; quizPath = null;
-    document.getElementById('quiz-question').textContent = qq('q1');
-    document.getElementById('quiz-input').value = '';
-    showInput(true);
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden'; /* 背後スクロール防止 */
-    setTimeout(function() { document.getElementById('quiz-input').focus(); }, 50);
-  };
+function openTimer() {
+  openTool('timer');
+  const titles  = { ja: 'タイマー',  de: 'Timer',         fi: 'Ajastin'   };
+  const starts  = { ja: 'スタート',  de: 'Start',         fi: 'Käynnistä' };
+  const resets  = { ja: 'リセット',  de: 'Zurücksetzen',  fi: 'Nollaa'    };
+  const hL      = { ja: '時',        de: 'Std',           fi: 'h'         };
+  const mL      = { ja: '分',        de: 'Min',           fi: 'min'       };
+  const sL      = { ja: '秒',        de: 'Sek',           fi: 's'         };
+  document.getElementById('timerTitle').textContent    = titles[currentLang];
+  document.getElementById('timerStartBtn').textContent = starts[currentLang];
+  document.getElementById('timerResetBtn').textContent = resets[currentLang];
+  document.getElementById('timerHLabel').textContent   = hL[currentLang];
+  document.getElementById('timerMLabel').textContent   = mL[currentLang];
+  document.getElementById('timerSLabel').textContent   = sL[currentLang];
+  updateTimerDisplay();
+}
 
-  function closeQuiz() {
-    overlay.classList.remove('open');
-    document.body.style.overflow = ''; /* スクロール復元 */
-  }
+function timerGetSetMs() {
+  const h = Math.max(0, parseInt(document.getElementById('timerH').value) || 0);
+  const m = Math.max(0, Math.min(59, parseInt(document.getElementById('timerM').value) || 0));
+  const s = Math.max(0, Math.min(59, parseInt(document.getElementById('timerS').value) || 0));
+  return (h * 3600 + m * 60 + s) * 1000;
+}
 
-  function wrongAnswer() {
-    document.getElementById('quiz-question').textContent = qq('wrong');
-    showInput(false);
-    setTimeout(closeQuiz, 1600);
-  }
+function updateTimerDisplay() {
+  const ms = timerRunning ? Math.max(0, timerEnd - Date.now()) : timerRemain;
+  const totalSec = Math.ceil(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  document.getElementById('timerDisplay').textContent =
+    h > 0
+      ? String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
+      : String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
 
-  function nextQ(key) {
-    document.getElementById('quiz-question').textContent = qq(key);
-    document.getElementById('quiz-input').value = '';
-    setTimeout(function() { document.getElementById('quiz-input').focus(); }, 20);
-  }
+function timerToggle() {
+  const starts = { ja: 'スタート', de: 'Start',  fi: 'Käynnistä' };
+  const pauses = { ja: 'ポーズ',   de: 'Pause',  fi: 'Tauko'     };
+  const btn    = document.getElementById('timerStartBtn');
 
-  async function handleSubmit() {
-    if (quizStep === 0) return;
-    var val = norm(document.getElementById('quiz-input').value);
-    if (!val) return;
+  if (!timerRunning) {
+    const ms = timerRemain || timerGetSetMs();
+    if (ms <= 0) return;
+    timerRemain  = ms;
+    timerEnd     = Date.now() + ms;
+    timerRunning = true;
+    document.getElementById('timerDoneMsg').style.display = 'none';
+    document.getElementById('timerDisplay').classList.remove('timer-done-anim');
+    btn.textContent = pauses[currentLang];
 
-    /* ボタンを一時的に無効化（連打・二重送信防止） */
-    var btn = document.getElementById('quiz-submit');
-    btn.disabled = true;
-
-    if (quizStep === 1) {
-      (await hashMatches(val, H.step1))
-        ? (quizStep = 2, nextQ('q2'))
-        : wrongAnswer();
-
-    } else if (quizStep === 2) {
-      (await hashMatches(val, H.step2))
-        ? (quizStep = 3, nextQ('q3'))
-        : wrongAnswer();
-
-    } else if (quizStep === 3) {
-      if      (await hashMatches(val, H.step3_oedipa))  { quizPath = 'oedipa';  quizStep = 4; nextQ('q3a'); }
-      else if (await hashMatches(val, H.step3_tonio)) { quizPath = 'tonio'; quizStep = 4; nextQ('q3b'); }
-      else                                               { wrongAnswer(); }
-
-    } else if (quizStep === 4) {
-      var hset = quizPath === 'oedipa' ? H.step4_oedipa : H.step4_tonio;
-      (await hashMatches(val, hset))
-        ? (quizStep = 5, nextQ('q4'))
-        : wrongAnswer();
-
-    } else if (quizStep === 5) {
-      if (await hashMatches(val, H.step5)) {
-        closeQuiz();
-        /* 正解の入力値（魔法の番号）をキーにXORデコードしてURLを復元 */
-        var h = await sha256hex(val);
-          var suffix = quizPath === 'oedipa' ? ':kyo' : ':tana';
-          var token = await sha256hex(h + suffix);
-          location.href = xorDecode(ENCODED_URLS[quizPath], val) + '?t=' + token;
-      } else {
-        wrongAnswer();
+    timerInterval = setInterval(() => {
+      const left = timerEnd - Date.now();
+      if (left <= 0) {
+        clearInterval(timerInterval); timerInterval = null;
+        timerRunning = false; timerRemain = 0;
+        document.getElementById('timerDisplay').textContent = '00:00';
+        document.getElementById('timerDisplay').classList.add('timer-done-anim');
+        const doneMsg = { ja: '⌛︎ 時間です！', de: '⌛︎ Zeit ist um!', fi: '⌛︎ Aika on kulunut!' };
+        const el = document.getElementById('timerDoneMsg');
+        el.textContent = doneMsg[currentLang];
+        el.style.color = '#e83929';
+        el.style.display = '';
+        btn.textContent = starts[currentLang];
+        return;
       }
-    }
-
-    btn.disabled = false;
+      timerRemain = left;
+      updateTimerDisplay();
+    }, 250);
+  } else {
+    timerRemain  = Math.max(0, timerEnd - Date.now());
+    timerRunning = false;
+    clearInterval(timerInterval); timerInterval = null;
+    btn.textContent = starts[currentLang];
   }
+}
 
-  document.getElementById('quiz-submit').addEventListener('click', handleSubmit);
-  document.getElementById('quiz-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleSubmit();
-  });
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) closeQuiz();
-  });
-})();
+function timerReset() {
+  timerRunning = false;
+  clearInterval(timerInterval); timerInterval = null;
+  timerRemain = 0;
+  document.getElementById('timerDisplay').classList.remove('timer-done-anim');
+  document.getElementById('timerDoneMsg').style.display = 'none';
+  const starts = { ja: 'スタート', de: 'Start', fi: 'Käynnistä' };
+  document.getElementById('timerStartBtn').textContent = starts[currentLang];
+  updateTimerDisplay();
+}
+
 </script>
+<script src="pxem-java.js"></script>
+<script src="pxem-bridge.js"></script>
+<script src="plotter-nim.js"></script>
+<script src="plotter-bridge.js"></script>
 </body>
 </html>
