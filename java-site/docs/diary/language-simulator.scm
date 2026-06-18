@@ -438,12 +438,40 @@
           (set! w nw)
           (rec! (string-append "音韻 [" (phonemes->string w0) "]→[" (phonemes->string w) "] 語頭chs→k")))))
 
-    ;; 中確率7%: ランダムな子音削除
-    (when (prob? 7)
+    ;; 高確率85%: y母音の消滅
+    (when (prob? 85)
+      (let ((nw (d-delete-y w)))
+        (unless (equal? nw w)
+          (set! w nw)
+          (rec! (string-append "音韻 [" (phonemes->string w0) "]→[" (phonemes->string w) "] y消滅")))))
+
+    ;; 高確率78%: 3つ以上の連続母音 → 先頭1つのみ残す
+    (when (prob? 78)
+      (let ((nw (d-collapse-triple-vowels w)))
+        (unless (equal? nw w)
+          (set! w nw)
+          (rec! (string-append "音韻 [" (phonemes->string w0) "]→[" (phonemes->string w) "] 連続母音縮約")))))
+
+    ;; 高確率78%: 許容されない母音連続の解消 (VV→V、許容二重母音は保持)
+    (when (prob? 78)
+      (let ((nw (d-collapse-vowel-sequences w)))
+        (unless (equal? nw w)
+          (set! w nw)
+          (rec! (string-append "音韻 [" (phonemes->string w0) "]→[" (phonemes->string w) "] 母音連続解消")))))
+
+    ;; 中確率13%: ランダムな子音削除
+    (when (prob? 13)
       (let ((nw (d-delete-random-consonant w)))
         (unless (equal? nw w)
           (set! w nw)
           (rec! (string-append "音韻 [" (phonemes->string w0) "]→[" (phonemes->string w) "] 子音削除")))))
+
+    ;; 中確率10%: ランダムな母音削除
+    (when (prob? 10)
+      (let ((nw (d-delete-random-vowel w)))
+        (unless (equal? nw w)
+          (set! w nw)
+          (rec! (string-append "音韻 [" (phonemes->string w0) "]→[" (phonemes->string w) "] 母音削除")))))
 
     ;; ── 共通サニタイザー ──────────────────────────────────────────
     (set! w (apply-shared-sanitizers! idx w))
