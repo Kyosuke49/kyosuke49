@@ -946,6 +946,9 @@ body.lang-fi { font-family: var(--font-mono); }
   .timer-digit-input {
     font-size: 16px;
   }
+  .ls-word {
+    font-size: 16px; /* 言語シミュレーター単語入力 */
+  }
 }
 /* ── ツールパネル スクロール修正 ──────────────────── */
 .tool-panel {
@@ -960,7 +963,135 @@ body.lang-fi { font-family: var(--font-mono); }
   -webkit-overflow-scrolling: touch; /* iOS慣性スクロール */
   overscroll-behavior: contain;      /* 背後への伝播を遮断 */
 }
+/* ── 言語進化シミュレーター ──────────────────────── */
+.ls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem 0.45rem;
+}
+@media (max-width: 480px) {
+  .ls-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.ls-cell { display: flex; flex-direction: column; gap: 0.12rem; }
+.ls-wlabel {
+  font-size: 0.52rem; letter-spacing: 0.08em;
+  color: var(--text-dim); font-family: var(--font-mono);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ls-word {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 1rem; /* iOS zoom防止: 16px未満でフォーカス時ズームが発生するため1rem(=16px)に固定 */
+  padding: 0.28rem 0.45rem;
+  outline: none;
+  width: 100%;
+  transition: border-color var(--transition);
+}
+.ls-word:focus { border-color: var(--accent-mid); }
+.ls-modes { display: flex; gap: 0.4rem; }
+.ls-mode-btn {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 0.18rem;
+  padding: 0.42rem 0.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+.ls-mode-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.ls-mode-btn:not(.active):hover { border-color: var(--border-hard); color: var(--text); }
+.ls-mode-letter { font-size: 1.05rem; line-height: 1; }
+.ls-mode-label  { font-size: 0.5rem; letter-spacing: 0.07em; text-align: center; white-space: nowrap; }
+.ls-sentence {
+  background: var(--bg-surface);
+  border-left: 2px solid var(--accent-mid);
+  padding: 0.38rem 0.65rem;
+  font-size: 0.7rem; font-family: var(--font-mono);
+  color: var(--text);
+  margin-bottom: 0.28rem;
+  line-height: 1.55;
+  word-break: break-all;
+}
+.ls-hist-item {
+  display: flex; gap: 0.55rem; align-items: baseline;
+  padding: 0.22rem 0;
+  border-bottom: 1px solid rgba(0,200,240,0.04);
+}
+.ls-hist-gen  { flex-shrink:0; color:var(--accent-mid); width:3em; text-align:right; font-size:0.57rem; }
+.ls-hist-desc { color:var(--text-dim); font-size:0.62rem; line-height:1.45; word-break:break-all; }
+.ls-filt-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.5rem; letter-spacing: 0.1em;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+}
+.ls-filt-btn.active { border-color: var(--accent-mid); color: var(--accent); }
+/* ── 例文リファレンス表示 ─────────────────────────── */
+.ls-sentence-block { margin-bottom: 0.5rem; }
+.ls-ref-sentence {
+  font-size: 0.58rem;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  opacity: 0.65;
+  padding: 0.18rem 0.65rem;
+  border-left: 2px solid var(--border-hard);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+.ls-ref-en {
+  font-size: 0.52rem;
+  color: var(--text-dim);
+  opacity: 0.5;
+  margin-left: 0.5em;
+}
+/* ── 単語タップTips ──────────────────────────────── */
+.ls-token {
+  cursor: pointer;
+  display: inline;
+  border-bottom: 1px dotted rgba(0,200,240,0.35);
+  transition: color 0.12s, border-color 0.12s;
+  border-radius: 0;
+}
+.ls-token:hover, .ls-token.ls-token-active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+#ls-tt {
+  position: fixed;
+  background: var(--bg-panel, #0d1117);
+  border: 1px solid var(--border-hard, rgba(0,200,240,0.25));
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.75;
+  z-index: 9999;
+  max-width: 210px;
+  min-width: 130px;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.75);
+  color: var(--text, #c9d1d9);
+  display: none;
+}
+#ls-tt.ls-tt-visible { display: block; }
+.ls-tt-evo  { color: var(--accent); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; border-bottom: 1px solid var(--border-hard); padding-bottom: 0.25rem; margin-bottom: 0.25rem; }
+.ls-tt-orig { color: var(--text-dim); font-size: 0.6rem; }
+.ls-tt-role { color: var(--accent-mid); font-size: 0.6rem; }
+.ls-tt-sfx  { color: var(--text-dim); font-size: 0.6rem; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.0/release/biwascheme-min.js"></script>
 </head>
 
 <body class="lang-ja">
@@ -1183,12 +1314,12 @@ body.lang-fi { font-family: var(--font-mono); }
           </span>
         </button>
 
-        <!-- チャット -->
-        <button class="qa-btn" onclick="openTool('chat')">
-          <i class="qa-icon">⊟</i>
+        <!-- 言語進化シミュレーター -->
+        <button class="qa-btn" onclick="openTool('langsim')">
+          <i class="qa-icon" style="font-style:normal;font-size:0.68rem;letter-spacing:-0.02em;color:var(--text-dim);">λ</i>
           <span class="qa-label">
-            <span class="qa-label-main" data-ja="チャット" data-de="Chat" data-fi="Chat">チャット</span>
-            <span class="qa-label-sub">kyosuke bot</span>
+            <span class="qa-label-main" data-ja="言語進化シミュレーター" data-de="Sprachsimulator" data-fi="Kielisimulaattori">言語進化シミュレーター</span>
+            <span class="qa-label-sub">LISP · 100 generations</span>
           </span>
         </button>
 
@@ -1434,15 +1565,79 @@ body.lang-fi { font-family: var(--font-mono); }
     <div class="tool-body" style="padding:0;"></div>
   </div>
 
-  <!-- チャット -->
-  <div class="tool-panel" id="panel-chat">
+  <!-- 言語進化シミュレーター -->
+  <div class="tool-panel" id="panel-langsim" style="max-width:640px;">
     <div class="tool-titlebar">
-      <span id="wipTitle-chat">チャット</span>
+      <span data-ja="言語進化シミュレーター" data-de="Sprachsimulator" data-fi="Kielisimulaattori">言語進化シミュレーター</span>
       <button class="tool-close" onclick="closeTool()">✕</button>
     </div>
-    <div class="tool-body" style="text-align:center;padding:2.5rem 1.4rem;">
-      <div style="font-size:0.55rem;letter-spacing:0.28em;color:var(--accent-mid);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:1.4rem;">Status</div>
-      <div id="wipMsg-chat" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--accent);letter-spacing:0.14em;text-shadow:0 0 18px var(--accent-glow);">鋭意製作中！</div>
+    <div class="tool-body">
+
+      <p id="lsDesc" style="font-size:0.63rem;color:var(--text-dim);letter-spacing:0.05em;line-height:1.7;margin-bottom:0.9rem;font-family:var(--font-mono);border-left:1px solid var(--border-hard);padding-left:0.65rem;"></p>
+
+      <!-- 単語入力グリッド -->
+      <div style="font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-mid);font-family:var(--font-mono);margin-bottom:0.4rem;" data-ja="初期語彙（a-z入力）" data-de="Grundwortschatz (a-z)" data-fi="Perussanasto (a-z)">初期語彙（a-z入力）</div>
+      <div class="ls-grid">
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl0">私(1SG)</div><input class="ls-word" id="ls-w0" type="text" maxlength="14" value="watashi" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl1">僕(poss)</div><input class="ls-word" id="ls-w1" type="text" maxlength="14" value="boku" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl2">君(2SG)</div><input class="ls-word" id="ls-w2" type="text" maxlength="14" value="kimi" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl3">彼(3SG)</div><input class="ls-word" id="ls-w3" type="text" maxlength="14" value="kare" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl4">りんご(apple)</div><input class="ls-word" id="ls-w4" type="text" maxlength="14" value="ringo" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl5">ワイン(wine)</div><input class="ls-word" id="ls-w5" type="text" maxlength="14" value="wain" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl6">友達(friend)</div><input class="ls-word" id="ls-w6" type="text" maxlength="14" value="tomodachi" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl7">食べる(eat)</div><input class="ls-word" id="ls-w7" type="text" maxlength="14" value="taberu" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl8">飲む(drink)</div><input class="ls-word" id="ls-w8" type="text" maxlength="14" value="nomu" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl9">好き(like)</div><input class="ls-word" id="ls-w9" type="text" maxlength="14" value="suki" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl10">だ/be(cop)</div><input class="ls-word" id="ls-w10" type="text" maxlength="14" value="da" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+        <div class="ls-cell"><div class="ls-wlabel" id="lsLbl11">昨日(yest.)</div><input class="ls-word" id="ls-w11" type="text" maxlength="14" value="kino" spellcheck="false" autocorrect="off" autocapitalize="off"></div>
+      </div>
+
+      <!-- モード選択 -->
+      <div style="font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-mid);font-family:var(--font-mono);margin:0.8rem 0 0.4rem;" data-ja="進化モード" data-de="Evolutionsmodus" data-fi="Evoluutiotila">進化モード</div>
+      <div class="ls-modes">
+        <button class="ls-mode-btn active" data-mode="J" onclick="lsSelectMode('J')">
+          <span class="ls-mode-letter">J</span>
+          <span class="ls-mode-label" data-ja="" data-de="" data-fi="">J型</span>
+        </button>
+        <button class="ls-mode-btn" data-mode="D" onclick="lsSelectMode('D')">
+          <span class="ls-mode-letter">D</span>
+          <span class="ls-mode-label" data-ja="" data-de="" data-fi="">D型</span>
+        </button>
+        <button class="ls-mode-btn" data-mode="F" onclick="lsSelectMode('F')">
+          <span class="ls-mode-letter">F</span>
+          <span class="ls-mode-label" data-ja="" data-de="" data-fi="">F型</span>
+        </button>
+      </div>
+
+      <!-- 実行ボタン -->
+      <button class="tool-btn" id="lsRunBtn" onclick="lsRun()" style="width:100%;margin-top:0.85rem;letter-spacing:0.16em;" data-ja="▶ 100世代シミュレート" data-de="▶ 100 Generationen simulieren" data-fi="▶ Simuloi 100 sukupolvea">▶ 100世代シミュレート</button>
+
+      <!-- ステータス -->
+      <div id="lsStatus" style="display:none;font-size:0.62rem;color:var(--text-dim);font-family:var(--font-mono);letter-spacing:0.1em;text-align:center;padding:0.65rem 0;"></div>
+
+      <!-- 結果エリア -->
+      <div id="lsResult" style="display:none;margin-top:1rem;">
+
+        <div style="font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-mid);font-family:var(--font-mono);margin-bottom:0.38rem;" data-ja="単語変化" data-de="Wortveränderungen" data-fi="Sanamuutokset">単語変化</div>
+        <div id="lsWordTable" style="display:grid;grid-template-columns:1fr 1fr;gap:0.18rem 0.7rem;font-size:0.68rem;font-family:var(--font-mono);margin-bottom:0.9rem;"></div>
+
+        <div style="font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-mid);font-family:var(--font-mono);margin-bottom:0.38rem;" data-ja="例文" data-de="Beispielsätze" data-fi="Esimerkkejä">例文</div>
+        <div id="lsSentences" style="margin-bottom:0.9rem;"></div>
+
+        <div style="font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-mid);font-family:var(--font-mono);margin-bottom:0.38rem;" data-ja="文法特徴" data-de="Grammatikmerkmale" data-fi="Kielioppipiirteet">文法特徴</div>
+        <div id="lsGrammar" style="font-size:0.68rem;font-family:var(--font-mono);color:var(--text-dim);margin-bottom:0.9rem;border-left:1px solid var(--border-hard);padding-left:0.65rem;line-height:1.8;white-space:pre-line;"></div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.38rem;">
+          <div style="font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-mid);font-family:var(--font-mono);" data-ja="変化履歴" data-de="Änderungsverlauf" data-fi="Muutoshistoria">変化履歴</div>
+          <div style="display:flex;gap:0.28rem;">
+            <button class="ls-filt-btn active" data-filt="all" onclick="lsFilter('all')" data-ja="全て" data-de="Alle" data-fi="Kaikki">全て</button>
+            <button class="ls-filt-btn" data-filt="phon" onclick="lsFilter('phon')" data-ja="音韻" data-de="Phon." data-fi="Fon.">音韻</button>
+            <button class="ls-filt-btn" data-filt="gram" onclick="lsFilter('gram')" data-ja="文法" data-de="Gram." data-fi="Gram.">文法</button>
+          </div>
+        </div>
+        <div id="lsHistory" style="max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;"></div>
+
+      </div>
     </div>
   </div>
 
@@ -1687,6 +1882,7 @@ function applyLang(lang) {
   if (window._plotterInited && typeof plotterSetLang === 'function') {
     plotterSetLang(lang);
   }
+  try { lsApplyLang(lang); } catch(e) {}
 }
 
 /* ============================================================
@@ -1695,10 +1891,6 @@ function applyLang(lang) {
 const WIP_PANELS = {
   omikuji: {
     title: { ja: 'VIPおみくじ',      de: 'VIP-Glückslos',        fi: 'VIP-onnenlippu'    },
-    msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
-  },
-  chat: {
-    title: { ja: 'チャット',          de: 'Chat',                 fi: 'Chat'              },
     msg:   { ja: '鋭意製作中！',      de: 'In Arbeit!',           fi: 'Työn alla!'        },
   },
   esoteric: {
@@ -1809,6 +2001,9 @@ function openTool(id) {
     } else {
       plotterSetLang(currentLang);
     }
+  }
+  if (id === 'langsim') {
+    lsOnOpen();
   }
 
   panel.classList.add('visible');
@@ -2435,10 +2630,338 @@ function timerReset() {
   updateTimerDisplay();
 }
 
+/* ============================================================
+   言語進化シミュレーター
+============================================================ */
+let _lsBiwaReady   = false;
+let _lsBiwaLoading = false;
+let _lsInterp      = null;
+let _lsHistory     = [];
+let _lsMode        = 'J';
+
+const LS_DESC = {
+  ja: 'BiwaScheme（Lisp）で動く音韻・文法進化シミュレーター。12語の初期語彙を a-z で入力し、J・D・Fの3モードで100世代の言語変化を観察できます。',
+  de: 'Ein phonologischer und grammatischer Evolutionssimulator, der in BiwaScheme (Lisp) läuft. Gib 12 Grundvokabeln (a–z) ein und beobachte 100 Generationen sprachlichen Wandels im Modus J, D oder F.',
+  fi: 'BiwaScheme-pohjainen äänne- ja kieliopillinen evoluutiosimulaattori. Syötä 12 alkusanaa (a–z) ja seuraa 100 sukupolven kielellistä muutosta tilassa J, D tai F.',
+};
+const LS_WLABELS = {
+  // 単語インデックス: 0=私(1SG) 1=僕(poss) 2=君(2SG) 3=彼(3SG)
+  //   4=りんご 5=ワイン 6=友達 7=食べる 8=飲む 9=好き 10=だ(be) 11=昨日
+  ja: ['私(1SG)','僕(poss)','君(2SG)','彼(3SG)','りんご','ワイン','友達','食べる','飲む','好き','だ(be)','昨日'],
+  de: ['ich(1SG)','mein(poss)','du(2SG)','er(3SG)','Apfel','Wein','Freund','essen','trinken','mögen','sein(be)','gestern'],
+  fi: ['minä(1SG)','minun(poss)','sinä(2SG)','hän(3SG)','omena','viini','ystävä','syödä','juoda','pitää','olla(be)','eilen'],
+};
+const LS_GLABELS = {
+  // get-stateの文法サマリー18項目に対応 (g[0..20]のうち表示対象を抜粋)
+  ja: ['語順','主語省略','冠詞','所有形式','コピュラ','動詞語尾','主語助詞','目的語/格語尾','過去補助/語尾','動詞人称活用','V2語順','性別体系','副詞位置(J)','動詞終端固定(J)','性別語尾(D)','Dコピュラ','格依存構文(F)','融合レベル(F)'],
+  de: ['Wortstellung','Pro-drop','Artikel','Possessivform','Kopula','Verbendung','Subjektpartikel','Akk./Kasusendung','Perf.-Hilfsverb','Personalflexion','V2-Stellung','Genussystem','Adverbstellung(J)','Verb-final(J)','Genusendungen(D)','D-Kopula','Kasusabhängig(F)','Fusionsstufe(F)'],
+  fi: ['Sanajärjestys','Pro-drop','Artikkeli','Possessiivimuoto','Kopula','Verbipääte','Subjektipartikkeli','Akkus./Sijapääte','Perf.-apuverbi','Persoonakonjugaatio','V2-järjestys','Sukujärjestelmä','Adverbin paikka(J)','Verbi lopussa(J)','Sukupäätteet(D)','D-kopula','Sijarakenne(F)','Fuusiotaso(F)'],
+};
+
+/* 例文のリファレンス原文（モード別・文別） */
+const LS_REFSENTENCES = {
+  J: [
+    { ref: '私は昨日りんごを食べた',       en: 'I ate an apple yesterday' },
+    { ref: '彼はワインを飲むのが好きだ',   en: 'He likes drinking wine' },
+    { ref: '君は僕の友達だ',               en: 'You are my friend' },
+  ],
+  D: [
+    { ref: 'Ich aß gestern einen Apfel.',  en: 'I ate an apple yesterday' },
+    { ref: 'Er trinkt gerne Wein.',        en: 'He likes drinking wine' },
+    { ref: 'Du bist mein Freund.',         en: 'You are my friend' },
+  ],
+  F: [
+    { ref: 'Minä söin eilen omenan.',      en: 'I ate an apple yesterday' },
+    { ref: 'Hän pitää viinin juomisesta.', en: 'He likes drinking wine' },
+    { ref: 'Sinä olet minun ystäväni.',    en: 'You are my friend' },
+  ],
+};
+
+/* 各文における単語スロットの文法的役割
+   インデックスはword-slot番号、値はrole文字列 */
+const LS_SENTROLES = [
+  { 0:'SUBJ', 11:'ADV',  4:'OBJ',  7:'VERB' },           // S1: 私は昨日りんごを食べた
+  { 3:'SUBJ', 5:'OBJ',   8:'VERB', 9:'LIKE', 10:'COP' }, // S2: 彼はワインを飲むのが好きだ
+  { 2:'SUBJ', 1:'POSS',  6:'NOUN', 10:'COP' },            // S3: 君は僕の友達だ
+];
+
+/* 役割名の翻訳 */
+const LS_ROLELABELS = {
+  ja: { SUBJ:'主語', OBJ:'目的語', VERB:'動詞', ADV:'副詞', COP:'コピュラ', POSS:'所有者', NOUN:'名詞', LIKE:'述語(好き)', '?':'?' },
+  de: { SUBJ:'Subjekt', OBJ:'Objekt', VERB:'Verb', ADV:'Adverb', COP:'Kopula', POSS:'Possessiv', NOUN:'Nomen', LIKE:'Adjektiv', '?':'?' },
+  fi: { SUBJ:'Subjekti', OBJ:'Objekti', VERB:'Verbi', ADV:'Adverbi', COP:'Kopula', POSS:'Possessivi', NOUN:'Substantiivi', LIKE:'Adjektiivi', '?':'?' },
+};
+
+function lsOnOpen() {
+  lsApplyLang(currentLang);
+}
+
+function lsApplyLang(lang) {
+  const d = document.getElementById('lsDesc');
+  if (d) d.textContent = LS_DESC[lang] || LS_DESC.ja;
+  const wl = LS_WLABELS[lang] || LS_WLABELS.ja;
+  for (let i = 0; i < 12; i++) {
+    const el = document.getElementById('lsLbl' + i);
+    if (el) el.textContent = wl[i];
+  }
+}
+
+function lsSelectMode(m) {
+  _lsMode = m;
+  document.querySelectorAll('.ls-mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === m);
+  });
+}
+
+async function lsBiwaInit() {
+  if (_lsBiwaReady) return;
+  if (_lsBiwaLoading) {
+    await new Promise(r => {
+      const t = setInterval(() => { if (_lsBiwaReady) { clearInterval(t); r(); } }, 100);
+    });
+    return;
+  }
+  _lsBiwaLoading = true;
+  _lsInterp = new BiwaScheme.Interpreter(err => console.error('[LangSim]', err));
+  BiwaScheme.define_libfunc('js-random-int', 1, 1, ar => Math.floor(Math.random() * ar[0]));
+  const resp = await fetch('language-simulator.scm');
+  if (!resp.ok) throw new Error('language-simulator.scm が見つかりません (HTTP ' + resp.status + ')');
+  const code = await resp.text();
+  await new Promise((resolve, reject) => {
+    _lsInterp.evaluate(code, r => {
+      if (r instanceof BiwaScheme.Error) reject(r.message || String(r));
+      else resolve();
+    });
+  });
+  _lsBiwaReady = true;
+}
+
+function lsS2J(v) {
+  if (v === BiwaScheme.nil) return [];
+  if (v instanceof BiwaScheme.Pair) {
+    const a = []; let cur = v;
+    while (cur instanceof BiwaScheme.Pair) { a.push(lsS2J(cur.car)); cur = cur.cdr; }
+    return a;
+  }
+  return v;
+}
+
+async function lsRun() {
+  const btn    = document.getElementById('lsRunBtn');
+  const status = document.getElementById('lsStatus');
+  const result = document.getElementById('lsResult');
+  // 単語スロット: 0=私(1SG) 1=僕(poss) 2=君(2SG) 3=彼(3SG)
+  //   4=りんご 5=ワイン 6=友達 7=食べる 8=飲む 9=好き 10=だ(be) 11=昨日
+  const DEFAULTS = ['watashi','boku','kimi','kare','ringo','wain','tomodachi','taberu','nomu','suki','da','kino'];
+  const words = [];
+  for (let i = 0; i < 12; i++) {
+    const raw = (document.getElementById('ls-w' + i).value || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+    words.push(raw || DEFAULTS[i]);
+  }
+  btn.disabled = true;
+  result.style.display = 'none';
+  status.style.display = '';
+  status.style.color   = 'var(--text-dim)';
+  const statusMsg = { ja: 'BiwaScheme を初期化中…', de: 'BiwaScheme wird initialisiert…', fi: 'Alustetaan BiwaScheme…' };
+  const runMsg    = { ja: '100世代シミュレート中…', de: '100 Generationen werden simuliert…', fi: 'Simuloidaan 100 sukupolvea…' };
+  status.textContent = statusMsg[currentLang];
+  try {
+    await lsBiwaInit();
+    status.textContent = runMsg[currentLang];
+    const expr = `(start! "${words.join('" "')}" '${_lsMode})`;
+    const raw = await new Promise((resolve, reject) => {
+      _lsInterp.evaluate(expr, r => {
+        if (r instanceof BiwaScheme.Error) reject(r.message || String(r));
+        else resolve(r);
+      });
+    });
+    const data = lsS2J(raw);
+    _lsHistory = data[2] || [];
+    lsRenderResults(data, words);
+    status.style.display = 'none';
+    result.style.display = '';
+  } catch(e) {
+    const errPfx = { ja: 'エラー: ', de: 'Fehler: ', fi: 'Virhe: ' };
+    status.textContent = (errPfx[currentLang] || 'Error: ') + e;
+    status.style.color = '#e83929';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function lsRenderResults(data, origWords) {
+  const finalWords = data[0] || [];
+  const sentences  = data[1] || [];
+  const grammar    = data[3] || [];
+  const wl = LS_WLABELS[currentLang] || LS_WLABELS.ja;
+  const gl = LS_GLABELS[currentLang] || LS_GLABELS.ja;
+
+  /* 単語変化表 */
+  const wt = document.getElementById('lsWordTable');
+  wt.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const label = (wl[i] || '').replace(/\(.*\)/, '').trim();
+    wt.innerHTML +=
+      `<span style="color:var(--text-dim)">${label}</span>` +
+      `<span>${origWords[i]||''} <span style="color:var(--accent-mid)">→</span> <span style="color:var(--accent)">${finalWords[i]||''}</span></span>`;
+  }
+
+  /* 例文（リファレンス + クリッカブルトークン） */
+  const st = document.getElementById('lsSentences');
+  st.innerHTML = '';
+  const refs = (LS_REFSENTENCES[_lsMode] || LS_REFSENTENCES.J);
+  (sentences || []).forEach((s, si) => {
+    const refInfo = refs[si] || {};
+    const block = document.createElement('div');
+    block.className = 'ls-sentence-block';
+
+    // リファレンス原文（薄字）
+    const refDiv = document.createElement('div');
+    refDiv.className = 'ls-ref-sentence';
+    refDiv.innerHTML =
+      (refInfo.ref ? lsEsc(refInfo.ref) : '') +
+      (refInfo.en ? `<span class="ls-ref-en">${lsEsc(refInfo.en)}</span>` : '');
+    block.appendChild(refDiv);
+
+    // 進化後の文（クリッカブルトークン）
+    const sentDiv = document.createElement('div');
+    sentDiv.className = 'ls-sentence';
+    const tokens = (s || '').split(' ').filter(t => t.length > 0);
+    const roleMap = LS_SENTROLES[si] || {};
+    tokens.forEach((tok, ti) => {
+      if (ti > 0) sentDiv.appendChild(document.createTextNode(' '));
+      const info = lsAnnotateToken(tok, finalWords, origWords, wl, roleMap);
+      const sp = document.createElement('span');
+      sp.className = 'ls-token';
+      sp.textContent = tok;
+      sp.addEventListener('click', e => lsShowTooltip(e, sp, info));
+      sentDiv.appendChild(sp);
+    });
+    block.appendChild(sentDiv);
+    st.appendChild(block);
+  });
+
+  /* 文法サマリー */
+  const gEl = document.getElementById('lsGrammar');
+  let gramLines = '';
+  (grammar || []).forEach((val, i) => {
+    gramLines += (gl[i] || 'g'+i) + ': ' + (val !== undefined ? val : '?') + '\n';
+  });
+  gEl.textContent = gramLines.trim();
+
+  /* 履歴初期表示 */
+  const activeFilt = document.querySelector('.ls-filt-btn.active');
+  lsFilter(activeFilt ? activeFilt.dataset.filt : 'all');
+}
+
+/* HTMLエスケープ */
+function lsEsc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* トークン → アノテーション
+   finalWords[0..11] の進化形と比較し、最長一致で単語スロットを特定する */
+function lsAnnotateToken(token, finalWords, origWords, wlabels, roleMap) {
+  let bestIdx = -1;
+  let bestLen = 0;
+  for (let i = 0; i < 12; i++) {
+    const fw = finalWords[i] || '';
+    if (fw.length > 0 && token.startsWith(fw) && fw.length > bestLen) {
+      bestIdx = i;
+      bestLen = fw.length;
+    }
+  }
+  if (bestIdx >= 0) {
+    const fw = finalWords[bestIdx];
+    const suffix = token.slice(fw.length);
+    const rawLabel = (wlabels[bestIdx] || '').replace(/[（(][^)）]*[)）]/g, '').trim();
+    const role = roleMap[bestIdx] || '?';
+    return { text: token, origIdx: bestIdx, origWord: origWords[bestIdx] || '', label: rawLabel, role, suffix };
+  }
+  return { text: token, origIdx: -1, origWord: token, label: '', role: '?', suffix: '' };
+}
+
+/* ─── ツールチップ表示 ─── */
+let _lsTTActive = null;
+
+function lsShowTooltip(e, tokenEl, info) {
+  const tt = document.getElementById('ls-tt');
+  if (!tt) return;
+  e.stopPropagation();
+
+  if (_lsTTActive === tokenEl) { lsHideTooltip(); return; }
+  if (_lsTTActive) _lsTTActive.classList.remove('ls-token-active');
+  _lsTTActive = tokenEl;
+  tokenEl.classList.add('ls-token-active');
+
+  const rl = LS_ROLELABELS[currentLang] || LS_ROLELABELS.ja;
+  const roleStr = (info.role && info.role !== '?') ? (rl[info.role] || info.role) : null;
+
+  let html = `<div class="ls-tt-evo">${lsEsc(info.text)}</div>`;
+  if (info.origIdx >= 0) {
+    html += `<div class="ls-tt-orig">元: ${lsEsc(info.origWord)}</div>`;
+    if (info.label) html += `<div class="ls-tt-orig">${lsEsc(info.label)}</div>`;
+  }
+  if (roleStr) html += `<div class="ls-tt-role">役割: ${lsEsc(roleStr)}</div>`;
+  if (info.suffix) html += `<div class="ls-tt-sfx">語尾: -${lsEsc(info.suffix)}</div>`;
+
+  tt.innerHTML = html;
+
+  // 位置計算: クリックされたspanの下（画面端をはみ出さないよう補正）
+  const rect = tokenEl.getBoundingClientRect();
+  const margin = 8;
+  const ttW = 210;
+  let x = rect.left;
+  let y = rect.bottom + 6;
+  if (x + ttW > window.innerWidth - margin) x = window.innerWidth - ttW - margin;
+  if (x < margin) x = margin;
+  tt.style.left = x + 'px';
+  tt.style.top  = y + 'px';
+  tt.classList.add('ls-tt-visible');
+}
+
+function lsHideTooltip() {
+  const tt = document.getElementById('ls-tt');
+  if (tt) tt.classList.remove('ls-tt-visible');
+  if (_lsTTActive) { _lsTTActive.classList.remove('ls-token-active'); _lsTTActive = null; }
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('ls-token')) lsHideTooltip();
+});
+
+function lsFilter(filt) {
+  document.querySelectorAll('.ls-filt-btn').forEach(b => b.classList.toggle('active', b.dataset.filt === filt));
+  const histEl = document.getElementById('lsHistory');
+  if (!histEl) return;
+  histEl.innerHTML = '';
+  const items = filt === 'all' ? _lsHistory :
+    _lsHistory.filter(h => {
+      const d = String(h[1] || '');
+      return filt === 'phon' ? d.startsWith('音韻') : d.startsWith('文法');
+    });
+  if (!items.length) {
+    histEl.innerHTML = '<div style="color:var(--text-dim);font-size:0.62rem;padding:0.3rem 0;">—</div>';
+    return;
+  }
+  items.forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'ls-hist-item';
+    row.innerHTML =
+      `<span class="ls-hist-gen">${h[0]||''}</span>` +
+      `<span class="ls-hist-desc">${h[1]||''}</span>`;
+    histEl.appendChild(row);
+  });
+}
+
 </script>
 <script src="pxem-java.js"></script>
 <script src="pxem-bridge.js"></script>
 <script src="plotter-nim.js"></script>
 <script src="plotter-bridge.js"></script>
+<!-- 言語シミュレーター 単語タップツールチップ -->
+<div id="ls-tt" role="tooltip" aria-live="polite"></div>
 </body>
 </html>
