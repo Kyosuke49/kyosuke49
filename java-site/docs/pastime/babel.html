@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>バベルの司書 — 偽造切手</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .game-area {
+      margin: 2rem 0;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+
+    /* ── WASM ステータス ── */
+    .wasm-status {
+      text-align: center;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      min-height: 1.2em;
+    }
+
+    /* ── ステータスバー ── */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.2rem;
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      min-height: 1.4em;
+    }
+    .status-timer {
+      font-size: 1.1rem;
+      color: var(--fg);
+      font-feature-settings: "tnum";
+    }
+    .status-timer.urgent { color: #c0392b; }
+    .status-score { font-size: 1.1rem; color: var(--fg); }
+
+    /* ── グリッド ── */
+    .grid-wrapper {
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 3px;
+      margin: 0 auto;
+      max-width: 500px;
+    }
+    .cell {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Geosans', sans-serif;
+      font-size: clamp(0.75rem, 2.5vw, 1rem);
+      letter-spacing: 0;
+      color: var(--muted);
+      cursor: default;
+      transition: background 0.08s ease, color 0.08s ease,
+                  border-color 0.08s ease, opacity 0.15s ease;
+      position: relative;
+    }
+    .cell.active { color: var(--fg); }
+
+    /*
+      使用済みセル — 薄く表示するが pointer-events は残す。
+      pointer-events: none にすると elementFromPoint() で検出できなくなり、
+      なぞる指/カーソルが無効マスを「すり抜けて」先の有効マスに繋がるバグの原因となる。
+      代わりに JS 側で usedCells フラグを見てトレースを即座に打ち切る。
+    */
+    .cell.used {
+      opacity: 0.28;
+    }
+
+    .cell.traced {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .cell.scored {
+      animation: cellScore 0.45s ease forwards;
+    }
+    @keyframes cellScore {
+      0%   { background: var(--black); color: var(--white); border-color: var(--black); }
+      70%  { background: var(--black); color: var(--white); border-color: var(--black); }
+      100% { background: transparent; color: var(--fg);    border-color: var(--border); }
+    }
+
+    /* ── カウントダウンオーバーレイ ── */
+    .countdown-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--bg-rgb, 255,255,255), 0.88);
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .countdown-overlay.visible { opacity: 1; pointer-events: all; }
+    .countdown-number {
+      font-family: 'Geosans', sans-serif;
+      font-size: clamp(3rem, 15vw, 6rem);
+      letter-spacing: 0.04em;
+      color: var(--fg);
+      animation: pulse 0.8s ease;
+    }
+    @keyframes pulse {
+      0%   { transform: scale(1.3); opacity: 0; }
+      40%  { transform: scale(1.0); opacity: 1; }
+      100% { transform: scale(1.0); opacity: 1; }
+    }
+
+    /* ── ボタン列 ── */
+    .btn-row {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      margin: 1.4rem 0 0;
+    }
+    .game-btn {
+      background: none;
+      border: 1px solid var(--black);
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      padding: 0.65rem 2.2rem;
+      cursor: pointer;
+      color: var(--fg);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .game-btn:hover  { background: var(--black); color: var(--white); }
+    .game-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .game-btn:disabled:hover { background: none; color: var(--fg); }
+
+    /* ── 通知 ── */
+    .notification-area {
+      min-height: 3.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .notification {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      border: 1px solid var(--border);
+      padding: 0.5rem 1.2rem;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      text-align: center;
+    }
+    .notification.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── 結果オーバーレイ ── */
+    .result-overlay {
+      display: none;
+      border: 1px solid var(--border);
+      padding: 2.4rem 2rem;
+      margin: 1.5rem auto 0;
+      max-width: 420px;
+      text-align: center;
+      animation: fadeIn 0.35s ease;
+    }
+    .result-overlay.visible { display: block; }
+    .result-label {
+      font-family: 'Geosans', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .result-score {
+      font-family: 'Geosans', sans-serif;
+      font-size: clamp(2.8rem, 10vw, 4.5rem);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .result-unit {
+      font-family: 'Kazesawa', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.6rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="shared-header"></div>
+
+  <div class="container">
+    <main class="sub-main">
+      <h1 class="page-title font-kazesawa" data-i18n="title">バベルの司書</h1>
+
+      <p class="font-kazesawa-light" style="font-size:0.9rem; color:var(--muted);" data-i18n="subtitle">
+        数列の海から、価値を収集せよ。
+      </p>
+
+      <div class="game-area">
+
+        <div class="wasm-status" id="wasmStatus" data-i18n="wasm_loading">読み込み中…</div>
+
+        <!-- ステータスバー -->
+        <div class="status-bar">
+          <span id="timerDisplay" class="status-timer">—</span>
+          <span id="scoreDisplay" class="status-score"></span>
+        </div>
+
+        <!-- グリッド -->
+        <div class="grid-wrapper" id="gridWrapper">
+          <div class="countdown-overlay" id="countdownOverlay">
+            <div class="countdown-number" id="countdownNum"></div>
+          </div>
+          <div class="grid" id="grid"></div>
+        </div>
+
+        <!-- 通知 -->
+        <div class="notification-area">
+          <div class="notification" id="notification"></div>
+        </div>
+
+        <!-- ボタン -->
+        <div class="btn-row">
+          <button class="game-btn font-geosans" id="startBtn" onclick="startGame()" disabled data-i18n="start">スタート</button>
+          <button class="game-btn font-geosans" id="passBtn"  onclick="passGrid()"  disabled data-i18n="pass">パス</button>
+        </div>
+
+        <!-- 結果 -->
+        <div class="result-overlay" id="resultOverlay">
+          <div class="result-label font-geosans" data-i18n="result_label">RESULT</div>
+          <div class="result-score font-geosans" id="resultScore">0</div>
+          <div class="result-unit font-kazesawa-light" data-i18n="result_unit">点</div>
+          <button class="game-btn font-geosans" onclick="resetGame()" data-i18n="play_again">もう一度</button>
+        </div>
+
+      </div>
+
+      <a href="index.html" class="back-link font-geosans" data-i18n="back">← Pastimeへ</a>
+    </main>
+    <div id="shared-footer"></div>
+  </div>
+
+<script src="../shared-nav.js"></script>
+<script>
+/* =====================================================================
+   多言語 UI テキスト
+===================================================================== */
+var pageI18n = {
+  ja: {
+    title:              'バベルの司書',
+    subtitle:           '数列の海から、価値を収集せよ。',
+    wasm_loading:       '読み込み中…',
+    wasm_ready:         '',
+    wasm_error:         '読み込みエラー（フォールバック動作中）',
+    start:              'スタート',
+    pass:               'パス',
+    result_label:       'RESULT',
+    result_unit:        '点',
+    play_again:         'もう一度',
+    back:               '← Pastimeへ',
+    score_suffix:       '点',
+    timer_suffix:       's',
+    msg_result_teaser:  '結果は…',
+    msg_got:            'ゲット！: ',
+    msg_run_small:      'ちょっとラッキー',
+    msg_run_medium:     '運のいいやつめ！',
+    msg_run_large:      '豪運の持ち主！',
+    msg_e:              'ひとはちふたはち…',
+    msg_pi:             '産医師異国に向かう…',
+    msg_sqrt2:          '美しき大和の比率',
+    msg_phi:            '麗しき黄金の比率',
+    msg_cbrt2:          'デロスの定数？贅沢な名だね！',
+    msg_champ:          'チャンパーノウン！',
+    msg_fumo:           '(これ指摘したら…)',
+  },
+  de: {
+    title:              'Der Bibliothekar von Babel',
+    subtitle:           'Sammle Werte aus dem Meer der Zahlen.',
+    wasm_loading:       'Lädt…',
+    wasm_ready:         '',
+    wasm_error:         'Ladefehler (Fallback aktiv)',
+    start:              'Start',
+    pass:               'Passen',
+    result_label:       'ERGEBNIS',
+    result_unit:        'Punkte',
+    play_again:         'Nochmal',
+    back:               '← Zeitvertreib',
+    score_suffix:       ' Pkt.',
+    timer_suffix:       's',
+    msg_result_teaser:  'Ergebnis…',
+    msg_got:            ' geholt: ',
+    msg_run_small:      'Ein bisschen Glück',
+    msg_run_medium:     'Du Glückspilz!',
+    msg_run_large:      'Unglaubliches Glück!',
+    msg_e:              'Eins-acht-zwei-acht…',
+    msg_pi:             'Drei-eins-vier-eins…',
+    msg_sqrt2:          'Schönes Verhältnis — √2',
+    msg_phi:            'Der goldene Schnitt',
+    msg_cbrt2:          'Die Konstante von Delos? Ein schöner Name!',
+    msg_champ:          'Champernowne!',
+    msg_fumo:           '(Wenn man das erwähnt…)',
+  },
+  fi: {
+    title:              'Baabelin kirjastonhoitaja',
+    subtitle:           'Kerää arvoja lukumeren syvyyksistä.',
+    wasm_loading:       'Ladataan…',
+    wasm_ready:         '',
+    wasm_error:         'Latausvirhe (varamoodi käytössä)',
+    start:              'Aloita',
+    pass:               'Ohita',
+    result_label:       'TULOS',
+    result_unit:        'pistettä',
+    play_again:         'Uudelleen',
+    back:               '← Ajanviete',
+    score_suffix:       ' p.',
+    timer_suffix:       's',
+    msg_result_teaser:  'Tulos…',
+    msg_got:            ' saatu: ',
+    msg_run_small:      'Pientä tuuria',
+    msg_run_medium:     'Sinulla on tuuria!',
+    msg_run_large:      'Uskomaton tuuri!',
+    msg_e:              'Yksi-kahdeksan-kaksi-kahdeksan…',
+    msg_pi:             'Kolme-yksi-neljä-yksi…',
+    msg_sqrt2:          'Kaunis suhde — √2',
+    msg_phi:            'Kultainen leikkaus',
+    msg_cbrt2:          'Delosin vakio? Hieno nimi!',
+    msg_champ:          'Champernowne!',
+    msg_fumo:           '(Jos tämän mainitsee…)',
+  }
+};
+
+/* =====================================================================
+   アワードキーインデックス — babel.nim の定数と順序を合わせること
+===================================================================== */
+var AWARD_KEYS = [
+  'msg_run_small',   /* 0 */
+  'msg_run_medium',  /* 1 */
+  'msg_run_large',   /* 2 */
+  'msg_e',           /* 3 */
+  'msg_pi',          /* 4 */
+  'msg_sqrt2',       /* 5 */
+  'msg_phi',         /* 6 */
+  'msg_cbrt2',       /* 7 */
+  'msg_champ',       /* 8 */
+  'msg_fumo',        /* 9 */
+];
+
+/* =====================================================================
+   JS フォールバック用採点定数（WASM ロード失敗時に使用）
+===================================================================== */
+var SCORE_CONSTANTS = [
+  { digits: '2718281828459045', key: 'msg_e'     },
+  { digits: '3141592653589793', key: 'msg_pi'    },
+  { digits: '141421356',        key: 'msg_sqrt2' },
+  { digits: '161803398',        key: 'msg_phi'   },
+  { digits: '12599210498',      key: 'msg_cbrt2' },
+];
+var FUMO_SEQ = '1145141919810';
+var CHAMPERNOWNE = '012345678910111213';
+
+/* =====================================================================
+   WASM — Nim ゲームシステム (babel.nim → babel.wasm)
+===================================================================== */
+var wasmExports = null;
+var wasmMem     = null;   /* Uint8Array view of WASM memory */
+var gridBufPtr  = 0;      /* offset of gridBuf in WASM memory */
+var traceBufPtr = 0;      /* offset of traceBuf in WASM memory */
+var rngState    = 0;
+
+function initWasm() {
+  fetch('babel.wasm')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.arrayBuffer();
+    })
+    .then(function(buf) { return WebAssembly.instantiate(buf); })
+    .then(function(result) {
+      wasmExports = result.instance.exports;
+      wasmMem     = new Uint8Array(wasmExports.memory.buffer);
+      gridBufPtr  = wasmExports.gridBufPtr();
+      traceBufPtr = wasmExports.traceBufPtr();
+      document.getElementById('wasmStatus').textContent = t('wasm_ready');
+      document.getElementById('startBtn').disabled = false;
+    })
+    .catch(function(e) {
+      /* WASM が存在しない場合は JS フォールバックで動作 */
+      console.warn('babel.wasm not loaded, using JS fallback:', e);
+      document.getElementById('wasmStatus').textContent = t('wasm_error');
+      document.getElementById('startBtn').disabled = false;
+    });
+}
+
+/* 次の数字を1つ生成 (WASM RNG 優先、なければ Math.random) */
+function nimNextDigit() {
+  if (wasmExports) {
+    rngState = wasmExports.nextSeed(rngState) >>> 0;
+    return wasmExports.digit(rngState) >>> 0;
+  }
+  return Math.floor(Math.random() * 10);
+}
+
+/* =====================================================================
+   状態
+===================================================================== */
+var gridDigits  = new Array(100).fill(0);   /* 数字値 0-9 */
+var usedCells   = new Array(100).fill(false);
+var gameActive  = false;
+var gameStarted = false;
+var score       = 0;
+var timeLeft    = 90;
+var timerInterval = null;
+
+var isTracing    = false;
+var traceIndices = [];
+
+var notifQueue = [];
+var notifBusy  = false;
+
+/* =====================================================================
+   言語ヘルパー
+===================================================================== */
+function currentLang() { return localStorage.getItem('lang') || 'ja'; }
+function t(key) {
+  var d = pageI18n[currentLang()] || pageI18n['ja'];
+  return d[key] !== undefined ? d[key] : (pageI18n['ja'][key] || key);
+}
+
+/* =====================================================================
+   グリッド構築 / 描画
+===================================================================== */
+function buildGrid() {
+  var grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (var i = 0; i < 100; i++) {
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.index = i;
+    grid.appendChild(cell);
+  }
+}
+
+function randomizeGrid() {
+  if (wasmExports) {
+    rngState = (Math.random() * 0xFFFFFFFF) >>> 0;
+  }
+  for (var i = 0; i < 100; i++) {
+    var d = nimNextDigit();
+    gridDigits[i] = d;
+    /* WASM グリッドバッファにも書き込む（採点エンジン用） */
+    if (wasmMem) wasmMem[gridBufPtr + i] = d;
+  }
+  clearUsedCells();
+  renderGrid();
+}
+
+function renderGrid() {
+  var cells = document.querySelectorAll('.cell');
+  cells.forEach(function(cell, i) {
+    cell.textContent = (gameActive || gameStarted) ? String(gridDigits[i]) : '';
+    cell.classList.remove('traced', 'scored');
+    if (gameActive) {
+      cell.classList.add('active');
+      if (usedCells[i]) cell.classList.add('used');
+      else               cell.classList.remove('used');
+    } else {
+      cell.classList.remove('active', 'used');
+    }
+  });
+}
+
+/* =====================================================================
+   使用済みセル管理
+===================================================================== */
+function clearUsedCells() {
+  usedCells = new Array(100).fill(false);
+  document.querySelectorAll('.cell.used').forEach(function(c) {
+    c.classList.remove('used');
+  });
+}
+
+function markTracedCellsUsed() {
+  traceIndices.forEach(function(idx) {
+    usedCells[idx] = true;
+    var cell = document.querySelector('.cell[data-index="' + idx + '"]');
+    if (cell) cell.classList.add('used');
+  });
+}
+
+/* =====================================================================
+   ゲーム制御
+===================================================================== */
+function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+  score    = 0;
+  timeLeft = 90;
+  randomizeGrid();
+
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('passBtn').disabled  = true;
+  document.getElementById('resultOverlay').classList.remove('visible');
+  document.getElementById('scoreDisplay').textContent = '';
+
+  var overlay = document.getElementById('countdownOverlay');
+  var numEl   = document.getElementById('countdownNum');
+  overlay.classList.add('visible');
+
+  var count = 3;
+  numEl.textContent = count;
+
+  var cd = setInterval(function() {
+    count--;
+    if (count <= 0) {
+      clearInterval(cd);
+      overlay.classList.remove('visible');
+      beginPlay();
+    } else {
+      numEl.style.animation = 'none';
+      void numEl.offsetWidth;
+      numEl.style.animation = '';
+      numEl.textContent = count;
+    }
+  }, 1000);
+}
+
+function beginPlay() {
+  gameActive = true;
+  renderGrid();
+  updateStatusBar();
+  document.getElementById('passBtn').disabled = false;
+
+  timerInterval = setInterval(function() {
+    timeLeft--;
+    updateStatusBar();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      endGame();
+    }
+  }, 1000);
+}
+
+function updateStatusBar() {
+  var timerEl = document.getElementById('timerDisplay');
+  timerEl.textContent = timeLeft + t('timer_suffix');
+  timerEl.className   = 'status-timer' + (timeLeft <= 10 ? ' urgent' : '');
+  document.getElementById('scoreDisplay').textContent = score + t('score_suffix');
+}
+
+function passGrid() {
+  if (!gameActive) return;
+  clearCurrentTrace();
+  randomizeGrid();
+}
+
+function endGame() {
+  gameActive  = false;
+  gameStarted = false;
+  clearCurrentTrace();
+  clearUsedCells();
+
+  document.querySelectorAll('.cell').forEach(function(c) {
+    c.textContent = String(gridDigits[parseInt(c.dataset.index)]);
+    c.classList.remove('active', 'traced', 'scored', 'used');
+  });
+
+  document.getElementById('passBtn').disabled  = true;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('timerDisplay').textContent = '0' + t('timer_suffix');
+
+  notifQueue = [];
+  notifBusy  = false;
+  var notif = document.getElementById('notification');
+  notif.textContent = t('msg_result_teaser');   /* ← i18n 対応 */
+  notif.classList.add('visible');
+
+  setTimeout(function() {
+    notif.classList.remove('visible');
+    setTimeout(showResult, 300);
+  }, 1800);
+}
+
+function showResult() {
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultOverlay').classList.add('visible');
+  document.getElementById('startBtn').disabled = false;
+}
+
+function resetGame() {
+  document.getElementById('resultOverlay').classList.remove('visible');
+  document.getElementById('timerDisplay').textContent = '—';
+  document.getElementById('scoreDisplay').textContent = '';
+  document.querySelectorAll('.cell').forEach(function(c) {
+    c.textContent = '';
+    c.classList.remove('active', 'traced', 'scored', 'used');
+  });
+}
+
+/* =====================================================================
+   トレース入力 (マウス + タッチ)
+===================================================================== */
+function getCellFromPoint(x, y) {
+  var el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  if (el.classList.contains('cell')) return el;
+  return (el.closest && el.closest('.cell')) || null;
+}
+
+function traceStart(cell) {
+  if (!gameActive) return;
+  var idx = parseInt(cell.dataset.index);
+  if (usedCells[idx]) return;  /* 使用済みセルではトレース開始しない */
+  isTracing    = true;
+  traceIndices = [];
+  addCellToTrace(cell);
+}
+
+function traceMove(x, y) {
+  if (!isTracing || !gameActive) return;
+  var cell = getCellFromPoint(x, y);
+  if (cell) addCellToTrace(cell);
+}
+
+function traceEnd() {
+  if (!isTracing) return;
+  isTracing = false;
+  evaluateTrace();
+  clearCurrentTrace();
+}
+
+function addCellToTrace(cell) {
+  var idx = parseInt(cell.dataset.index);
+
+  /*
+    使用済みセルに触れたらトレースをそこで打ち切る。
+    ※ CSS の pointer-events を none にすると elementFromPoint が
+       使用済みセルを検出できず、先の有効セルへ繋がってしまうため、
+       pointer-events は残しつつここで JS 側で判定・打ち切りを行う。
+  */
+  if (usedCells[idx]) {
+    traceEnd();
+    return;
+  }
+
+  if (traceIndices.indexOf(idx) !== -1) return;  /* すでにトレース中 */
+  traceIndices.push(idx);
+  cell.classList.add('traced');
+}
+
+function clearCurrentTrace() {
+  document.querySelectorAll('.cell.traced').forEach(function(c) {
+    c.classList.remove('traced');
+  });
+  traceIndices = [];
+  isTracing    = false;
+}
+
+/* マウスイベント */
+document.getElementById('gridWrapper').addEventListener('mousedown', function(e) {
+  var cell = e.target.closest && e.target.closest('.cell');
+  if (cell) traceStart(cell);
+});
+document.addEventListener('mousemove', function(e) {
+  if (isTracing) traceMove(e.clientX, e.clientY);
+});
+document.addEventListener('mouseup', function() {
+  if (isTracing) traceEnd();
+});
+
+/* タッチイベント */
+document.getElementById('gridWrapper').addEventListener('touchstart', function(e) {
+  if (!gameActive) return;
+  e.preventDefault();
+  var touch = e.touches[0];
+  var cell = getCellFromPoint(touch.clientX, touch.clientY);
+  if (cell) traceStart(cell);
+}, { passive: false });
+
+document.getElementById('gridWrapper').addEventListener('touchmove', function(e) {
+  if (!isTracing) return;
+  e.preventDefault();
+  var touch = e.touches[0];
+  traceMove(touch.clientX, touch.clientY);
+}, { passive: false });
+
+document.getElementById('gridWrapper').addEventListener('touchend', function(e) {
+  e.preventDefault();
+  if (isTracing) traceEnd();
+}, { passive: false });
+
+/* =====================================================================
+   採点エンジン
+   WASM が利用可能な場合は Nim 実装を使用し、それ以外は JS フォールバック
+===================================================================== */
+function evaluateTrace() {
+  if (traceIndices.length < 1) return;
+
+  if (wasmExports && wasmMem) {
+    evaluateTraceWasm();
+  } else {
+    evaluateTraceJS();
+  }
+}
+
+/* ── WASM 採点（babel.nim の evalTrace を呼ぶ） ── */
+function evaluateTraceWasm() {
+  var len = traceIndices.length;
+
+  /* トレースインデックスを WASM メモリに書き込む */
+  for (var i = 0; i < len; i++) {
+    wasmMem[traceBufPtr + i] = traceIndices[i];
+  }
+
+  var totalPts = wasmExports.evalTrace(len);
+  if (totalPts <= 0) return;
+
+  markTracedCellsUsed();
+  flashTracedCells();
+
+  var cnt = wasmExports.getAwardCount();
+  for (var ai = 0; ai < cnt; ai++) {
+    var pts    = wasmExports.getAwardPts(ai);
+    var keyIdx = wasmExports.getAwardKey(ai);
+    score += pts;
+    updateStatusBar();
+    enqueueNotification(pts, t(AWARD_KEYS[keyIdx]));
+  }
+}
+
+/* ── JS フォールバック採点（WASM なし時） ── */
+function evaluateTraceJS() {
+  var seq    = traceIndices.map(function(i) { return String(gridDigits[i]); }).join('');
+  var awards = [];
+
+  /* 1. 同じ数字の連続 (3+) */
+  var i = 0;
+  while (i < seq.length) {
+    var j = i + 1;
+    while (j < seq.length && seq[j] === seq[i]) j++;
+    var runLen = j - i;
+    if (runLen >= 3) {
+      var rKey = runLen <= 5 ? 'msg_run_small'
+               : runLen <= 8 ? 'msg_run_medium'
+               :               'msg_run_large';
+      awards.push({ pts: runLen, key: rKey });
+    }
+    i = j;
+  }
+
+  /* 2. 数学定数 (先頭から 3+ 一致) */
+  for (var ci = 0; ci < SCORE_CONSTANTS.length; ci++) {
+    var c = SCORE_CONSTANTS[ci];
+    var matchLen = 0;
+    var maxCheck = Math.min(seq.length, c.digits.length);
+    for (var k = 0; k < maxCheck; k++) {
+      if (seq[k] === c.digits[k]) matchLen++;
+      else break;
+    }
+    if (matchLen >= 3) {
+      awards.push({ pts: matchLen * 2, key: c.key });
+    }
+  }
+
+  /* 3. チャンパーノウン数列 (任意位置, 5+) */
+  var champMatch = longestCommonSubstring(seq, CHAMPERNOWNE);
+  if (champMatch >= 5) {
+    awards.push({ pts: champMatch, key: 'msg_champ' });
+  }
+
+  /* 4. 1145141919810 (任意位置, 6+) */
+  var fumoMatch = longestCommonSubstring(seq, FUMO_SEQ);
+  if (fumoMatch >= 6) {
+    awards.push({ pts: fumoMatch, key: 'msg_fumo' });
+  }
+
+  if (awards.length > 0) {
+    markTracedCellsUsed();
+    flashTracedCells();
+    for (var ai = 0; ai < awards.length; ai++) {
+      score += awards[ai].pts;
+      updateStatusBar();
+      enqueueNotification(awards[ai].pts, t(awards[ai].key));
+    }
+  }
+}
+
+function longestCommonSubstring(s, tgt) {
+  var max = 0;
+  for (var si = 0; si < s.length; si++) {
+    for (var ti = 0; ti < tgt.length; ti++) {
+      var len = 0;
+      while (si + len < s.length && ti + len < tgt.length &&
+             s[si + len] === tgt[ti + len]) len++;
+      if (len > max) max = len;
+    }
+  }
+  return max;
+}
+
+function flashTracedCells() {
+  traceIndices.forEach(function(idx) {
+    var cell = document.querySelector('.cell[data-index="' + idx + '"]');
+    if (!cell) return;
+    cell.classList.remove('traced');
+    void cell.offsetWidth;
+    cell.classList.add('scored');
+    setTimeout(function() {
+      cell.classList.remove('scored');
+      if (usedCells[idx]) cell.classList.add('used');
+    }, 480);
+  });
+}
+
+/* =====================================================================
+   通知キュー
+===================================================================== */
+function enqueueNotification(pts, msg) {
+  notifQueue.push({ pts: pts, msg: msg });
+  if (!notifBusy) processNotifQueue();
+}
+
+function processNotifQueue() {
+  if (notifQueue.length === 0) { notifBusy = false; return; }
+  notifBusy = true;
+  var item  = notifQueue.shift();
+  var notif = document.getElementById('notification');
+  /* ← '+N点ゲット！: メッセージ' 形式を i18n 化 */
+  notif.textContent = '+' + item.pts + t('score_suffix') + t('msg_got') + item.msg;
+  notif.classList.add('visible');
+  setTimeout(function() {
+    notif.classList.remove('visible');
+    setTimeout(processNotifQueue, 220);
+  }, 1700);
+}
+
+/* =====================================================================
+   多言語 — UI テキスト適用
+===================================================================== */
+function applyPageLang(lang) {
+  var d = pageI18n[lang] || pageI18n['ja'];
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (key in d) el.textContent = d[key];
+  });
+  if (gameActive || gameStarted) updateStatusBar();
+}
+
+var _origSetLang = window.setLang;
+window.setLang = function(lang) {
+  if (_origSetLang) _origSetLang(lang);
+  applyPageLang(lang);
+};
+
+/* =====================================================================
+   初期化
+===================================================================== */
+function init() {
+  buildGrid();
+  applyPageLang(currentLang());
+  initWasm(); /* babel.wasm を非同期ロード → 完了後スタートボタンを有効化 */
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
