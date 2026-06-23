@@ -207,7 +207,7 @@ body.lang-fi { font-family: var(--font-fi); }
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 4rem 2rem 0rem;
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 4rem;
@@ -556,6 +556,233 @@ body.lang-fi { font-family: var(--font-fi); }
         margin-bottom: 2rem;
       }
 
+      /* =====================
+         広告カルーセル
+      ===================== */
+      .ad-carousel-section {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 1rem 2rem 3rem;
+      }
+
+      .ad-carousel-label {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: 0.9rem;
+      }
+
+      .ad-carousel-wrapper {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        background: #000;
+        cursor: pointer;
+        aspect-ratio: 5 / 2;
+        max-height: 280px;
+      }
+
+      .ad-carousel-track {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.45s cubic-bezier(0.77, 0, 0.18, 1);
+      }
+
+      .ad-slide {
+        flex: 0 0 100%;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .ad-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        pointer-events: none;
+        transition: transform 0.4s ease;
+      }
+
+      .ad-carousel-wrapper:hover .ad-slide.active-slide img {
+        transform: scale(1.015);
+      }
+
+      .ad-slide-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0);
+        transition: background 0.25s;
+        display: flex;
+        align-items: flex-end;
+        padding: 1rem 1.2rem;
+      }
+
+      .ad-carousel-wrapper:hover .ad-slide-overlay {
+        background: rgba(0,0,0,0.18);
+      }
+
+      .ad-slide-hint {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        letter-spacing: 0.2em;
+        color: rgba(255,255,255,0);
+        text-transform: uppercase;
+        transition: color 0.25s;
+      }
+
+      .ad-carousel-wrapper:hover .ad-slide-hint {
+        color: rgba(255,255,255,0.7);
+      }
+
+      /* 矢印ボタン */
+      .ad-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        background: rgba(0,0,0,0.4);
+        border: none;
+        color: #fff;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s, background 0.2s;
+        font-size: 1rem;
+        line-height: 1;
+      }
+
+      .ad-carousel-wrapper:hover .ad-arrow { opacity: 1; }
+      .ad-arrow:hover { background: rgba(0,0,0,0.75); }
+      .ad-arrow.prev { left: 0; }
+      .ad-arrow.next { right: 0; }
+
+      /* インジケーター */
+      .ad-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 0.75rem;
+      }
+
+      .ad-dot {
+        width: 20px;
+        height: 2px;
+        background: #ccc;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: background 0.2s, width 0.25s;
+      }
+
+      .ad-dot.active {
+        background: #111;
+        width: 32px;
+      }
+
+      /* =====================
+         広告モーダル
+      ===================== */
+      #ad-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.65);
+        z-index: 9500;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      #ad-modal-overlay.open { display: flex; }
+
+      #ad-modal {
+        background: #fff;
+        max-width: 680px;
+        width: 100%;
+        position: relative;
+        animation: fadeInUp 0.25s cubic-bezier(0.16,1,0.3,1);
+      }
+
+      #ad-modal-img-wrap {
+        position: relative;
+        width: 100%;
+        background: #000;
+        line-height: 0;
+      }
+
+      #ad-modal-img {
+        width: 100%;
+        display: block;
+        max-height: 60vh;
+        object-fit: contain;
+      }
+
+      #ad-modal-body {
+        position: relative;
+        padding: 1.4rem 1.6rem 2.4rem;
+      }
+
+      #ad-modal-title {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 0.5rem;
+      }
+
+      #ad-modal-desc {
+        font-family: var(--font-ja);
+        font-size: 0.9rem;
+        line-height: 1.8;
+        color: #111;
+      }
+
+      #ad-modal-close {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(0,0,0,0.5);
+        border: none;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+      }
+
+      #ad-modal-close:hover { background: rgba(0,0,0,0.85); }
+
+      #ad-modal-advertiser {
+        position: absolute;
+        bottom: 0.7rem;
+        right: 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #aaa;
+        pointer-events: none;
+      }
+
       /* ─── エントリー ─── */
       .credit-entry {
         display: flex;
@@ -699,6 +926,60 @@ body.lang-fi { font-family: var(--font-fi); }
   </aside>
 </div>
 
+<!-- 広告カルーセル -->
+<section class="ad-carousel-section">
+  <p class="ad-carousel-label" id="adCarouselLabel">Advertisement</p>
+  <div class="ad-carousel-wrapper" id="adCarouselWrapper">
+    <button class="ad-arrow prev" id="adPrev" aria-label="前へ">&#8592;</button>
+    <button class="ad-arrow next" id="adNext" aria-label="次へ">&#8594;</button>
+
+    <div class="ad-carousel-track" id="adTrack">
+      <!-- スライド 1 -->
+      <div class="ad-slide active-slide" data-index="0">
+        <img src="ad/ad1.jpg" alt="広告1">
+        <div class="ad-slide-overlay">
+          <span class="ad-slide-hint">[click to open]</span>
+        </div>
+      </div>
+      <!-- スライド 2 -->
+      <div class="ad-slide" data-index="1">
+        <img src="ad/ad2.jpg" alt="広告2">
+        <div class="ad-slide-overlay">
+          <span class="ad-slide-hint">[click to open]</span>
+        </div>
+      </div>
+      <!-- スライド 3 -->
+      <div class="ad-slide" data-index="2">
+        <img src="ad/ad3.jpg" alt="広告3">
+        <div class="ad-slide-overlay">
+          <span class="ad-slide-hint">[click to open]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-indicators" id="adIndicators">
+    <button class="ad-dot active" data-i="0"></button>
+    <button class="ad-dot" data-i="1"></button>
+    <button class="ad-dot" data-i="2"></button>
+  </div>
+</section>
+
+<!-- 広告モーダル -->
+<div id="ad-modal-overlay">
+  <div id="ad-modal">
+    <button id="ad-modal-close" aria-label="閉じる">&#215;</button>
+    <div id="ad-modal-img-wrap">
+      <img id="ad-modal-img" src="" alt="">
+    </div>
+    <div id="ad-modal-body">
+      <p id="ad-modal-title"></p>
+      <p id="ad-modal-desc"></p>
+      <span id="ad-modal-advertiser"></span>
+    </div>
+  </div>
+</div>
+
 <!-- フッター -->
 <footer class="site-footer">
   <div class="footer-inner">
@@ -755,7 +1036,8 @@ const RANDOM_TEXTS = [
   'Anzeigechance etwa 5%.\nSie haben Glück!',
   'ポリネシアンJava1日目、とりあえず\npublic static void main(String[] args)\nとだけ打ち込む',
   'Nim mag dich.',
-  'Tulkoon LISP'
+  'Tulkoon LISP',
+  'PCで見ることを考慮して作られていないクソみたいなホームページ！'
 ];
 
 /* =====================
@@ -790,6 +1072,7 @@ function applyLang(lang) {
 
   updateInfo();
   updateDailyText();
+  updateAdLabel();
 }
 
 /* =====================
@@ -848,18 +1131,33 @@ function updateInfo() {
 }
 
 /* =====================
-   日替わり・特殊条件テキスト
+   日替わり・特殊条件テキスト（多言語対応版）
+   dailyByDate / specialConditions の html フィールドが
+   オブジェクト { ja, de, fi } の場合は currentLang に応じた値を使用。
+   文字列の場合は従来通りそのまま使用（後方互換）。
 ===================== */
 function updateDailyText() {
   const now = new Date();
 
+  // html フィールドが文字列かオブジェクトかを吸収するヘルパー
+  function resolveHtml(raw) {
+    if (!raw) return '';
+    if (typeof raw === 'object') {
+      // 多言語オブジェクト: currentLang → ja の順にフォールバック
+      return raw[currentLang] || raw.ja || '';
+    }
+    return raw;
+  }
+
+  function stripTags(html) {
+    return html.replace ? html.replace(/<[^>]+>/g, '').trim() : html;
+  }
+
   if (typeof specialConditions !== 'undefined') {
     for (const cond of specialConditions) {
       if (cond.check && cond.check(now)) {
-        const text = cond.html
-          ? cond.html.replace(/<[^>]+>/g, '').trim()
-          : (cond.text || '');
-        document.getElementById('infoDaily').textContent = text;
+        const resolved = resolveHtml(cond.html || cond.text || '');
+        document.getElementById('infoDaily').textContent = stripTags(resolved);
         return;
       }
     }
@@ -868,9 +1166,8 @@ function updateDailyText() {
   const key = pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
 
   if (typeof dailyByDate !== 'undefined' && dailyByDate[key]) {
-    const raw = dailyByDate[key];
-    document.getElementById('infoDaily').textContent =
-      raw.replace ? raw.replace(/<[^>]+>/g, '').trim() : raw;
+    const resolved = resolveHtml(dailyByDate[key]);
+    document.getElementById('infoDaily').textContent = stripTags(resolved);
     return;
   }
 
@@ -1013,6 +1310,176 @@ document.getElementById('fragmentsArea').addEventListener('click', () => {
 function init() {
   applyLang(currentLang);
   updateFragment();
+  initAdCarousel();
+}
+
+/* =====================
+   広告カルーセル
+===================== */
+
+const AD_DATA = [
+  {
+    thumbImg:   { ja: 'ad/SampleJP.PNG', de: 'ad/SampleDE.PNG', fi: 'ad/SampleFI.PNG' },
+    img:        'ad/Nai.PNG',
+    title:      { ja: '(´･ω･`)', de: '(´･ω･`)', fi: '(´･ω･`)' },
+    desc:       { ja: 'ここ何か好きなものを宣伝する用のスペース！ でも今のところ載せるものがなくて困ってるよ！ 何か載せてほしい場合は競介までどうぞ！', de: 'Hier könnte Werbung für irgendwas stehen, das ich mag! Nur leider fällt mir gerade nichts ein, was ich hier reinpacken könnte. Wenn du einen Vorschlag hast, melde dich einfach bei kyosuke!', fi: 'Tämä on paikka, jossa voisin mainostaa jotain mistä pidän! Valitettavasti en ole vielä keksinyt mitään tänne laitettavaa. Jos haluat tähän jotain, ota yhteyttä Kyoisukeen!' },
+    advertiser: ''
+  },
+  {
+    thumbImg:   { ja: 'ad/SampleJP.PNG', de: 'ad/SampleDE.PNG', fi: 'ad/SampleFI.PNG' },
+    img:        'ad/Nai.PNG',
+    title:      { ja: '(´･ω･`)', de: '(´･ω･`)', fi: '(´･ω･`)' },
+    desc:       { ja: 'ここ何か好きなものを宣伝する用のスペース！ でも今のところ載せるものがなくて困ってるよ！ 何か載せてほしい場合は競介までどうぞ！', de: 'Hier könnte Werbung für irgendwas stehen, das ich mag! Nur leider fällt mir gerade nichts ein, was ich hier reinpacken könnte. Wenn du einen Vorschlag hast, melde dich einfach bei kyosuke!', fi: 'Tämä on paikka, jossa voisin mainostaa jotain mistä pidän! Valitettavasti en ole vielä keksinyt mitään tänne laitettavaa. Jos haluat tähän jotain, ota yhteyttä Kyoisukeen!' },
+    advertiser: ''
+  },
+  {
+    thumbImg:   { ja: 'ad/SampleJP.PNG', de: 'ad/SampleDE.PNG', fi: 'ad/SampleFI.PNG' },
+    img:        'ad/Nai.PNG',
+    title:      { ja: '(´･ω･`)', de: '(´･ω･`)', fi: '(´･ω･`)' },
+    desc:       { ja: 'ここ何か好きなものを宣伝する用のスペース！ でも今のところ載せるものがなくて困ってるよ！ 何か載せてほしい場合は競介までどうぞ！', de: 'Hier könnte Werbung für irgendwas stehen, das ich mag! Nur leider fällt mir gerade nichts ein, was ich hier reinpacken könnte. Wenn du einen Vorschlag hast, melde dich einfach bei kyosuke!', fi: 'Tämä on paikka, jossa voisin mainostaa jotain mistä pidän! Valitettavasti en ole vielä keksinyt mitään tänne laitettavaa. Jos haluat tähän jotain, ota yhteyttä Kyoisukeen!' },
+    advertiser: ''
+  }
+];
+
+const AD_LABEL = { ja: 'ADVERTISE', de: 'ADVERTISE', fi: 'ADVERTISE' };
+const AD_ADVERTISER_PREFIX = { ja: 'ADVERTISER', de: 'ADVERTISER', fi: 'ADVERTISER' };
+const AD_HINT = { ja: '[CLICK TO OPEN]', de: '[CLICK TO OPEN]', fi: '[CLICK TO OPEN]' };
+
+function resolveAdImg(ad) {
+  if (!ad.img) return '';
+  if (typeof ad.img === 'object') return ad.img[currentLang] || ad.img.ja || '';
+  return ad.img;
+}
+
+function resolveAdThumb(ad) {
+  var src = ad.thumbImg || ad.img;
+  if (!src) return '';
+  if (typeof src === 'object') return src[currentLang] || src.ja || '';
+  return src;
+}
+
+function updateAdLabel() {
+  var label = document.getElementById('adCarouselLabel');
+  if (label) label.textContent = AD_LABEL[currentLang] || 'Advertisement';
+  var hint = AD_HINT[currentLang] || '[click to open]';
+  document.querySelectorAll('.ad-slide').forEach(function(slide) {
+    var i = parseInt(slide.dataset.index);
+    var img = slide.querySelector('img');
+    if (img && AD_DATA[i]) img.src = resolveAdThumb(AD_DATA[i]);
+    var hintEl = slide.querySelector('.ad-slide-hint');
+    if (hintEl) hintEl.textContent = hint;
+  });
+}
+
+function initAdCarousel() {
+  const track      = document.getElementById('adTrack');
+  const wrapper    = document.getElementById('adCarouselWrapper');
+  const prevBtn    = document.getElementById('adPrev');
+  const nextBtn    = document.getElementById('adNext');
+  const dots       = document.querySelectorAll('.ad-dot');
+  const slides     = document.querySelectorAll('.ad-slide');
+  const overlay    = document.getElementById('ad-modal-overlay');
+  const modalImg        = document.getElementById('ad-modal-img');
+  const modalTitle      = document.getElementById('ad-modal-title');
+  const modalDesc       = document.getElementById('ad-modal-desc');
+  const modalAdvertiser = document.getElementById('ad-modal-advertiser');
+  const closeBtn        = document.getElementById('ad-modal-close');
+
+  if (!track) return;
+
+  let current = 0;
+  const total = slides.length;
+  let autoTimer = null;
+  let startX = null;
+
+  function goTo(idx) {
+    slides[current].classList.remove('active-slide');
+    dots[current].classList.remove('active');
+    current = (idx + total) % total;
+    slides[current].classList.add('active-slide');
+    dots[current].classList.add('active');
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+  }
+
+  function startAuto() {
+    stopAuto();
+    autoTimer = setInterval(function() { goTo(current + 1); }, 5000);
+  }
+
+  function stopAuto() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  }
+
+  prevBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    goTo(current - 1);
+    stopAuto(); startAuto();
+  });
+
+  nextBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    goTo(current + 1);
+    stopAuto(); startAuto();
+  });
+
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function(e) {
+      e.stopPropagation();
+      goTo(parseInt(dot.dataset.i));
+      stopAuto(); startAuto();
+    });
+  });
+
+  wrapper.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+
+  wrapper.addEventListener('touchend', function(e) {
+    if (startX === null) return;
+    var diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) { goTo(diff > 0 ? current + 1 : current - 1); }
+    startX = null;
+    stopAuto(); startAuto();
+  });
+
+  wrapper.addEventListener('click', function() {
+    var ad = AD_DATA[current];
+    var t  = typeof ad.title === 'object' ? (ad.title[currentLang] || ad.title.ja) : ad.title;
+    var d  = typeof ad.desc  === 'object' ? (ad.desc[currentLang]  || ad.desc.ja)  : ad.desc;
+    modalImg.src           = resolveAdImg(ad);
+    modalImg.alt           = t;
+    modalTitle.textContent = t;
+    modalDesc.textContent  = d;
+    if (modalAdvertiser) {
+      var prefix = AD_ADVERTISER_PREFIX[currentLang] || 'Advertiser';
+      modalAdvertiser.textContent = ad.advertiser ? prefix + ' ' + ad.advertiser : '';
+    }
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    stopAuto();
+  });
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    startAuto();
+  }
+
+  closeBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    closeModal();
+  });
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') closeModal();
+  });
+
+  startAuto();
 }
 
 init();
