@@ -938,6 +938,115 @@ body.lang-fi { font-family: var(--font-mono); }
   line-height: 1.85; font-family: var(--font-mono);
   text-align: left;
 }
+/* =====================
+   アンケート
+===================== */
+#panel-survey { max-width: 500px; }
+
+.survey-q-meta {
+  display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;
+}
+.survey-q-num {
+  font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-mid); white-space: nowrap; flex-shrink: 0;
+}
+.survey-prog-wrap { flex: 1; height: 2px; background: var(--border); }
+.survey-prog-fill {
+  height: 100%; background: var(--accent); transition: width 0.35s ease;
+}
+
+.survey-question {
+  font-size: 0.9rem; line-height: 1.7; color: var(--text-bright);
+  margin-bottom: 1.2rem; font-family: var(--font-mono);
+  transition: opacity 0.2s ease;
+}
+
+.survey-choices {
+  display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.4rem;
+}
+.survey-choice {
+  display: flex; align-items: center; gap: 0.75rem;
+  width: 100%; background: var(--bg-surface);
+  border: 1px solid var(--border); color: var(--text-dim);
+  font-family: var(--font-mono); font-size: 0.78rem;
+  padding: 0.65rem 0.9rem; cursor: pointer; text-align: left; line-height: 1.4;
+  transition: border-color var(--transition), color var(--transition),
+              background var(--transition), box-shadow var(--transition);
+}
+.survey-choice:hover {
+  border-color: var(--border-hard); color: var(--text);
+  background: rgba(0,200,240,0.04);
+}
+.survey-choice.selected {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-dim); box-shadow: 0 0 8px var(--accent-glow);
+}
+.survey-choice.disabled-choice {
+  opacity: 0.3; cursor: not-allowed; pointer-events: none;
+}
+
+.survey-checkbox {
+  width: 14px; height: 14px; border: 1px solid var(--border-hard);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: border-color var(--transition), background var(--transition);
+  position: relative;
+}
+.survey-choice.selected .survey-checkbox {
+  border-color: var(--accent); background: var(--accent);
+}
+.survey-checkbox::after {
+  content: '';
+  display: block; width: 7px; height: 4px;
+  border-left: 1.5px solid #000; border-bottom: 1.5px solid #000;
+  transform: rotate(-45deg) translateY(-1px);
+  opacity: 0; transition: opacity var(--transition);
+}
+.survey-choice.selected .survey-checkbox::after { opacity: 1; }
+.survey-choice-text { flex: 1; }
+
+.survey-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.5rem; border-top: 1px solid rgba(0,200,240,0.06); padding-top: 1rem;
+}
+.survey-nav-btn {
+  background: transparent; border: 1px solid var(--border-hard);
+  color: var(--text-dim); font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.12em;
+  padding: 0.45rem 0.9rem; cursor: pointer; min-width: 4.5rem;
+  transition: background var(--transition), color var(--transition),
+              box-shadow var(--transition), opacity var(--transition);
+}
+.survey-nav-btn.primary { color: var(--accent); border-color: var(--accent-mid); }
+.survey-nav-btn.primary:not(:disabled):hover {
+  background: var(--accent-dim); box-shadow: 0 0 12px var(--accent-glow);
+}
+.survey-nav-btn:not(.primary):hover:not(:disabled) {
+  border-color: var(--border-hard); color: var(--text);
+}
+.survey-nav-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+.survey-counter {
+  font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent-mid);
+  font-family: var(--font-mono); text-align: center; flex: 1;
+}
+
+.survey-done { text-align: center; padding: 2rem 0; }
+.survey-done-label {
+  font-size: 0.55rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--accent-mid); margin-bottom: 1.2rem; font-family: var(--font-mono);
+}
+.survey-done-icon {
+  font-size: 2rem; margin-bottom: 1.2rem; color: var(--accent);
+  text-shadow: 0 0 16px var(--accent-glow);
+}
+.survey-done-heading {
+  font-size: 1rem; color: var(--text-bright); margin-bottom: 0.7rem;
+  font-family: var(--font-ja); line-height: 1.6;
+}
+.survey-done-sub {
+  font-size: 0.72rem; color: var(--text-dim); line-height: 1.9; letter-spacing: 0.05em;
+}
+
 /* ── スマホ自動ズーム防止 ─────────────────────────── */
 @media screen and (max-width: 768px) {
   .tool-input {
@@ -1221,6 +1330,15 @@ body.lang-fi { font-family: var(--font-mono); }
             <span class="qa-label-sub" data-ja="君は競介の何を知っているのか" data-de="Was weißt du über Kyosuke?" data-fi="Mitä tiedät Kyosukesta?">君は競介の何を知っているのか</span>
           </span>
         </button>
+
+        <!-- アンケート -->
+        <button class="qa-btn qa-btn-top" onclick="openSurvey()">
+          <i class="qa-icon">✎</i>
+          <span class="qa-label">
+            <span class="qa-label-main" data-ja="アンケート" data-de="Umfrage" data-fi="Kysely">アンケート</span>
+            <span class="qa-label-sub" data-ja="ご意見をお聞かせください" data-de="Teile deine Meinung mit" data-fi="Kerro mielipiteesi">ご意見をお聞かせください</span>
+          </span>
+        </button>
       </div>
     </div>
   </main>
@@ -1296,12 +1414,12 @@ body.lang-fi { font-family: var(--font-mono); }
           </span>
         </button>
 
-        <!-- おみくじ -->
+        <!-- アンケート(未実装) -->
         <button class="qa-btn" onclick="openTool('omikuji')">
-          <i class="qa-icon">♫</i>
+          <i class="qa-icon">✉︎</i>
           <span class="qa-label">
-            <span class="qa-label-main" data-ja="VIPおみくじ" data-de="VIP-Glückslos" data-fi="VIP-onnenlippu">VIPおみくじ</span>
-            <span class="qa-label-sub">fortune · VIP only</span>
+            <span class="qa-label-main" data-ja="アンケート" data-de="Umfrage" data-fi="Kysely">アンケート</span>
+            <span class="qa-label-sub">ENQUÊTE</span>
           </span>
         </button>
 
@@ -1490,6 +1608,47 @@ body.lang-fi { font-family: var(--font-mono); }
     </div>
   </div>
 
+
+  <!-- アンケート -->
+  <div class="tool-panel" id="panel-survey">
+    <div class="tool-titlebar">
+      <span id="surveyPanelTitle">アンケート</span>
+      <button class="tool-close" onclick="closeTool()">✕</button>
+    </div>
+    <div class="tool-body">
+
+      <!-- 質問ビュー -->
+      <div id="surveyViewQuestion">
+        <div class="survey-q-meta">
+          <span class="survey-q-num" id="surveyQNum">Q 1 / 5</span>
+          <div class="survey-prog-wrap">
+            <div class="survey-prog-fill" id="surveyProgFill" style="width:0%"></div>
+          </div>
+        </div>
+        <p class="survey-question" id="surveyQuestion"></p>
+        <div class="survey-choices" id="surveyChoices"></div>
+        <div class="survey-nav">
+          <button class="survey-nav-btn" id="surveyBackBtn" onclick="surveyBack()">← 戻る</button>
+          <span class="survey-counter" id="surveyCounter">1 / 5</span>
+          <button class="survey-nav-btn primary" id="surveyNextBtn" onclick="surveyNext()" disabled>次へ →</button>
+        </div>
+      </div>
+
+      <!-- 完了ビュー -->
+      <div id="surveyViewDone" style="display:none;">
+        <div class="survey-done">
+          <div class="survey-done-label">SURVEY COMPLETE</div>
+          <div class="survey-done-icon">✓</div>
+          <div class="survey-done-heading" id="surveyDoneHeading">回答ありがとうございました！</div>
+          <div class="survey-done-sub" id="surveyDoneSub"></div>
+        </div>
+        <div style="text-align:center;margin-top:1.2rem;">
+          <button class="survey-nav-btn primary" onclick="closeTool()" id="surveyCloseBtn">閉じる</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Base-29 -->
   <div class="tool-panel" id="panel-base29">
@@ -2931,6 +3090,399 @@ function lsHideTooltip() {
 document.addEventListener('click', function(e) {
   if (!e.target.classList.contains('ls-token')) lsHideTooltip();
 });
+
+/* ============================================================
+   アンケート — データ
+============================================================ */
+const SURVEY_I18N = {
+  ja: {
+    panelTitle: 'アンケート',
+    backBtn:    '← 戻る',
+    nextBtn:    '次へ →',
+    submitBtn:  '送信 →',
+    counter:    (c, t) => `${c} / ${t}`,
+    qNum:       (c, t) => `Q ${c} / ${t}`,
+    doneLabel:  'SURVEY COMPLETE',
+    doneIcon:   '✓',
+    doneHeading:'回答ありがとうございました！',
+    doneSub:    'いただいたご意見は今後の参考にさせていただきます。',
+    closeBtn:   '閉じる',
+    questions: [
+      {
+        q: 'あなたはどの国/地域から来ましたか？',
+        multi: false,
+        choices: ['日本', '非文明圏'],
+        special: null,
+      },
+      {
+        q: 'このサイトでもっとも興味深く感じられた機能は？',
+        multi: false,
+        choices: ['作品掲載', 'ミニゲーム', 'その他機能', '特になし'],
+        special: {
+          triggerIdx: 3,
+          newQ: '強いて言うなら？',
+          disabledIdxs: [3],
+        },
+      },
+      {
+        q: '何かこのサイトに改善点をあげるとするなら？',
+        multi: false,
+        choices: ['現状でも最高！', '操作性が悪い機能が一部ある', '視認性に問題があるかも', 'その他'],
+        special: {
+          triggerIdx: 3,
+          newQ: 'まあでも大目に見ると？',
+          replaceAll: '大体OK!',
+        },
+      },
+      {
+        q: '今開発を行なっている機能について、特に興味深いと思うものは？',
+        multi: false,
+        choices: ['掲示板', 'VIP用おみくじ', '情報ウィンドウの高機能化', '新たなミニゲーム'],
+        special: null,
+      },
+      {
+        q: '最後に競介にメッセージを！',
+        multi: true,
+        choices: ['頑張ってね！', '応援してるよ！', 'かっこいい！', '大好き！'],
+        special: null,
+      },
+    ],
+  },
+  de: {
+    panelTitle: 'Umfrage',
+    backBtn:    '← Zurück',
+    nextBtn:    'Weiter →',
+    submitBtn:  'Absenden →',
+    counter:    (c, t) => `${c} / ${t}`,
+    qNum:       (c, t) => `F ${c} / ${t}`,
+    doneLabel:  'SURVEY COMPLETE',
+    doneIcon:   '✓',
+    doneHeading:'Vielen Dank für deine Antworten!',
+    doneSub:    'Deine Meinung hilft uns, die Seite zu verbessern.',
+    closeBtn:   'Schließen',
+    questions: [
+      {
+        q: 'Aus welchem Land/welcher Region kommst du?',
+        multi: false,
+        choices: ['Japan', 'Unzivilisiertes Gebiet'],
+        special: null,
+      },
+      {
+        q: 'Welche Funktion fandest du am interessantesten?',
+        multi: false,
+        choices: ['Werke', 'Minispiele', 'Sonstige Funktionen', 'Keine besonders'],
+        special: {
+          triggerIdx: 3,
+          newQ: 'Wenn du es dir genau überlegst?',
+          disabledIdxs: [3],
+        },
+      },
+      {
+        q: 'Was würdest du an der Seite verbessern?',
+        multi: false,
+        choices: ['Schon perfekt so!', 'Einige Funktionen sind schwer zu bedienen', 'Manche Teile sind schwer lesbar', 'Sonstiges'],
+        special: {
+          triggerIdx: 3,
+          newQ: 'Na, wenn man es großzügig betrachtet?',
+          replaceAll: 'Eigentlich OK!',
+        },
+      },
+      {
+        q: 'Welche der derzeit entwickelten Funktionen interessiert dich am meisten?',
+        multi: false,
+        choices: ['Schwarzes Brett', 'VIP-Glückslos', 'Erweiterter Info-Monitor', 'Neues Minispiel'],
+        special: null,
+      },
+      {
+        q: 'Zum Schluss: eine Nachricht an Kyosuke!',
+        multi: true,
+        choices: ['Viel Erfolg!', 'Ich drücke dir die Daumen!', 'Du bist cool!', 'Ich mag dich!'],
+        special: null,
+      },
+    ],
+  },
+  fi: {
+    panelTitle: 'Kysely',
+    backBtn:    '← Takaisin',
+    nextBtn:    'Seuraava →',
+    submitBtn:  'Lähetä →',
+    counter:    (c, t) => `${c} / ${t}`,
+    qNum:       (c, t) => `K ${c} / ${t}`,
+    doneLabel:  'SURVEY COMPLETE',
+    doneIcon:   '✓',
+    doneHeading:'Kiitos vastauksistasi!',
+    doneSub:    'Mielipiteesi auttaa meitä kehittämään sivustoa.',
+    closeBtn:   'Sulje',
+    questions: [
+      {
+        q: 'Mistä maasta/alueelta tulet?',
+        multi: false,
+        choices: ['Japani', 'Sivistymätön alue'],
+        special: null,
+      },
+      {
+        q: 'Mikä toiminto oli sinulle mielenkiintoisin?',
+        multi: false,
+        choices: ['Teokset', 'Minipelit', 'Muut toiminnot', 'Ei erityisesti mikään'],
+        special: {
+          triggerIdx: 3,
+          newQ: 'Jos sinun pitäisi valita jokin?',
+          disabledIdxs: [3],
+        },
+      },
+      {
+        q: 'Mitä parantaisit sivustossa?',
+        multi: false,
+        choices: ['Se on jo täydellinen!', 'Jotkin toiminnot ovat hankalakäyttöisiä', 'Luettavuudessa voi olla ongelmia', 'Muu'],
+        special: {
+          triggerIdx: 3,
+          newQ: 'No, suopeasti katsoen?',
+          replaceAll: 'Ihan OK!',
+        },
+      },
+      {
+        q: 'Mikä kehitteillä oleva toiminto kiinnostaa sinua eniten?',
+        multi: false,
+        choices: ['Ilmoitustaulu', 'VIP-onnenlippu', 'Info-ikkunan kehitys', 'Uusi minipeli'],
+        special: null,
+      },
+      {
+        q: 'Lopuksi: viesti Kyosukelle!',
+        multi: true,
+        choices: ['Jatka samaan malliin!', 'Kannustan sinua!', 'Olet siisti!', 'Pidän sinusta!'],
+        special: null,
+      },
+    ],
+  },
+};
+
+/* ============================================================
+   アンケート — 状態
+============================================================ */
+let surveyIdx       = 0;
+let surveyAnswers   = [];   /* Set[] — 各問の選択インデックス集合 */
+let surveySpecialOn = [];   /* bool[] — 各問でspecial発動中かどうか */
+
+/* ============================================================
+   アンケートを開く
+============================================================ */
+function openSurvey() {
+  const lang  = SURVEY_I18N[currentLang];
+  const total = lang.questions.length;
+  surveyIdx       = 0;
+  surveyAnswers   = Array.from({ length: total }, () => new Set());
+  surveySpecialOn = Array(total).fill(false);
+
+  document.getElementById('surveyViewQuestion').style.display = '';
+  document.getElementById('surveyViewDone').style.display     = 'none';
+  renderSurveyQ();
+  openTool('survey');
+}
+
+/* ============================================================
+   質問を描画
+============================================================ */
+function renderSurveyQ() {
+  const lang    = SURVEY_I18N[currentLang];
+  const total   = lang.questions.length;
+  const qData   = lang.questions[surveyIdx];
+  const sel     = surveyAnswers[surveyIdx];
+  const special = qData.special;
+  const spOn    = surveySpecialOn[surveyIdx];
+
+  /* タイトルバー */
+  document.getElementById('surveyPanelTitle').textContent = lang.panelTitle;
+
+  /* 進捗 */
+  document.getElementById('surveyQNum').textContent =
+    lang.qNum(surveyIdx + 1, total);
+  document.getElementById('surveyProgFill').style.width =
+    (surveyIdx / total * 100) + '%';
+  document.getElementById('surveyCounter').textContent =
+    lang.counter(surveyIdx + 1, total);
+
+  /* 問の文（special発動中は newQ を使用）*/
+  document.getElementById('surveyQuestion').textContent =
+    (spOn && special) ? special.newQ : qData.q;
+
+  /* 選択肢を生成 */
+  const choicesEl = document.getElementById('surveyChoices');
+  choicesEl.innerHTML = '';
+
+  const displayChoices = (spOn && special && special.replaceAll)
+    ? qData.choices.map(() => special.replaceAll)
+    : qData.choices;
+
+  displayChoices.forEach((text, i) => {
+    const isSelected = sel.has(i);
+
+    /* special.disabledIdxs: 発動中は特定の選択肢を押せなくする */
+    const isDisabled = spOn && special && special.disabledIdxs &&
+                       special.disabledIdxs.includes(i);
+
+    const btn = document.createElement('button');
+    btn.className = 'survey-choice' +
+                    (isSelected  ? ' selected'       : '') +
+                    (isDisabled  ? ' disabled-choice' : '');
+    btn.innerHTML =
+      `<span class="survey-checkbox"></span>` +
+      `<span class="survey-choice-text">${escSurvey(text)}</span>`;
+    btn.onclick = isDisabled ? null : () => toggleSurveyChoice(i);
+    choicesEl.appendChild(btn);
+  });
+
+  /* ナビゲーションボタン */
+  document.getElementById('surveyBackBtn').textContent = lang.backBtn;
+  document.getElementById('surveyBackBtn').disabled    = surveyIdx === 0;
+
+  const nextBtn = document.getElementById('surveyNextBtn');
+  nextBtn.textContent = surveyIdx === total - 1 ? lang.submitBtn : lang.nextBtn;
+
+  /* 次へ有効条件:
+     - 何か選択されている
+     - かつ special 発動中なら disabledIdxs 以外が選ばれている */
+  nextBtn.disabled = !isSurveyNextable();
+}
+
+/* 次へ進めるかチェック */
+function isSurveyNextable() {
+  const lang    = SURVEY_I18N[currentLang];
+  const qData   = lang.questions[surveyIdx];
+  const sel     = surveyAnswers[surveyIdx];
+  const special = qData.special;
+  const spOn    = surveySpecialOn[surveyIdx];
+
+  if (sel.size === 0) return false;
+  if (spOn && special && special.disabledIdxs) {
+    /* 選択済みがすべてdisabledIdxsに含まれているとNG */
+    const hasValid = [...sel].some(i => !special.disabledIdxs.includes(i));
+    return hasValid;
+  }
+  return true;
+}
+
+/* ============================================================
+   選択肢をタップ
+============================================================ */
+function toggleSurveyChoice(idx) {
+  const lang  = SURVEY_I18N[currentLang];
+  const qData = lang.questions[surveyIdx];
+  const sel   = surveyAnswers[surveyIdx];
+
+  if (qData.multi) {
+    /* 複数選択（問5）*/
+    if (sel.has(idx)) sel.delete(idx);
+    else sel.add(idx);
+  } else {
+    /* 単一選択 */
+    sel.clear();
+    sel.add(idx);
+  }
+
+  /* special 発動チェック */
+  const special = qData.special;
+  if (special && sel.has(special.triggerIdx)) {
+    surveySpecialOn[surveyIdx] = true;
+  } else if (special) {
+    surveySpecialOn[surveyIdx] = false;
+  }
+
+  /* 再描画 */
+  renderSurveyQ();
+}
+
+/* ============================================================
+   次へ / 送信
+============================================================ */
+function surveyNext() {
+  const lang  = SURVEY_I18N[currentLang];
+  const total = lang.questions.length;
+
+  if (surveyIdx < total - 1) {
+    surveyIdx++;
+    renderSurveyQ();
+    return;
+  }
+
+  /* 最終問 → 完了画面 */
+  showSurveyDone();
+}
+
+/* ============================================================
+   戻る
+============================================================ */
+function surveyBack() {
+  if (surveyIdx === 0) return;
+  surveyIdx--;
+  renderSurveyQ();
+}
+
+/* ============================================================
+   完了画面 + Formspree 送信
+============================================================ */
+
+
+const FORMSPREE_ID = 'ningaesst';
+
+function showSurveyDone() {
+  const lang = SURVEY_I18N[currentLang];
+
+  document.getElementById('surveyViewQuestion').style.display = 'none';
+  document.getElementById('surveyViewDone').style.display     = '';
+  document.getElementById('surveyProgFill').style.width       = '100%';
+
+  document.getElementById('surveyDoneHeading').textContent = lang.doneHeading;
+  document.getElementById('surveyDoneSub').textContent     = lang.doneSub;
+  document.getElementById('surveyCloseBtn').textContent    = lang.closeBtn;
+
+  submitToFormspree(lang);
+}
+
+async function submitToFormspree(lang) {
+  if (!FORMSPREE_ID || FORMSPREE_ID === 'YOUR_FORM_ID') return;
+
+  /* 各問の選択肢テキストを人間が読める形式に変換 */
+  const answers = {};
+  lang.questions.forEach((qData, i) => {
+    const sel = surveyAnswers[i];
+    const spOn = surveySpecialOn[i];
+
+    /* special発動中で replaceAll がある問は置換後テキストを使う */
+    const choices = (spOn && qData.special && qData.special.replaceAll)
+      ? qData.choices.map(() => qData.special.replaceAll)
+      : qData.choices;
+
+    const selected = [...sel].map(idx => choices[idx]).join(' / ');
+    const qText    = (spOn && qData.special) ? qData.special.newQ : qData.q;
+    answers[`Q${i + 1}: ${qText}`] = selected;
+  });
+
+  /* ハニーポット（ボット対策）を含めてPOST */
+  try {
+    await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _language: currentLang,
+        _gotcha:   '',   /* ハニーポット: 人間は空のまま */
+        ...answers,
+      }),
+    });
+  } catch (e) {
+    /* 送信失敗してもユーザーへの表示には影響させない */
+  }
+}
+
+/* ============================================================
+   ユーティリティ
+============================================================ */
+function escSurvey(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 function lsFilter(filt) {
   document.querySelectorAll('.ls-filt-btn').forEach(b => b.classList.toggle('active', b.dataset.filt === filt));
