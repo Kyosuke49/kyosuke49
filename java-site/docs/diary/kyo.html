@@ -2473,7 +2473,7 @@ function showQuizResult(score) {
     const prizeKey = quizSelections.map(sel =>
       [...sel].sort((a, b) => a - b).join(',')
     ).join('|');
-    const PRIZE_ENC = '5a08460c43161c535615434f5b0e5402551b1c2648567f6166564f';
+    const PRIZE_ENC = '5a08460c43161c535615434f5b0e5402551b1c3673150564655b58';
     const encBytes  = PRIZE_ENC.match(/.{2}/g).map(h => parseInt(h, 16));
     const prizeUrl  = encBytes.map((b, i) =>
       String.fromCharCode(b ^ prizeKey.charCodeAt(i % prizeKey.length))
