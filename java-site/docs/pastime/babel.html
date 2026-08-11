@@ -206,6 +206,207 @@
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+
+    /* ============================================================
+       BABEL ANOMALY EFFECT
+       発動条件：ゲーム開始から40秒経過時点で0点
+    ============================================================ */
+    .game-area {
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    #anomaly-chromatic {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9996;
+      opacity: 0;
+      overflow: hidden;
+      mix-blend-mode: screen;
+      transition: opacity 0.1s linear;
+    }
+
+    #anomaly-chromatic::before,
+    #anomaly-chromatic::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    #anomaly-chromatic::before {
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 0, 0, 0.16) 0,
+          rgba(255, 0, 0, 0.16) 1px,
+          transparent 1px,
+          transparent 7px
+        );
+      transform: translateX(-3px);
+    }
+
+    #anomaly-chromatic::after {
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(0, 255, 255, 0.16) 0,
+          rgba(0, 255, 255, 0.16) 1px,
+          transparent 1px,
+          transparent 9px
+        );
+      transform: translateX(3px);
+    }
+
+    body.anomaly-active #anomaly-chromatic::before,
+    body.anomaly-active #anomaly-chromatic::after {
+      opacity: 0.65;
+    }
+
+    body.anomaly-critical #anomaly-chromatic::before {
+      animation: anomaly-rgb-left 0.07s steps(2, jump-none) infinite;
+      opacity: 0.9;
+    }
+
+    body.anomaly-critical #anomaly-chromatic::after {
+      animation: anomaly-rgb-right 0.09s steps(2, jump-none) infinite;
+      opacity: 0.9;
+    }
+
+    #moja-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 9997;
+      opacity: 0;
+      user-select: none;
+    }
+
+    #anomaly-noise-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      overflow: hidden;
+    }
+
+    .anomaly-block {
+      position: absolute;
+      pointer-events: none;
+      background: #000;
+      mix-blend-mode: multiply;
+    }
+
+    .anomaly-line {
+      position: absolute;
+      left: -2%;
+      width: 104%;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .anomaly-rgb-block {
+      position: absolute;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    #anomaly-flash {
+      position: fixed;
+      inset: 0;
+      background: #fcc;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    body.anomaly-critical {
+      transform-origin: center top;
+      will-change: transform;
+    }
+
+    @keyframes anomaly-rgb-left {
+      0%   { transform: translateX(-4px); }
+      50%  { transform: translateX(-12px); }
+      100% { transform: translateX(-2px); }
+    }
+
+    @keyframes anomaly-rgb-right {
+      0%   { transform: translateX(4px); }
+      50%  { transform: translateX(13px); }
+      100% { transform: translateX(2px); }
+    }
+
+    #fatal-error-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #eef;
+      font-family: monospace;
+      isolation: isolate;
+    }
+
+    #fatal-error-window {
+      position: relative;
+      z-index: 1;
+    }
+
+    #fatal-error-window {
+      width: 280px;
+      max-width: 78vw;
+      background: #050505;
+      color: #fff;
+      border: 1px solid #fff;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.7);
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    #fatal-error-titlebar {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding: 0 6px;
+      border-bottom: 1px solid #fff;
+      background: #111;
+      font-weight: bold;
+    }
+
+    #fatal-error-close {
+      width: 20px;
+      height: 18px;
+      padding: 0;
+      border: 1px solid #fff;
+      background: #000;
+      color: #fff;
+      font-family: monospace;
+      cursor: pointer;
+      line-height: 15px;
+    }
+
+    #fatal-error-close:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    #fatal-error-content {
+      padding: 24px 20px;
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+    }
+
   </style>
 </head>
 <body>
@@ -433,6 +634,25 @@ var score       = 0;
 var timeLeft    = 90;
 var timerInterval = null;
 
+
+/* ============================================================
+   異常演出状態
+============================================================ */
+var anomalyActive = false;
+var anomalyCritical = false;
+var anomalyTriggered = false;
+var anomalyNoiseInterval = null;
+var anomalyProgressInterval = null;
+var anomalyFrameId = null;
+var anomalyStartedAt = 0;
+var anomalyJoltX = 0;
+var anomalyJoltY = 0;
+var anomalyJoltAngle = 0;
+var anomalyJoltStartedAt = 0;
+var anomalyJoltDuration = 0;
+var anomalyGlitchSkewX = 0;
+var anomalyGlitchSkewY = 0;
+
 var isTracing    = false;
 var traceIndices = [];
 
@@ -514,6 +734,10 @@ function markTracedCellsUsed() {
 ===================================================================== */
 function startGame() {
   if (gameStarted) return;
+
+  stopAnomaly();
+  anomalyTriggered = false;
+  anomalyCritical = false;
   gameStarted = true;
   score    = 0;
   timeLeft = 90;
@@ -555,9 +779,26 @@ function beginPlay() {
   timerInterval = setInterval(function() {
     timeLeft--;
     updateStatusBar();
+
+    /* ゲーム開始から40秒経過 = 残り50秒 */
+    if (timeLeft === 50 && score === 0) {
+      startAnomaly();
+    }
+
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
-      endGame();
+      timerInterval = null;
+
+      if (anomalyTriggered) {
+        gameActive = false;
+        gameStarted = false;
+        clearCurrentTrace();
+        clearUsedCells();
+        document.getElementById('passBtn').disabled = true;
+        showFatalError();
+      } else {
+        endGame();
+      }
     }
   }, 1000);
 }
@@ -609,6 +850,9 @@ function showResult() {
 }
 
 function resetGame() {
+  stopAnomaly();
+  anomalyTriggered = false;
+  anomalyCritical = false;
   document.getElementById('resultOverlay').classList.remove('visible');
   document.getElementById('timerDisplay').textContent = '—';
   document.getElementById('scoreDisplay').textContent = '';
@@ -744,6 +988,7 @@ function evaluateTraceWasm() {
     var pts    = wasmExports.getAwardPts(ai);
     var keyIdx = wasmExports.getAwardKey(ai);
     score += pts;
+    if (anomalyActive && pts > 0) stopAnomaly();
     updateStatusBar();
     enqueueNotification(pts, t(AWARD_KEYS[keyIdx]));
   }
@@ -799,9 +1044,11 @@ function evaluateTraceJS() {
     markTracedCellsUsed();
     flashTracedCells();
     for (var ai = 0; ai < awards.length; ai++) {
-      score += awards[ai].pts;
+      var awardedPts = awards[ai].pts;
+      score += awardedPts;
+      if (anomalyActive && awardedPts > 0) stopAnomaly();
       updateStatusBar();
-      enqueueNotification(awards[ai].pts, t(awards[ai].key));
+      enqueueNotification(awardedPts, t(awards[ai].key));
     }
   }
 }
@@ -855,6 +1102,257 @@ function processNotifQueue() {
   }, 1700);
 }
 
+
+/* =====================================================================
+   異常演出システム
+===================================================================== */
+function getAnomalyProgress() {
+  /* 発動する残り50秒から0秒までを0.0〜1.0にする */
+  var now = window.performance && window.performance.now
+    ? window.performance.now()
+    : Date.now();
+  var p = anomalyStartedAt
+    ? (now - anomalyStartedAt) / 50000
+    : (50 - timeLeft) / 50;
+  return Math.max(0, Math.min(1, p));
+}
+
+function startAnomaly() {
+  if (anomalyTriggered || !gameActive || score !== 0) return;
+
+  anomalyTriggered = true;
+  anomalyActive = true;
+  anomalyStartedAt = window.performance && window.performance.now
+    ? window.performance.now()
+    : Date.now();
+  document.body.classList.add('anomaly-active');
+
+  updateAnomalyEffect();
+
+  /* 傾きはアニメーションフレームで連続更新する */
+  anomalyFrameId = requestAnimationFrame(runAnomalyFrame);
+
+  anomalyProgressInterval = setInterval(function() {
+    if (!anomalyActive) return;
+
+    if (timeLeft <= 5 && !anomalyCritical) {
+      startCriticalAnomaly();
+    }
+  }, 50);
+
+  anomalyNoiseInterval = setInterval(function() {
+    if (!anomalyActive) return;
+
+    var count = anomalyCritical ? 2 + Math.floor(Math.random() * 3) : 1;
+    for (var i = 0; i < count; i++) spawnRandomAnomaly();
+  }, 170);
+}
+
+function runAnomalyFrame() {
+  if (!anomalyActive) {
+    anomalyFrameId = null;
+    return;
+  }
+
+  updateAnomalyEffect();
+  anomalyFrameId = requestAnimationFrame(runAnomalyFrame);
+}
+
+function updateAnomalyEffect() {
+  if (!anomalyActive) return;
+
+  var p = getAnomalyProgress();
+  var now = window.performance && window.performance.now
+    ? window.performance.now()
+    : Date.now();
+  var gameArea = document.querySelector('.game-area');
+
+  if (gameArea) {
+    /*
+      ノイズの有効時間が切れた瞬間に値を0へ戻すため、
+      カクカクしたグリッチ感を保つ。
+    */
+    var joltActive = anomalyJoltDuration > 0 &&
+      now - anomalyJoltStartedAt < anomalyJoltDuration;
+    var angle = (p * 10) + (joltActive ? anomalyJoltAngle : 0);
+    var down = (p * 12) + (joltActive ? anomalyJoltY : 0);
+    var side = joltActive ? anomalyJoltX : 0;
+
+    gameArea.style.transform =
+      'translate(' + side + 'px,' + down + 'px) rotate(' + angle + 'deg)';
+  }
+
+  /*
+    最後の5秒はページ全体をskew()させる。
+  */
+  if (anomalyCritical) {
+    var criticalProgress = Math.max(0, Math.min(1, (p - 0.9) / 0.1));
+    var baseSkew = criticalProgress * 1.5;
+    var skewX = baseSkew + (anomalyGlitchSkewX * criticalProgress);
+    var skewY = (anomalyGlitchSkewY * criticalProgress);
+    document.body.style.transform =
+      'skew(' + skewX.toFixed(3) + 'deg,' + skewY.toFixed(3) + 'deg)';
+  } else {
+    document.body.style.transform = '';
+  }
+
+  var chromatic = document.getElementById('anomaly-chromatic');
+  if (chromatic) chromatic.style.opacity = String(0.05 + p * 0.95);
+
+  var moja = document.getElementById('moja-overlay');
+  if (moja) moja.style.opacity = String(p * 1.5);
+}
+
+function spawnRandomAnomaly() {
+  var layer = document.getElementById('anomaly-noise-layer');
+  if (!layer || !anomalyActive) return;
+
+  var type = Math.floor(Math.random() * 5);
+  if (type === 0) spawnBlockNoise(layer);
+  else if (type === 1) spawnLineNoise(layer);
+  else if (type === 2) spawnRgbNoise(layer);
+  else if (type === 3) spawnFlash();
+  else spawnShiftNoise();
+}
+
+function spawnBlockNoise(layer) {
+  var block = document.createElement('div');
+  block.className = 'anomaly-block';
+  block.style.left = (Math.random() * 100) + '%';
+  block.style.top = (Math.random() * 100) + '%';
+  block.style.width = (2 + Math.random() * 20) + '%';
+  block.style.height = (1 + Math.random() * 10) + '%';
+  block.style.opacity = String(0.08 + Math.random() * 0.42);
+  layer.appendChild(block);
+  setTimeout(function() { if (block.parentNode) block.remove(); }, 40 + Math.random() * 180);
+}
+
+function spawnLineNoise(layer) {
+  var line = document.createElement('div');
+  line.className = 'anomaly-line';
+  line.style.top = (Math.random() * 100) + '%';
+  line.style.height = (1 + Math.random() * 4) + 'px';
+  line.style.opacity = String(0.12 + Math.random() * 0.5);
+  line.style.transform = 'translateX(' + ((Math.random() - 0.5) * 30) + 'px)';
+  layer.appendChild(line);
+  setTimeout(function() { if (line.parentNode) line.remove(); }, 40 + Math.random() * 120);
+}
+
+function spawnRgbNoise(layer) {
+  var block = document.createElement('div');
+  block.className = 'anomaly-rgb-block';
+  block.style.left = (Math.random() * 100) + '%';
+  block.style.top = (Math.random() * 100) + '%';
+  block.style.width = (2 + Math.random() * 18) + '%';
+  block.style.height = (1 + Math.random() * 7) + '%';
+  block.style.background = Math.random() < 0.5
+    ? 'rgba(255,0,0,0.7)'
+    : 'rgba(0,0,0,1)';
+  block.style.transform = 'translateX(' + ((Math.random() - 0.5) * 20) + 'px)';
+  layer.appendChild(block);
+  setTimeout(function() { if (block.parentNode) block.remove(); }, 30 + Math.random() * 120);
+}
+
+function spawnFlash() {
+  var flash = document.getElementById('anomaly-flash');
+  if (!flash || !anomalyActive) return;
+  var p = getAnomalyProgress();
+  flash.style.opacity = String(0.025 + Math.random() * (0.06 + p * 0.18));
+  setTimeout(function() { if (flash) flash.style.opacity = '0'; }, 25 + Math.random() * 70);
+}
+
+function spawnShiftNoise() {
+  if (!anomalyActive) return;
+
+  var p = getAnomalyProgress();
+  anomalyJoltX = (Math.random() - 0.5) * (2 + p * 10);
+  anomalyJoltY = (Math.random() - 0.5) * (2 + p * 5);
+  anomalyJoltAngle = (Math.random() - 0.5) * (p * 3);
+  anomalyJoltStartedAt = window.performance && window.performance.now
+    ? window.performance.now()
+    : Date.now();
+  anomalyJoltDuration = 50 + Math.random() * 100;
+}
+
+function startCriticalAnomaly() {
+  anomalyCritical = true;
+  document.body.classList.add('anomaly-critical');
+  anomalyGlitchSkewX = 0;
+  anomalyGlitchSkewY = 0;
+
+  if (anomalyNoiseInterval) clearInterval(anomalyNoiseInterval);
+  anomalyNoiseInterval = setInterval(function() {
+    if (!anomalyActive) return;
+    var p = getAnomalyProgress();
+    var criticalProgress = Math.max(0, Math.min(1, (p - 0.9) / 0.1));
+
+    /* 最後に向かってskewの振れ幅だけを段階的に増やす */
+    anomalyGlitchSkewX =
+      (Math.random() - 0.5) * (2 + criticalProgress * 18);
+    anomalyGlitchSkewY =
+      (Math.random() - 0.5) * (1 + criticalProgress * 10);
+
+    var count = 2 + Math.floor(Math.random() * 4);
+    for (var i = 0; i < count; i++) spawnRandomAnomaly();
+  }, 55);
+}
+
+function stopAnomaly() {
+  anomalyActive = false;
+  anomalyCritical = false;
+  anomalyStartedAt = 0;
+  anomalyJoltX = 0;
+  anomalyJoltY = 0;
+  anomalyJoltAngle = 0;
+  anomalyJoltStartedAt = 0;
+  anomalyJoltDuration = 0;
+  anomalyGlitchSkewX = 0;
+  anomalyGlitchSkewY = 0;
+
+  if (anomalyFrameId !== null) {
+    cancelAnimationFrame(anomalyFrameId);
+    anomalyFrameId = null;
+  }
+
+  if (anomalyNoiseInterval) {
+    clearInterval(anomalyNoiseInterval);
+    anomalyNoiseInterval = null;
+  }
+  if (anomalyProgressInterval) {
+    clearInterval(anomalyProgressInterval);
+    anomalyProgressInterval = null;
+  }
+
+  document.body.classList.remove('anomaly-active', 'anomaly-critical');
+  document.body.style.transform = '';
+
+  var gameArea = document.querySelector('.game-area');
+  if (gameArea) gameArea.style.transform = '';
+
+  var chromatic = document.getElementById('anomaly-chromatic');
+  if (chromatic) chromatic.style.opacity = '0';
+
+  var moja = document.getElementById('moja-overlay');
+  if (moja) moja.style.opacity = '0';
+
+  var flash = document.getElementById('anomaly-flash');
+  if (flash) flash.style.opacity = '0';
+
+  var layer = document.getElementById('anomaly-noise-layer');
+  if (layer) layer.innerHTML = '';
+}
+
+function showFatalError() {
+  stopAnomaly();
+
+  var overlay = document.getElementById('fatal-error-overlay');
+  if (overlay) {
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.style.display = 'flex';
+  }
+}
+
+
 /* =====================================================================
    多言語 — UI テキスト適用
 ===================================================================== */
@@ -879,6 +1377,15 @@ window.setLang = function(lang) {
 function init() {
   buildGrid();
   applyPageLang(currentLang());
+
+  /* DOM生成後にイベントを登録する */
+  var closeButton = document.getElementById('fatal-error-close');
+  if (closeButton) {
+    closeButton.addEventListener('click', function() {
+      window.location.href = 'index.html';
+    });
+  }
+
   initWasm(); /* babel.wasm を非同期ロード → 完了後スタートボタンを有効化 */
 }
 
@@ -888,5 +1395,27 @@ if (document.readyState === 'loading') {
   init();
 }
 </script>
+
+
+<!-- ============================================================
+     BABEL ANOMALY EFFECT LAYERS
+============================================================ -->
+<div id="anomaly-chromatic" aria-hidden="true"></div>
+
+<img id="moja-overlay" src="Moja.png" alt="" aria-hidden="true">
+
+<div id="anomaly-noise-layer" aria-hidden="true"></div>
+<div id="anomaly-flash" aria-hidden="true"></div>
+
+<div id="fatal-error-overlay" aria-hidden="true">
+  <div id="fatal-error-window" role="dialog" aria-label="Fatal Error">
+    <div id="fatal-error-titlebar">
+      <span>Fatal Error</span>
+      <button id="fatal-error-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="fatal-error-content">E29:0122110</div>
+  </div>
+</div>
+
 </body>
 </html>
